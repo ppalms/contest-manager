@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Transition, Dialog, Menu } from '@headlessui/react';
 import {
   XMarkIcon,

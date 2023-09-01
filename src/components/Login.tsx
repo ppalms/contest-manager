@@ -1,3 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
+'use client';
+
 import { Auth } from 'aws-amplify';
 
 export default function Login() {
@@ -9,7 +12,7 @@ export default function Login() {
       password: event.target.password.value,
     });
 
-    location.reload();
+    window.location.reload();
   };
 
   return (
