@@ -22,19 +22,6 @@ const navigation = [
     icon: UsersIcon,
     current: false,
   },
-  { name: 'Contests', href: '/contests', icon: FolderIcon, current: false },
-  {
-    name: 'Calendar',
-    href: '/calendar',
-    icon: CalendarDaysIcon,
-    current: false,
-  },
-  {
-    name: 'Scores',
-    href: '/scores',
-    icon: ClipboardDocumentCheckIcon,
-    current: false,
-  },
 ];
 
 const teams = [
