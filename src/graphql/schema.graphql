@@ -1,0 +1,41 @@
+schema @aws_api_key @aws_lambda {
+  query: Query
+  mutation: Mutation
+}
+
+type Query @aws_api_key @aws_lambda {
+  getOrganizationById(id: String!): Organization
+  listOrganizations: [Organization]
+}
+
+type Mutation @aws_api_key @aws_lambda {
+  createOrganization(organization: OrganizationInput!): Organization
+  deleteOrganization(id: String!): String
+  updateOrganization(organization: UpdateOrganizationInput!): Organization
+}
+
+type Organization @aws_api_key @aws_lambda {
+  id: ID!
+  name: String!
+  type: OrganizationType
+}
+
+enum OrganizationType {
+  DISTRICT
+  NATIONAL
+  SCHOOL
+  STATE
+  UNKNOWN
+}
+
+input OrganizationInput {
+  id: ID!
+  name: String!
+  type: OrganizationType!
+}
+
+input UpdateOrganizationInput {
+  id: ID!
+  name: String!
+  type: OrganizationType!
+}

@@ -19,5 +19,26 @@
         }
       }
     }
+  },
+  "sandbox": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-contestmanager-sandbox-232925-authRole",
+      "UnauthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-contestmanager-sandbox-232925-deployment",
+      "UnauthRoleName": "amplify-contestmanager-sandbox-232925-unauthRole",
+      "StackName": "amplify-contestmanager-sandbox-232925",
+      "StackId": "arn:aws:cloudformation:us-east-1:275316640779:stack/amplify-contestmanager-sandbox-232925/f9ed5b80-42ff-11ee-88a6-0e9a81a32a7b",
+      "AmplifyAppId": "d2gq3invfbyrye"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2gq3invfbyrye",
+          "type": "manual"
+        }
+      }
+    }
   }
 }
