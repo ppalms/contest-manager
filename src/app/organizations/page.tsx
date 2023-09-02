@@ -8,6 +8,8 @@ import { listOrganizations } from '@/graphql/queries';
 import { Organization } from '@/graphql/API';
 import { getAuthHeader } from '@/helpers';
 import { FolderPlusIcon } from '@heroicons/react/20/solid';
+import { deleteOrganization } from '@/graphql/mutations';
+import { orgTypeMap } from '../../org-type-map';
 
 const Index = () => {
   const [organizations, setOrganizations] = useState([]);
@@ -25,6 +27,20 @@ const Index = () => {
     };
     fetchOrgs();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure?')) {
+      return;
+    }
+
+    const authHeader = await getAuthHeader();
+
+    await API.graphql(graphqlOperation(deleteOrganization, { id }), authHeader);
+
+    setOrganizations(
+      organizations.filter((org: Organization) => org.id !== id)
+    );
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -62,23 +78,41 @@ const Index = () => {
                     </th>
                     <th
                       scope="col"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      Type
+                    </th>
+                    <th
+                      scope="col"
                       className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Edit</span>
                     </th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {organizations.map((org: Organization) => (
                     <tr key={org.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                         {org.name}
                       </td>
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        {orgTypeMap[org.type!]}
+                      </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link
                           href={`/organizations/${org.id}`}
-                          className="text-indigo-600 hover:text-indigo-900">
+                          className="text-indigo-600 hover:text-indigo-900 mr-2">
                           Edit<span className="sr-only">, {org.name}</span>
                         </Link>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDelete(org.id);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer">
+                          Delete<span className="sr-only">, {org.name}</span>
+                        </button>
                       </td>
                     </tr>
                   ))}

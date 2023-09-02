@@ -4,16 +4,13 @@ import {
   XMarkIcon,
   Cog6ToothIcon,
   Bars3Icon,
-  BellIcon,
   ChevronDownIcon,
-  CalendarDaysIcon,
-  ClipboardDocumentCheckIcon,
-  FolderIcon,
   HomeIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
 import { usePathname } from 'next/navigation';
 import { useState, Fragment } from 'react';
+import { classNames } from '@/helpers';
 
 const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon, current: true },
@@ -32,10 +29,6 @@ const teams = [
 ];
 
 const userNavigation = [{ name: 'Your profile', href: '/profile' }];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 const App = ({ children, user, signOut }: any) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
