@@ -106,7 +106,16 @@ export default function OrganizationDetail({ params }: any) {
                 label="Name"
                 type="text"
                 inputName="name"
-                defaultValue={organization?.name}></TextInput>
+                inputValue={organization?.name || ''}
+                validate={(value: string) => {
+                  if (!value || value.length === 0) {
+                    return 'Name is required';
+                  }
+                  if (value.length <= 3 || value.length >= 50) {
+                    return 'Name must be between 3 and 50 characters';
+                  }
+                  return null;
+                }}></TextInput>
             </div>
 
             <div className="sm:col-span-4">

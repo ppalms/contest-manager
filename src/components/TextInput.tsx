@@ -1,42 +1,55 @@
-import { classNames } from '@/helpers';
+import { useEffect, useState } from 'react';
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
 
 export interface TextInputProps {
   label: string;
   type: string;
   inputName: string;
-  defaultValue?: string | undefined;
-  errorMessage?: string | undefined;
+  inputValue: string;
+  validate: (s: string) => string | null;
 }
 
 export default function TextInput(props: TextInputProps) {
-  if (props.errorMessage && props.errorMessage.length < 3) {
-    throw new Error('Error message must be at least 3 characters');
-  }
+  const { label, type, inputName, inputValue, validate } = props;
+
+  const [value, setValue] = useState<string>(inputValue);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
+
+  const handleChange = (e: { target: { value: any } }) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+
+    if (validate) {
+      const errorMessage = validate(newValue);
+      setError(errorMessage);
+    }
+  };
 
   return (
     <div>
       <label
-        htmlFor={props.inputName}
+        htmlFor={inputName}
         className="block text-sm font-medium leading-6 text-gray-900">
-        {props.label}
+        {label}
       </label>
-      <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+      <div className="relative mt-2 rounded-md shadow-sm">
         <input
-          type={props.type}
-          name={props.inputName}
-          id={props.inputName}
-          className={classNames(
-            props.errorMessage
-              ? 'text-red-900  ring-red-300 placeholder:text-red-300  focus:ring-red-500'
-              : 'text-gray-900',
-            'block flex-1 border-0 bg-transparent py-1.5 pl-1 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6'
-          )}
-          defaultValue={props.defaultValue}
-          aria-invalid="true"
+          type={type}
+          name={inputName}
+          id={inputName}
+          className={`block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
+            error ? 'ring-red-300 text-red-900 focus:ring-red-500' : ''
+          }`}
+          value={value}
+          onChange={handleChange}
+          aria-invalid={(error && error.length > 0) || false}
           aria-describedby="input-error"
         />
-        {props.errorMessage ? (
+        {error ? (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <ExclamationCircleIcon
               className="h-5 w-5 text-red-500"
@@ -45,9 +58,9 @@ export default function TextInput(props: TextInputProps) {
           </div>
         ) : null}
       </div>
-      {props.errorMessage ? (
+      {error ? (
         <p className="mt-2 text-sm text-red-600" id="input-error">
-          Not a valid email address.
+          {error}
         </p>
       ) : null}
     </div>
