@@ -13,17 +13,21 @@ export default function TextInput(props: TextInputProps) {
   const { label, type, inputName, inputValue, validate } = props;
 
   const [value, setValue] = useState<string>(inputValue);
+  const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setValue(inputValue);
+    if (inputValue.length > 0) {
+      setTouched(true);
+    }
   }, [inputValue]);
 
   const handleChange = (e: { target: { value: any } }) => {
     const newValue = e.target.value;
     setValue(newValue);
 
-    if (validate) {
+    if (touched && validate) {
       const errorMessage = validate(newValue);
       setError(errorMessage);
     }
@@ -46,6 +50,10 @@ export default function TextInput(props: TextInputProps) {
           }`}
           value={value}
           onChange={handleChange}
+          onBlur={(e) => {
+            handleChange(e);
+            setTouched(true);
+          }}
           aria-invalid={(error && error.length > 0) || false}
           aria-describedby="input-error"
         />

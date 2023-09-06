@@ -16,15 +16,41 @@ import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
 import { orgTypeMap } from '../../../org-type-map';
 import TextInput from '@/components/TextInput';
+import Notification from '@/components/Notification';
 
 export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isValid, setIsValid] = useState(false);
   const [organization, setOrganization] = useState<Organization | null>(null);
+
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('success');
+
   const router = useRouter();
+
+  const validateOrgName = (value: string) => {
+    if (!value || value.length === 0) {
+      setIsValid(false);
+      return 'Name is required';
+    }
+    if (value.length < 3) {
+      setIsValid(false);
+      return 'Name must be at least 3';
+    }
+    setIsValid(true);
+    return null;
+  };
 
   useEffect(() => {
     const fetchOrg = async () => {
+      if (params.id === 'new') {
+        setIsValid(false);
+        return;
+      }
+
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
@@ -39,7 +65,6 @@ export default function OrganizationDetail({ params }: any) {
 
     try {
       setLoading(true);
-
       fetchOrg();
     } finally {
       setLoading(false);
@@ -85,8 +110,16 @@ export default function OrganizationDetail({ params }: any) {
 
         setOrganization(result.data.createOrganization!);
       }
+      setNotificationTitle('Successfully saved!');
+      setNotificationMessage(`${event.target.name.value} saved`);
+      setNotificationType('success');
+    } catch (error: any) {
+      setNotificationTitle('Error saving');
+      setNotificationMessage(error.message);
+      setNotificationType('error');
     } finally {
       setSaving(false);
+      setShowNotification(true);
     }
   };
 
@@ -101,24 +134,16 @@ export default function OrganizationDetail({ params }: any) {
       <form onSubmit={(e) => handleSubmit(e)}>
         <fieldset disabled={loading} aria-busy={loading}>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-4">
+            <div className="sm:col-span-6">
               <TextInput
                 label="Name"
                 type="text"
                 inputName="name"
                 inputValue={organization?.name || ''}
-                validate={(value: string) => {
-                  if (!value || value.length === 0) {
-                    return 'Name is required';
-                  }
-                  if (value.length <= 3 || value.length >= 50) {
-                    return 'Name must be between 3 and 50 characters';
-                  }
-                  return null;
-                }}></TextInput>
+                validate={validateOrgName}></TextInput>
             </div>
 
-            <div className="sm:col-span-4">
+            <div className="sm:col-span-2">
               <label
                 htmlFor="type"
                 className="block text-sm font-medium leading-6 text-gray-900">
@@ -149,12 +174,13 @@ export default function OrganizationDetail({ params }: any) {
           <div className="mt-6 flex items-center justify-end gap-x-6">
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={() => router.push('/organizations')}
               className="text-sm font-semibold leading-6 text-gray-900">
               Cancel
             </button>
             <button
               type="submit"
+              disabled={!isValid || saving}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               {saving ? (
                 <>
@@ -184,6 +210,16 @@ export default function OrganizationDetail({ params }: any) {
           </div>
         </fieldset>
       </form>
+
+      {showNotification && (
+        <Notification
+          title={notificationTitle}
+          message={notificationMessage}
+          show={showNotification}
+          notificationType={notificationType}
+          returnHref="/organizations"
+          onClose={() => setShowNotification(false)}></Notification>
+      )}
     </>
   );
 }
