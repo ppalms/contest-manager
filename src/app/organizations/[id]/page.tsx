@@ -38,7 +38,7 @@ export default function OrganizationDetail({ params }: any) {
     }
     if (value.length < 3) {
       setIsValid(false);
-      return 'Name must be at least 3';
+      return 'Name must be at least 3 characters long';
     }
     setIsValid(true);
     return null;
