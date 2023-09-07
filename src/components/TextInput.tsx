@@ -23,11 +23,14 @@ export default function TextInput(props: TextInputProps) {
     }
   }, [inputValue]);
 
-  const handleChange = (e: { target: { value: any } }) => {
+  const handleChange = (e: { target: { value: any }; type: string }) => {
     const newValue = e.target.value;
     setValue(newValue);
 
-    if (touched && validate) {
+    // No validation function was provided
+    if (!validate) return;
+
+    if (touched || e.type == 'blur') {
       const errorMessage = validate(newValue);
       setError(errorMessage);
     }
