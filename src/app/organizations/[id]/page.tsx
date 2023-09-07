@@ -14,9 +14,9 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
-import { orgTypeMap } from '../../../org-type-map';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
+import { orgTypeMap } from '@/org-type-map';
 
 export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
