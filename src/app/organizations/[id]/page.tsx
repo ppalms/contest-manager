@@ -65,8 +65,11 @@ export default function OrganizationDetail({ params }: any) {
 
     try {
       setLoading(true);
-      fetchOrg();
-    } finally {
+      fetchOrg().then(() => {
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error(error);
       setLoading(false);
     }
   }, [params.id]);
@@ -76,7 +79,6 @@ export default function OrganizationDetail({ params }: any) {
     try {
       setSaving(true);
       const authHeader = await getAuthHeader();
-
       if (organization?.id) {
         const result = (await API.graphql(
           graphqlOperation(
