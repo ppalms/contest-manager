@@ -14,9 +14,9 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
-import { orgTypeMap } from '../../../org-type-map';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
+import { orgTypeMap } from '@/org-type-map';
 
 export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
@@ -65,8 +65,11 @@ export default function OrganizationDetail({ params }: any) {
 
     try {
       setLoading(true);
-      fetchOrg();
-    } finally {
+      fetchOrg().then(() => {
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error(error);
       setLoading(false);
     }
   }, [params.id]);
@@ -76,7 +79,6 @@ export default function OrganizationDetail({ params }: any) {
     try {
       setSaving(true);
       const authHeader = await getAuthHeader();
-
       if (organization?.id) {
         const result = (await API.graphql(
           graphqlOperation(
