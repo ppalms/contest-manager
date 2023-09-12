@@ -61,7 +61,7 @@ export default function Users() {
         className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {users.map((user) => (
           <li
-            key={user.email}
+            key={user.id}
             className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
             <div className="flex w-full items-center justify-between space-x-6 p-6">
               <div className="flex-1 truncate">
