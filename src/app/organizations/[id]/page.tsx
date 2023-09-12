@@ -17,6 +17,7 @@ import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/org-type-map';
+import Users from '@/components/Users';
 
 export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
@@ -212,6 +213,8 @@ export default function OrganizationDetail({ params }: any) {
           </div>
         </fieldset>
       </form>
+
+      <Users></Users>
 
       {showNotification && (
         <Notification
