@@ -8,7 +8,10 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
+  const organization = ctx.result;
+  ctx.stash.organization = organization;
+
   return {
-    organization: ctx.result,
+    organization: organization,
   };
 }

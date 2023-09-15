@@ -92,10 +92,10 @@ export class OrganizationAPI extends Construct {
       props.organizationTable
     );
 
-    // const organizationUserMappingDataSource = api.addDynamoDbDataSource(
-    //   'OrganizationUserMappingDataSource',
-    //   props.organizationUserMappingTable
-    // );
+    const organizationUserMappingDataSource = api.addDynamoDbDataSource(
+      'OrganizationUserMappingDataSource',
+      props.organizationUserMappingTable
+    );
 
     const defaultPipelineCode = `
       // The before step
@@ -124,38 +124,33 @@ export class OrganizationAPI extends Construct {
       }
     );
 
+    const getOrgUserMappingsFunction = new AppsyncFunction(
+      this,
+      'GetOrgUserMappingsFunction',
+      {
+        api,
+        name: 'getOrgUserMappings',
+        dataSource: organizationUserMappingDataSource,
+        code: Code.fromAsset(
+          path.join(
+            __dirname,
+            '..',
+            'src',
+            'resolvers',
+            'getOrgUserMappings.js'
+          )
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      }
+    );
+
     api.createResolver('getOrganizationWithUsersResolver', {
       typeName: 'Query',
       fieldName: 'getOrganizationWithUsers',
       code: Code.fromInline(defaultPipelineCode),
-      pipelineConfig: [getOrganizationFunction],
+      pipelineConfig: [getOrganizationFunction, getOrgUserMappingsFunction],
       runtime: FunctionRuntime.JS_1_0_0,
     });
-
-    // const getOrgUserMappingsFunction = new AppsyncFunction(
-    //   this,
-    //   'GetOrgUserMappingsFunction',
-    //   {
-    //     api,
-    //     name: 'getOrgUserMappings',
-    //     dataSource: organizationUserMappingDataSource,
-    //     requestMappingTemplate: MappingTemplate.fromString(`
-    //     #set($organizationId = $util.dynamodb.toDynamoDBJson($ctx.source.id))
-    //     {
-    //       "version": "2018-05-29",
-    //       "operation": "Query",
-    //       "query": {
-    //         "expression": "organizationId = :organizationId",
-    //         "expressionValues": {
-    //           ":organizationId": $organizationId
-    //         }
-    //       }
-    //     }`),
-    //     responseMappingTemplate: MappingTemplate.fromString(`
-    //       $util.toJson($ctx.result.items)
-    //     `),
-    //   }
-    // );
 
     // TODO add Lambda resolver that gets user data from cognito listUsersByOrganization
 
