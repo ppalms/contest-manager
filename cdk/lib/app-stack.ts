@@ -10,14 +10,26 @@ export class AppStack extends Stack {
     super(scope, id, props);
 
     // TODO partition by tenantId
-    const table = new Table(this, 'OrganizationTable', {
+    const organizationTable = new Table(this, 'OrganizationTable', {
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
       partitionKey: { name: 'id', type: AttributeType.STRING },
     });
 
+    const organizationUserMappingTable = new Table(
+      this,
+      'OrganizationUserMappingTable',
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        partitionKey: { name: 'organizationId', type: AttributeType.STRING },
+        sortKey: { name: 'userId', type: AttributeType.STRING },
+      }
+    );
+
     new OrganizationAPI(this, 'OrganizationAPI', {
-      organizationTable: table,
+      organizationTable: organizationTable,
+      organizationUserMappingTable: organizationUserMappingTable,
     });
   }
 }

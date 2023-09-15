@@ -10,13 +10,22 @@ import {
   MappingTemplate,
   PrimaryKey,
   Values,
+  AppsyncFunction,
+  FunctionRuntime,
+  Code,
 } from 'aws-cdk-lib/aws-appsync';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Role } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import {
+  Architecture,
+  Function,
+  Code as LambdaCode,
+  Runtime,
+} from 'aws-cdk-lib/aws-lambda';
 
 interface APIProps {
   organizationTable: ITable;
+  organizationUserMappingTable: ITable;
 }
 
 export class OrganizationAPI extends Construct {
@@ -26,7 +35,15 @@ export class OrganizationAPI extends Construct {
     const api = new GraphqlApi(this, 'OrganizationAPI', {
       name: 'OrganizationAPI',
       schema: SchemaFile.fromAsset(
-        path.join(__dirname, '..', '..', 'src', 'graphql', 'schema.graphql')
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'src',
+          'graphql',
+          'schema',
+          'schema.graphql'
+        )
       ),
       authorizationConfig: {
         defaultAuthorization: {
@@ -40,7 +57,9 @@ export class OrganizationAPI extends Construct {
                 runtime: Runtime.NODEJS_18_X,
                 architecture: Architecture.ARM_64,
                 handler: 'authorizer.handler',
-                code: Code.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+                code: LambdaCode.fromAsset(
+                  path.join(__dirname, '..', 'esbuild.out')
+                ),
               }),
             },
           },
@@ -73,20 +92,95 @@ export class OrganizationAPI extends Construct {
       props.organizationTable
     );
 
+    // const organizationUserMappingDataSource = api.addDynamoDbDataSource(
+    //   'OrganizationUserMappingDataSource',
+    //   props.organizationUserMappingTable
+    // );
+
+    const defaultPipelineCode = `
+      // The before step
+      export function request(...args) {
+        console.log(args);
+        return {}
+      }
+
+      // The after step
+      export function response(ctx) {
+        return ctx.prev.result
+      }
+    `;
+
+    const getOrganizationFunction = new AppsyncFunction(
+      this,
+      'GetOrganizationFunction',
+      {
+        api,
+        name: 'getOrganization',
+        dataSource: organizationDataSource,
+        code: Code.fromAsset(
+          path.join(__dirname, '..', 'src', 'resolvers', 'getOrganization.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      }
+    );
+
+    api.createResolver('getOrganizationWithUsersResolver', {
+      typeName: 'Query',
+      fieldName: 'getOrganizationWithUsers',
+      code: Code.fromInline(defaultPipelineCode),
+      pipelineConfig: [getOrganizationFunction],
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    // const getOrgUserMappingsFunction = new AppsyncFunction(
+    //   this,
+    //   'GetOrgUserMappingsFunction',
+    //   {
+    //     api,
+    //     name: 'getOrgUserMappings',
+    //     dataSource: organizationUserMappingDataSource,
+    //     requestMappingTemplate: MappingTemplate.fromString(`
+    //     #set($organizationId = $util.dynamodb.toDynamoDBJson($ctx.source.id))
+    //     {
+    //       "version": "2018-05-29",
+    //       "operation": "Query",
+    //       "query": {
+    //         "expression": "organizationId = :organizationId",
+    //         "expressionValues": {
+    //           ":organizationId": $organizationId
+    //         }
+    //       }
+    //     }`),
+    //     responseMappingTemplate: MappingTemplate.fromString(`
+    //       $util.toJson($ctx.result.items)
+    //     `),
+    //   }
+    // );
+
+    // TODO add Lambda resolver that gets user data from cognito listUsersByOrganization
+
+    // api.createResolver('getOrganizationWithUsersResolver', {
+    //   typeName: 'Query',
+    //   fieldName: 'getOrganizationWithUsers',
+    //   pipelineConfig: [getOrganizationFunction, getOrgUserMappingsFunction],
+    //   requestMappingTemplate: MappingTemplate.fromString(`{}`),
+    //   responseMappingTemplate: MappingTemplate.fromString(`
+    //     #if($ctx.error)
+    //       $util.error($ctx.error.message, $ctx.error.type)
+    //     #end
+    //     {
+    //       "organization": $util.toJson($ctx.stash.get("organization")),
+    //       "users": $util.toJson($ctx.result)
+    //     }
+    //   `),
+    // });
+
     api.createResolver('listOrganizationsResolver', {
       typeName: 'Query',
       fieldName: 'listOrganizations',
       dataSource: organizationDataSource,
       requestMappingTemplate: MappingTemplate.dynamoDbScanTable(),
       responseMappingTemplate: MappingTemplate.dynamoDbResultList(),
-    });
-
-    api.createResolver('getOrganizationByIdResolver', {
-      typeName: 'Query',
-      fieldName: 'getOrganizationById',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbGetItem('id', 'id'),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
 
     api.createResolver('createOrganizationResolver', {
@@ -118,6 +212,17 @@ export class OrganizationAPI extends Construct {
       requestMappingTemplate: MappingTemplate.dynamoDbDeleteItem('id', 'id'),
       responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
+
+    // api.createResolver('addUserToOrganizationResolver', {
+    //   typeName: 'Mutation',
+    //   fieldName: 'addUserToOrganization',
+    //   dataSource: organizationUserMappingDataSource,
+    //   requestMappingTemplate: MappingTemplate.dynamoDbPutItem(
+    //     PrimaryKey.partition('userId').is('userId'),
+    //     Values.projecting('organizationId')
+    //   ),
+    //   responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
+    // });
 
     new CfnOutput(this, 'GraphQLAPIURL', {
       value: api.graphqlUrl,
