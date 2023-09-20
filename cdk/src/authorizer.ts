@@ -5,7 +5,13 @@ export async function handler(
   _context: any
 ): Promise<{ isAuthorized: boolean; resolverContext?: any }> {
   try {
-    const tenantId = getTenantId(event.authorizationToken);
+    const decoded = jwt.decode(event.authorizationToken, { complete: true });
+    const payload = decoded?.payload as jwt.JwtPayload;
+    if (!payload) {
+      throw new Error('Invalid JWT token');
+    }
+
+    const tenantId = getTenantId(payload);
     if (!tenantId) {
       return {
         isAuthorized: false,
@@ -59,19 +65,8 @@ export async function handler(
   }
 }
 
-function getTenantId(token: string): string {
-  const decoded = jwt.decode(token, { complete: true });
-
-  if (!decoded || typeof decoded !== 'object' || !decoded.payload) {
-    throw new Error('Invalid token');
-  }
-
+function getTenantId(payload: jwt.JwtPayload): string {
   // TODO verify JWT with Cognito
-
-  const payload = decoded.payload as jwt.JwtPayload;
-  if (!payload) {
-    throw new Error('Invalid token');
-  }
 
   if (payload['custom:tenantId']) {
     return payload['custom:tenantId'];

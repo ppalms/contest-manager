@@ -15,10 +15,10 @@ import {
   Code,
 } from 'aws-cdk-lib/aws-appsync';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { Role } from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import {
   Architecture,
-  Function,
+  Function as LambdaFunction,
   Code as LambdaCode,
   Runtime,
 } from 'aws-cdk-lib/aws-lambda';
@@ -53,13 +53,13 @@ export class OrganizationAPI extends Construct {
           {
             authorizationType: AuthorizationType.LAMBDA,
             lambdaAuthorizerConfig: {
-              handler: new Function(this, 'OrganizationAPIAuthorizer', {
-                runtime: Runtime.NODEJS_18_X,
-                architecture: Architecture.ARM_64,
-                handler: 'authorizer.handler',
+              handler: new LambdaFunction(this, 'OrganizationAPIAuthorizer', {
                 code: LambdaCode.fromAsset(
                   path.join(__dirname, '..', 'esbuild.out')
                 ),
+                handler: 'authorizer.handler',
+                runtime: Runtime.NODEJS_18_X,
+                architecture: Architecture.ARM_64,
               }),
             },
           },
@@ -97,18 +97,9 @@ export class OrganizationAPI extends Construct {
       props.organizationUserMappingTable
     );
 
-    const defaultPipelineCode = `
-      // The before step
-      export function request(...args) {
-        console.log(args);
-        return {}
-      }
-
-      // The after step
-      export function response(ctx) {
-        return ctx.prev.result
-      }
-    `;
+    // TODO parameterize region and account
+    const userPoolResources =
+      'arn:aws:cognito-idp:us-east-1:275316640779:userpool/*';
 
     const getOrganizationFunction = new AppsyncFunction(
       this,
@@ -144,31 +135,65 @@ export class OrganizationAPI extends Construct {
       }
     );
 
-    api.createResolver('getOrganizationWithUsersResolver', {
-      typeName: 'Query',
-      fieldName: 'getOrganizationWithUsers',
-      code: Code.fromInline(defaultPipelineCode),
-      pipelineConfig: [getOrganizationFunction, getOrgUserMappingsFunction],
+    const listUsersLambdaFunction = new LambdaFunction(
+      this,
+      'listUsersLambdaFunction',
+      {
+        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        handler: 'listUsersInGroup.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+      }
+    );
+
+    listUsersLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['dynamodb:GetItem', 'cognito-idp:ListUsersInGroup'],
+        resources: [props.organizationTable.tableArn, userPoolResources],
+      })
+    );
+
+    const getUsersDataSource = api.addLambdaDataSource(
+      'GetUsersDataSource',
+      listUsersLambdaFunction
+    );
+
+    const getUsersFunction = new AppsyncFunction(this, 'GetUsersFunction', {
+      api,
+      name: 'getUsers',
+      dataSource: getUsersDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, '..', 'src', 'resolvers', 'getUsers.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    // TODO add Lambda resolver that gets user data from cognito listUsersByOrganization
+    const getOrgUsersPipelineCode = `
+      export function request(...args) {
+        console.log(args);
+        return {};
+      }
 
-    // api.createResolver('getOrganizationWithUsersResolver', {
-    //   typeName: 'Query',
-    //   fieldName: 'getOrganizationWithUsers',
-    //   pipelineConfig: [getOrganizationFunction, getOrgUserMappingsFunction],
-    //   requestMappingTemplate: MappingTemplate.fromString(`{}`),
-    //   responseMappingTemplate: MappingTemplate.fromString(`
-    //     #if($ctx.error)
-    //       $util.error($ctx.error.message, $ctx.error.type)
-    //     #end
-    //     {
-    //       "organization": $util.toJson($ctx.stash.get("organization")),
-    //       "users": $util.toJson($ctx.result)
-    //     }
-    //   `),
-    // });
+      export function response(ctx) {
+        return {
+          organization: ctx.stash.organization,
+          users: ctx.prev.result,
+        };
+      }
+    `;
+
+    api.createResolver('getOrganizationWithUsersResolver', {
+      typeName: 'Query',
+      fieldName: 'getOrganizationWithUsers',
+      code: Code.fromInline(getOrgUsersPipelineCode),
+      pipelineConfig: [
+        getOrganizationFunction,
+        getOrgUserMappingsFunction,
+        getUsersFunction,
+      ],
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
 
     api.createResolver('listOrganizationsResolver', {
       typeName: 'Query',

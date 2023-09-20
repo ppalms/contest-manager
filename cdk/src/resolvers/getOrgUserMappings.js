@@ -1,7 +1,7 @@
 export function request(ctx) {
   const organizationId = ctx.stash.organization?.id;
   if (!organizationId) {
-    console.error('Missing ctx.stash.organization');
+    console.error('Failed to get organizationId from stash');
   }
 
   return {
@@ -16,8 +16,5 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  return {
-    organization: ctx.stash.organization,
-    users: ctx.result.items,
-  };
+  return ctx.result.items;
 }

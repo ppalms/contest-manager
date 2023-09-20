@@ -1,5 +1,5 @@
 // CommonJS build configuration for NodeJS Lambda functions
-const entryPoints = require('glob').sync('./src/authorizer.ts');
+const entryPoints = require('glob').sync('./src/*.ts');
 
 require('esbuild')
   .build({
