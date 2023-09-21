@@ -3,8 +3,10 @@ schema @aws_api_key @aws_lambda {
   mutation: Mutation
 }
 
+# ** Organizations ** #
 type Query @aws_api_key @aws_lambda {
-  getOrganizationById(id: String!): Organization
+  # getOrganization(id: String!): Organization
+  getOrganizationWithUsers(id: String!): OrganizationWithUsers
   listOrganizations: [Organization]
 }
 
@@ -12,12 +14,18 @@ type Mutation @aws_api_key @aws_lambda {
   createOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: String!): String
   updateOrganization(organization: UpdateOrganizationInput!): Organization
+  # addUserToOrganization(user: User): User
 }
 
 type Organization @aws_api_key @aws_lambda {
   id: ID!
   name: String!
   type: OrganizationType
+}
+
+type OrganizationWithUsers @aws_api_key @aws_lambda {
+  organization: Organization!
+  users: [User]
 }
 
 enum OrganizationType {
@@ -38,4 +46,14 @@ input UpdateOrganizationInput {
   id: ID!
   name: String!
   type: OrganizationType!
+}
+
+# ** Users ** #
+type User @aws_api_key @aws_lambda {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: AWSEmail!
+  role: String!
+  enabled: Boolean!
 }

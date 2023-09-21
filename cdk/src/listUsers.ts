@@ -1,4 +1,3 @@
-import { LambdaRequest } from '@aws-appsync/utils';
 import {
   CognitoIdentityProviderClient,
   ListUsersInGroupCommand,
@@ -6,19 +5,12 @@ import {
   UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
 
-// TODO rename to ListTenantUsers
-
-export interface ListUsersInGroupRequest {
+export interface ListUsersRequest {
   userPoolId: string;
   tenantId: string;
 }
 
-export async function handler(
-  event: ListUsersInGroupRequest,
-  _: any
-): Promise<any[]> {
-  console.log(event);
-
+export async function handler(event: ListUsersRequest, _: any): Promise<any[]> {
   const { userPoolId, tenantId } = event;
 
   try {
@@ -42,6 +34,8 @@ export async function handler(
           firstName: getUserAttribute(user, 'given_name'),
           lastName: getUserAttribute(user, 'family_name'),
           email: getUserAttribute(user, 'email'),
+          role: getUserAttribute(user, 'custom:userRole'),
+          enabled: user.Enabled,
         };
       }) || [];
 

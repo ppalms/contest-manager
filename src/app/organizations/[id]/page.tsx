@@ -2,13 +2,17 @@
 
 import {
   Organization,
-  GetOrganizationByIdQuery,
   UpdateOrganizationMutation,
   OrganizationType,
   CreateOrganizationMutation,
+  GetOrganizationWithUsersQuery,
+  OrganizationWithUsers,
+  User,
 } from '@/graphql/API';
-import { createOrganization, updateOrganization } from '@/graphql/mutations';
-import { getOrganizationById } from '@/graphql/queries';
+import {
+  createOrganization,
+  updateOrganization,
+} from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
@@ -17,13 +21,14 @@ import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/org-type-map';
-import Users from '@/components/Users';
+import UserList from '@/components/UserList';
+import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
 export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [view, setView] = useState<OrganizationWithUsers | null>(null);
 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -55,13 +60,13 @@ export default function OrganizationDetail({ params }: any) {
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
-          getOrganizationById,
+          getOrganizationWithUsers,
           { id: params.id },
           authHeader.Authorization
         )
-      )) as { data: GetOrganizationByIdQuery };
+      )) as { data: GetOrganizationWithUsersQuery };
 
-      setOrganization(result.data.getOrganizationById as Organization);
+      setView(result.data.getOrganizationWithUsers as OrganizationWithUsers);
     };
 
     try {
@@ -80,13 +85,13 @@ export default function OrganizationDetail({ params }: any) {
     try {
       setSaving(true);
       const authHeader = await getAuthHeader();
-      if (organization?.id) {
+      if (view?.organization.id) {
         const result = (await API.graphql(
           graphqlOperation(
             updateOrganization,
             {
               organization: {
-                id: organization!.id,
+                id: view!.organization.id,
                 name: event.target.name.value,
                 type: event.target.type.value as OrganizationType,
               },
@@ -95,7 +100,7 @@ export default function OrganizationDetail({ params }: any) {
           )
         )) as { data: UpdateOrganizationMutation };
 
-        setOrganization(result.data.updateOrganization!);
+        // setView(result.data.updateOrganization!);
       } else {
         const result = (await API.graphql(
           graphqlOperation(
@@ -111,7 +116,7 @@ export default function OrganizationDetail({ params }: any) {
           )
         )) as { data: CreateOrganizationMutation };
 
-        setOrganization(result.data.createOrganization!);
+        // setView(result.data.createOrganization!);
       }
       setNotificationTitle('Successfully saved!');
       setNotificationMessage(`${event.target.name.value} saved`);
@@ -142,7 +147,7 @@ export default function OrganizationDetail({ params }: any) {
                 label="Name"
                 type="text"
                 inputName="name"
-                inputValue={organization?.name || ''}
+                inputValue={view?.organization.name || ''}
                 validate={validateOrgName}></TextInput>
             </div>
 
@@ -156,19 +161,19 @@ export default function OrganizationDetail({ params }: any) {
                 id="type"
                 name="type"
                 className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                value={organization?.type || OrganizationType.SCHOOL}
+                value={view?.organization.type || OrganizationType.School}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   const type = e.target.value as OrganizationType;
-                  setOrganization({ ...organization!, type });
+                  // setView({ ...view!, type });
                 }}>
-                <option value={OrganizationType.STATE}>
-                  {orgTypeMap[OrganizationType.STATE]}
+                <option value={OrganizationType.State}>
+                  {orgTypeMap[OrganizationType.State]}
                 </option>
-                <option value={OrganizationType.DISTRICT}>
-                  {orgTypeMap[OrganizationType.DISTRICT]}
+                <option value={OrganizationType.District}>
+                  {orgTypeMap[OrganizationType.District]}
                 </option>
-                <option value={OrganizationType.SCHOOL}>
-                  {orgTypeMap[OrganizationType.SCHOOL]}
+                <option value={OrganizationType.School}>
+                  {orgTypeMap[OrganizationType.School]}
                 </option>
               </select>
             </div>
@@ -214,7 +219,7 @@ export default function OrganizationDetail({ params }: any) {
         </fieldset>
       </form>
 
-      <Users></Users>
+      <UserList users={(view?.users as User[]) || []} />
 
       {showNotification && (
         <Notification

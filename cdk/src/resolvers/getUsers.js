@@ -9,5 +9,21 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  return ctx.result;
+  // TODO define user roles and create user role mapping
+
+  if (!Array.isArray(ctx.result)) {
+    console.error('Failed to get users');
+  }
+
+  const users = ctx.result.map((user) => {
+    if (user.role === 'TenantAdmin') {
+      return {
+        ...user,
+        role: 'Administrator',
+      };
+    }
+    return user;
+  });
+
+  return users;
 }

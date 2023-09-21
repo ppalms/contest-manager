@@ -140,7 +140,7 @@ export class OrganizationAPI extends Construct {
       'listUsersLambdaFunction',
       {
         code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
-        handler: 'listUsersInGroup.handler',
+        handler: 'listUsers.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
       }
