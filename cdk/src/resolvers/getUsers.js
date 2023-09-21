@@ -12,18 +12,24 @@ export function response(ctx) {
   // TODO define user roles and create user role mapping
 
   if (!Array.isArray(ctx.result)) {
-    console.error('Failed to get users');
+    util.error('Failed to get users');
   }
 
-  const users = ctx.result.map((user) => {
-    if (user.role === 'TenantAdmin') {
-      return {
-        ...user,
-        role: 'Administrator',
-      };
-    }
-    return user;
-  });
+  // const orgUsers = new Set(ctx.prev.result.map((mapping) => mapping.userId));
+  const orgUsers = ctx.prev.result.map((mapping) => mapping.userId);
+
+  const users = ctx.result
+    // .filter((user) => orgUsers.has(user.id))
+    .filter((user) => orgUsers.includes(user.id))
+    .map((user) => {
+      if (user.role === 'TenantAdmin') {
+        return {
+          ...user,
+          role: 'Administrator',
+        };
+      }
+      return user;
+    });
 
   return users;
 }
