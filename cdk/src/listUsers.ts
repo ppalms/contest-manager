@@ -24,7 +24,12 @@ export async function handler(event: ListUsersRequest, _: any): Promise<any[]> {
     });
     const response = await idpClient.send(listUsersCommand);
     const getUserAttribute = (user: UserType, attrName: string) => {
-      return user.Attributes!.find((attr) => attr.Name === attrName)!.Value!;
+      try {
+        return user.Attributes!.find((attr) => attr.Name === attrName)!.Value!;
+      } catch (e) {
+        console.error(`Error getting attribute ${attrName} for user`, user);
+        throw e;
+      }
     };
 
     const users =
@@ -35,6 +40,7 @@ export async function handler(event: ListUsersRequest, _: any): Promise<any[]> {
           lastName: getUserAttribute(user, 'family_name'),
           email: getUserAttribute(user, 'email'),
           role: getUserAttribute(user, 'custom:userRole'),
+          username: user.Username,
           enabled: user.Enabled,
         };
       }) || [];

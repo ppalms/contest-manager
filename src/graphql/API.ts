@@ -27,6 +27,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createOrganization?: Maybe<Organization>;
   deleteOrganization?: Maybe<Scalars['String']['output']>;
+  saveUser?: Maybe<User>;
   updateOrganization?: Maybe<Organization>;
 };
 
@@ -38,6 +39,11 @@ export type MutationCreateOrganizationArgs = {
 
 export type MutationDeleteOrganizationArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationSaveUserArgs = {
+  user?: InputMaybe<SaveUserInput>;
 };
 
 
@@ -83,6 +89,13 @@ export type QueryGetOrganizationWithUsersArgs = {
   id: Scalars['String']['input'];
 };
 
+export type SaveUserInput = {
+  email?: InputMaybe<Scalars['AWSEmail']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  username: Scalars['String']['input'];
+};
+
 export type UpdateOrganizationInput = {
   id: Scalars['ID']['input'];
   name: Scalars['String']['input'];
@@ -97,6 +110,7 @@ export type User = {
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
   role: Scalars['String']['output'];
+  username: Scalars['String']['output'];
 };
 
 export type CreateOrganizationMutationVariables = Exact<{
@@ -120,12 +134,19 @@ export type UpdateOrganizationMutationVariables = Exact<{
 
 export type UpdateOrganizationMutation = { __typename?: 'Mutation', updateOrganization?: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null } | null };
 
+export type SaveUserMutationVariables = Exact<{
+  user: SaveUserInput;
+}>;
+
+
+export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any } | null };
+
 export type GetOrganizationWithUsersQueryVariables = Exact<{
   id: Scalars['String']['input'];
 }>;
 
 
-export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null }, users?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: string } | null> | null } | null };
+export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null }, users?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: string, username: string, enabled: boolean } | null> | null } | null };
 
 export type ListOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 

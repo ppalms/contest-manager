@@ -12,6 +12,7 @@ export const getOrganizationWithUsers = /* GraphQL */ `
         lastName
         email
         role
+        username
         enabled
       }
     }

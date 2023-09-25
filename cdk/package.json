@@ -11,7 +11,8 @@
     "cdk": "cdk",
     "build:cjs": "node esbuild.cjs.config.js",
     "package": "npm run build:cjs",
-    "deploy": "npm run package && cdk deploy AppStack --profile sandbox"
+    "deploy": "npm run package && cdk deploy AppStack --profile sandbox",
+    "cdk-watch": "npm run package && cdk watch AppStack --profile sandbox"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",

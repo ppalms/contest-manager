@@ -68,7 +68,7 @@ export class OrganizationAPI extends Construct {
       logConfig: {
         fieldLogLevel: FieldLogLevel.ALL,
       },
-      xrayEnabled: true,
+      xrayEnabled: false, // TODO
     });
 
     const pooledTenantRoleArn = StringParameter.fromStringParameterAttributes(
@@ -83,7 +83,6 @@ export class OrganizationAPI extends Construct {
       pooledTenantRoleArn.stringValue
     );
 
-    // TODO move policy creation to tenant stack
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
 
@@ -169,24 +168,18 @@ export class OrganizationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    const getOrgUsersPipelineCode = `
-      export function request(...args) {
-        console.log(args);
-        return {};
-      }
-
-      export function response(ctx) {
-        return {
-          organization: ctx.stash.organization,
-          users: ctx.prev.result,
-        };
-      }
-    `;
-
     api.createResolver('getOrganizationWithUsersResolver', {
       typeName: 'Query',
       fieldName: 'getOrganizationWithUsers',
-      code: Code.fromInline(getOrgUsersPipelineCode),
+      code: Code.fromAsset(
+        path.join(
+          __dirname,
+          '..',
+          'src',
+          'resolvers',
+          'getOrgWithUsersPipeline.js'
+        )
+      ),
       pipelineConfig: [
         getOrganizationFunction,
         getOrgUserMappingsFunction,
@@ -233,16 +226,43 @@ export class OrganizationAPI extends Construct {
       responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
 
-    // api.createResolver('addUserToOrganizationResolver', {
-    //   typeName: 'Mutation',
-    //   fieldName: 'addUserToOrganization',
-    //   dataSource: organizationUserMappingDataSource,
-    //   requestMappingTemplate: MappingTemplate.dynamoDbPutItem(
-    //     PrimaryKey.partition('userId').is('userId'),
-    //     Values.projecting('organizationId')
-    //   ),
-    //   responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
-    // });
+    // ** Save User ** //
+    const saveUserLambdaFunction = new LambdaFunction(
+      this,
+      'saveUserLambdaFunction',
+      {
+        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        handler: 'saveUser.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+      }
+    );
+
+    saveUserLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+          'cognito-idp:AdminUpdateUserAttributes',
+          'cognito-idp:AdminGetUser',
+        ],
+        resources: [userPoolResources],
+      })
+    );
+
+    const saveUserDataSource = api.addLambdaDataSource(
+      'SaveUserDataSource',
+      saveUserLambdaFunction
+    );
+
+    api.createResolver('saveUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'saveUser',
+      dataSource: saveUserDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, '..', 'src', 'resolvers', 'saveUser.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
 
     new CfnOutput(this, 'GraphQLAPIURL', {
       value: api.graphqlUrl,

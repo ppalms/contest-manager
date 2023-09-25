@@ -14,7 +14,7 @@ type Mutation @aws_api_key @aws_lambda {
   createOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: String!): String
   updateOrganization(organization: UpdateOrganizationInput!): Organization
-  # addUserToOrganization(user: User): User
+  saveUser(user: SaveUserInput): User
 }
 
 type Organization @aws_api_key @aws_lambda {
@@ -51,9 +51,17 @@ input UpdateOrganizationInput {
 # ** Users ** #
 type User @aws_api_key @aws_lambda {
   id: ID!
+  username: String!
   firstName: String!
   lastName: String!
   email: AWSEmail!
   role: String!
   enabled: Boolean!
+}
+
+input SaveUserInput {
+  username: String!
+  firstName: String
+  lastName: String
+  email: AWSEmail
 }

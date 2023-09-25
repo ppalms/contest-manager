@@ -24,10 +24,13 @@ export const updateOrganization = /* GraphQL */ `
   }
 `;
 
-// export const addUserToOrganization = /* GraphQL */ `
-//   mutation AddUserToOrganization($organizationId: String!, $userId: String!) {
-//     addUserToOrganization(organizationId: $organizationId, userId: $userId) {
-//       userId
-//     }
-//   }
-// `;
+export const saveUser = /* GraphQL */ `
+  mutation SaveUser($user: SaveUserInput!) {
+    saveUser(user: $user) {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;

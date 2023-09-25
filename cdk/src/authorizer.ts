@@ -10,8 +10,9 @@ export async function handler(
     if (!payload) {
       throw new Error('Invalid JWT token');
     }
+    // TODO verify JWT with Cognito
 
-    const tenantId = getTenantId(payload);
+    const tenantId = payload['custom:tenantId'];
     if (!tenantId) {
       return {
         isAuthorized: false,
@@ -55,6 +56,7 @@ export async function handler(
       isAuthorized: true,
       resolverContext: {
         tenantId: tenantId,
+        // TODO add userPoolId
       },
     };
   } catch (error) {
@@ -62,15 +64,5 @@ export async function handler(
     return {
       isAuthorized: false,
     };
-  }
-}
-
-function getTenantId(payload: jwt.JwtPayload): string {
-  // TODO verify JWT with Cognito
-
-  if (payload['custom:tenantId']) {
-    return payload['custom:tenantId'];
-  } else {
-    throw new Error('tenantId not found in token');
   }
 }
