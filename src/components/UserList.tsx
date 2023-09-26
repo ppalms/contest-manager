@@ -65,8 +65,6 @@ export default function UserList(props: UserListProps) {
 
   return (
     <>
-      <h2 className="text-sm font-medium text-gray-500">Users</h2>
-
       <ul
         role="list"
         className="grid grid-cols-1 gap-6 pt-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -108,11 +106,11 @@ export default function UserList(props: UserListProps) {
                   </a>
                 </div>
                 <div className="-ml-px flex w-0 flex-1">
-                  <a
+                  {/* <a
                     href="#"
                     className="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-indigo-100">
                     {user.enabled === true ? 'Deactivate' : 'Activate'}
-                  </a>
+                  </a> */}
                 </div>
               </div>
             </div>
@@ -194,7 +192,6 @@ export default function UserList(props: UserListProps) {
                                     autoComplete="email"
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                     defaultValue={editUser?.email}
-                                    disabled={true}
                                   />
                                 </div>
                               </div>

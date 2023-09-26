@@ -5,8 +5,8 @@ import {
   OrganizationType,
   CreateOrganizationMutation,
   GetOrganizationWithUsersQuery,
-  OrganizationWithUsers,
   User,
+  Organization,
 } from '@/graphql/API';
 import {
   createOrganization,
@@ -27,9 +27,8 @@ export default function OrganizationDetail({ params }: any) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [viewModel, setViewModel] = useState<OrganizationWithUsers | null>(
-    null
-  );
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -67,9 +66,13 @@ export default function OrganizationDetail({ params }: any) {
         )
       )) as { data: GetOrganizationWithUsersQuery };
 
-      setViewModel(
-        result.data.getOrganizationWithUsers as OrganizationWithUsers
+      setOrganization(
+        result.data.getOrganizationWithUsers?.organization ?? null
       );
+
+      if (result.data.getOrganizationWithUsers?.users) {
+        setUsers(result.data.getOrganizationWithUsers.users as User[]);
+      }
     };
 
     try {
@@ -89,13 +92,13 @@ export default function OrganizationDetail({ params }: any) {
     try {
       setSaving(true);
       const authHeader = await getAuthHeader();
-      if (viewModel?.organization.id) {
+      if (organization?.id) {
         const result = (await API.graphql(
           graphqlOperation(
             updateOrganization,
             {
               organization: {
-                id: viewModel!.organization.id,
+                id: organization.id,
                 name: event.target.name.value,
                 type: event.target.type.value as OrganizationType,
               },
@@ -104,7 +107,7 @@ export default function OrganizationDetail({ params }: any) {
           )
         )) as { data: UpdateOrganizationMutation };
 
-        // setView(result.data.updateOrganization!);
+        setOrganization(result.data.updateOrganization!);
       } else {
         const result = (await API.graphql(
           graphqlOperation(
@@ -120,7 +123,7 @@ export default function OrganizationDetail({ params }: any) {
           )
         )) as { data: CreateOrganizationMutation };
 
-        // setView(result.data.createOrganization!);
+        setOrganization(result.data.createOrganization!);
       }
       setNotificationTitle('Successfully saved!');
       setNotificationMessage(`${event.target.name.value} saved`);
@@ -151,8 +154,9 @@ export default function OrganizationDetail({ params }: any) {
                 label="Name"
                 type="text"
                 inputName="name"
-                inputValue={viewModel?.organization.name || ''}
-                validate={validateOrgName}></TextInput>
+                inputValue={organization?.name || ''}
+                validate={validateOrgName}
+              />
             </div>
 
             <div className="sm:col-span-2">
@@ -165,10 +169,10 @@ export default function OrganizationDetail({ params }: any) {
                 id="type"
                 name="type"
                 className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                value={viewModel?.organization.type || OrganizationType.School}
+                value={organization?.type || OrganizationType.School}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   const type = e.target.value as OrganizationType;
-                  // setView({ ...view!, type });
+                  setOrganization({ ...organization!, type });
                 }}>
                 <option value={OrganizationType.State}>
                   {orgTypeMap[OrganizationType.State]}
@@ -223,19 +227,30 @@ export default function OrganizationDetail({ params }: any) {
         </fieldset>
       </form>
 
+      {organization?.id && (
+        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div className="sm:col-span-6">
+            <h3 className="text-base font-semibold leading-7 text-gray-900">
+              Users
+            </h3>
+          </div>
+        </div>
+      )}
+
       <UserList
-        users={(viewModel?.users as User[]) ?? []}
+        users={users}
         onUserSaved={(user) => {
-          if (!viewModel?.users?.length || viewModel.users.length === 0) {
+          if (!users?.length || users.length === 0) {
             return;
           }
 
-          const i = viewModel.users.findIndex((u) => u?.id === user.id);
-          if (i < 0) {
-            return;
+          const i = users.findIndex((u) => u?.id === user.id);
+          if (i === -1) {
+            users.push(user);
+          } else {
+            users[i] = { ...users[i], ...user };
           }
 
-          viewModel.users[i] = { ...viewModel.users[i], ...user };
           setNotificationTitle('Successfully saved!');
           setNotificationMessage(`${user.firstName} ${user.lastName} saved`);
           setNotificationType('success');
@@ -250,7 +265,8 @@ export default function OrganizationDetail({ params }: any) {
           show={showNotification}
           notificationType={notificationType}
           returnHref="/organizations"
-          onClose={() => setShowNotification(false)}></Notification>
+          onClose={() => setShowNotification(false)}
+        />
       )}
     </>
   );
