@@ -24,11 +24,12 @@ import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
 export default function OrganizationDetail({ params }: any) {
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -228,35 +229,29 @@ export default function OrganizationDetail({ params }: any) {
       </form>
 
       {organization?.id && (
-        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-          <div className="sm:col-span-6">
-            <h3 className="text-base font-semibold leading-7 text-gray-900">
-              Users
-            </h3>
+        <>
+          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div className="sm:col-span-6">
+              <h3 className="text-base font-semibold leading-7 text-gray-900">
+                Users
+              </h3>
+            </div>
           </div>
-        </div>
+
+          <UserList
+            users={users}
+            organizationId={organization.id}
+            onUserSaved={(user) => {
+              setNotificationTitle('Successfully saved!');
+              setNotificationMessage(
+                `${user.firstName} ${user.lastName} saved`
+              );
+              setNotificationType('success');
+              setShowNotification(true);
+            }}
+          />
+        </>
       )}
-
-      <UserList
-        users={users}
-        onUserSaved={(user) => {
-          if (!users?.length || users.length === 0) {
-            return;
-          }
-
-          const i = users.findIndex((u) => u?.id === user.id);
-          if (i === -1) {
-            users.push(user);
-          } else {
-            users[i] = { ...users[i], ...user };
-          }
-
-          setNotificationTitle('Successfully saved!');
-          setNotificationMessage(`${user.firstName} ${user.lastName} saved`);
-          setNotificationType('success');
-          setShowNotification(true);
-        }}
-      />
 
       {showNotification && (
         <Notification

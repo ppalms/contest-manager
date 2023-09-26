@@ -22,7 +22,7 @@ export async function handler(event: ListUsersRequest, _: any): Promise<any[]> {
     const idpClient = new CognitoIdentityProviderClient({
       region: process.env.AWS_REGION,
     });
-    const response = await idpClient.send(listUsersCommand);
+    const result = await idpClient.send(listUsersCommand);
     const getUserAttribute = (user: UserType, attrName: string) => {
       try {
         return user.Attributes!.find((attr) => attr.Name === attrName)!.Value!;
@@ -33,7 +33,7 @@ export async function handler(event: ListUsersRequest, _: any): Promise<any[]> {
     };
 
     const users =
-      response.Users?.map((user) => {
+      result.Users?.map((user) => {
         return {
           id: getUserAttribute(user, 'sub'),
           firstName: getUserAttribute(user, 'given_name'),

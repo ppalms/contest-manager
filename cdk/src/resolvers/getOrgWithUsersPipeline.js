@@ -1,5 +1,6 @@
 export function request(ctx) {
   ctx.stash.tenantId = ctx.identity.resolverContext.tenantId;
+  ctx.stash.userPoolId = ctx.identity.resolverContext.userPoolId;
   return {};
 }
 

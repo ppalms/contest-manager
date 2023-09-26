@@ -92,7 +92,10 @@ export type QueryGetOrganizationWithUsersArgs = {
 export type SaveUserInput = {
   email?: InputMaybe<Scalars['AWSEmail']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['ID']['input'];
+  role?: InputMaybe<Scalars['String']['input']>;
   username: Scalars['String']['input'];
 };
 

@@ -6,10 +6,12 @@ import { Transition, Dialog } from '@headlessui/react';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { saveUser } from '@/graphql/resolvers/mutations';
+import { UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from './TextInput';
 
 export interface UserListProps {
   users: User[];
+  organizationId: string;
   onUserSaved?: (user: User) => void;
 }
 
@@ -23,38 +25,74 @@ export default function UserList(props: UserListProps) {
   const validateFirstLastName = (value: string) => {
     if (!value || value.length === 0) {
       setIsValid(false);
-      return 'First name is required';
+      return 'Name is required';
     }
     if (value.length < 3) {
       setIsValid(false);
-      return 'First name must be at least 3 characters long';
+      return 'Name must be at least 3 characters long';
     }
     setIsValid(true);
     return null;
   };
 
+  // TODO validate email
+
   const handleSaveUser = async (e: any) => {
     e.preventDefault();
     setSaving(true);
     try {
+      if (!editUser) {
+        throw new Error('No user to save');
+      }
+
       const authHeader = await getAuthHeader();
+      const username =
+        editUser!.username.length === 0
+          ? e.target.email.value
+          : editUser!.username;
+
       const result = (await API.graphql(
         graphqlOperation(
           saveUser,
           {
             user: {
+              id: editUser!.id,
+              username: username,
               firstName: e.target['first-name'].value,
               lastName: e.target['last-name'].value,
               email: e.target.email.value,
-              username: editUser?.username,
+              role: 'TenantAdmin',
+              organizationId: props.organizationId,
             },
           },
           authHeader.Authorization
         )
       )) as { data: SaveUserMutation };
 
+      if (!users?.length || users.length === 0) {
+        return;
+      }
+
+      let savedUser;
+      const i = users.findIndex((u) => u.id === result.data.saveUser!.id);
+      if (i === -1) {
+        savedUser = {
+          id: result.data.saveUser!.id,
+          firstName: result.data.saveUser!.firstName,
+          lastName: result.data.saveUser!.lastName,
+          email: result.data.saveUser!.email,
+          username: result.data.saveUser!.email,
+          enabled: true,
+          role: 'TenantAdmin',
+        };
+        users.push(savedUser);
+      } else {
+        savedUser = { ...users[i], ...result.data.saveUser };
+        users[i] = savedUser;
+      }
+
       if (onUserSaved) {
-        onUserSaved(result.data.saveUser as User);
+        onUserSaved(savedUser);
       }
     } finally {
       setEditUser(null);
@@ -65,6 +103,26 @@ export default function UserList(props: UserListProps) {
 
   return (
     <>
+      <div className="mt-4 sm:mt-0 flex flex-row-reverse">
+        <button
+          type="button"
+          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => {
+            setEditUser({
+              id: '',
+              firstName: '',
+              lastName: '',
+              email: '',
+              username: '',
+              enabled: true,
+              role: 'TenantAdmin',
+            });
+          }}>
+          Add
+          <UserPlusIcon className="-mr-0.5 ml-1 h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
+
       <ul
         role="list"
         className="grid grid-cols-1 gap-6 pt-4 sm:grid-cols-2 xl:grid-cols-3">

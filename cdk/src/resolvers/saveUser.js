@@ -2,7 +2,8 @@ export function request(ctx) {
   return {
     operation: 'Invoke',
     payload: {
-      userPoolId: 'us-east-1_tXpGrpozQ',
+      tenantId: ctx.identity.resolverContext.tenantId,
+      userPoolId: ctx.identity.resolverContext.userPoolId,
       user: ctx.arguments.user,
     },
   };

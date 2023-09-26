@@ -168,6 +168,7 @@ export class OrganizationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
+    // TODO refactor to use single table for org and users
     api.createResolver('getOrganizationWithUsersResolver', {
       typeName: 'Query',
       fieldName: 'getOrganizationWithUsers',
@@ -235,6 +236,9 @@ export class OrganizationAPI extends Construct {
         handler: 'saveUser.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
+        environment: {
+          ORGUSERS_TABLE_NAME: props.organizationUserMappingTable.tableName,
+        },
       }
     );
 
@@ -242,10 +246,16 @@ export class OrganizationAPI extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         actions: [
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminAddUserToGroup',
           'cognito-idp:AdminUpdateUserAttributes',
           'cognito-idp:AdminGetUser',
+          'dynamodb:PutItem',
         ],
-        resources: [userPoolResources],
+        resources: [
+          userPoolResources,
+          props.organizationUserMappingTable.tableArn,
+        ],
       })
     );
 

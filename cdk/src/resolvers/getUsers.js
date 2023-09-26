@@ -2,7 +2,7 @@ export function request(ctx) {
   return {
     operation: 'Invoke',
     payload: {
-      userPoolId: 'us-east-1_tXpGrpozQ',
+      userPoolId: ctx.stash.userPoolId,
       tenantId: ctx.stash.tenantId,
     },
   };

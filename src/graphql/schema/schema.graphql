@@ -60,8 +60,11 @@ type User @aws_api_key @aws_lambda {
 }
 
 input SaveUserInput {
+  id: ID
   username: String!
   firstName: String
   lastName: String
   email: AWSEmail
+  role: String
+  organizationId: ID!
 }
