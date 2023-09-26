@@ -4,7 +4,7 @@ import {
   AdminUpdateUserAttributesCommand,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { SaveUserInput } from '../../src/graphql/API';
+import { SaveUserInput } from '../../../src/graphql/API';
 
 export interface SaveUserRequest {
   userPoolId: string;

@@ -1,5 +1,6 @@
 // CommonJS build configuration for NodeJS Lambda functions
-const entryPoints = require('glob').sync('./src/*.ts');
+// TODO move lambdas into individual directories; e.g., authorizer/handler.ts
+const entryPoints = require('glob').sync('./src/lambdas/*.ts');
 
 require('esbuild')
   .build({
