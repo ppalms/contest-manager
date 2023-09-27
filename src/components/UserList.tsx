@@ -83,11 +83,15 @@ export default function UserList(props: UserListProps) {
           email: result.data.saveUser!.email,
           username: result.data.saveUser!.email,
           enabled: true,
-          role: 'TenantAdmin',
+          role: 'Administrator', // TODO get rid of role display text translation junk sprinkled throughout
         };
         users.push(savedUser);
       } else {
-        savedUser = { ...users[i], ...result.data.saveUser };
+        savedUser = {
+          ...users[i],
+          ...result.data.saveUser,
+          role: 'Administrator', // TODO get rid of role display text translation junk sprinkled throughout
+        };
         users[i] = savedUser;
       }
 
@@ -103,7 +107,7 @@ export default function UserList(props: UserListProps) {
 
   return (
     <>
-      <div className="mt-4 sm:mt-0 flex flex-row-reverse">
+      <div className="sm:flex flex-row-reverse">
         <button
           type="button"
           className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -123,6 +127,7 @@ export default function UserList(props: UserListProps) {
         </button>
       </div>
 
+      {/* USER LIST */}
       <ul
         role="list"
         className="grid grid-cols-1 gap-6 pt-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -176,7 +181,7 @@ export default function UserList(props: UserListProps) {
         ))}
       </ul>
 
-      {/** USER EDIT MODAL **/}
+      {/* USER EDIT MODAL */}
       <Transition.Root show={editUser !== null} as={Fragment}>
         <Dialog
           as="div"
