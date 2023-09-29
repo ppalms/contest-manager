@@ -1,14 +1,17 @@
 'use client';
 
 import {
-  Organization,
-  GetOrganizationByIdQuery,
   UpdateOrganizationMutation,
   OrganizationType,
   CreateOrganizationMutation,
+  GetOrganizationWithUsersQuery,
+  User,
+  Organization,
 } from '@/graphql/API';
-import { createOrganization, updateOrganization } from '@/graphql/mutations';
-import { getOrganizationById } from '@/graphql/queries';
+import {
+  createOrganization,
+  updateOrganization,
+} from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
@@ -17,12 +20,16 @@ import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/org-type-map';
+import UserList from '@/components/UserList';
+import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
 export default function OrganizationDetail({ params }: any) {
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [organization, setOrganization] = useState<Organization | null>(null);
 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -45,7 +52,7 @@ export default function OrganizationDetail({ params }: any) {
   };
 
   useEffect(() => {
-    const fetchOrg = async () => {
+    const fetchOrgWithUsers = async () => {
       if (params.id === 'new') {
         setIsValid(false);
         return;
@@ -54,18 +61,24 @@ export default function OrganizationDetail({ params }: any) {
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
-          getOrganizationById,
+          getOrganizationWithUsers,
           { id: params.id },
           authHeader.Authorization
         )
-      )) as { data: GetOrganizationByIdQuery };
+      )) as { data: GetOrganizationWithUsersQuery };
 
-      setOrganization(result.data.getOrganizationById as Organization);
+      setOrganization(
+        result.data.getOrganizationWithUsers?.organization ?? null
+      );
+
+      if (result.data.getOrganizationWithUsers?.users) {
+        setUsers(result.data.getOrganizationWithUsers.users as User[]);
+      }
     };
 
     try {
       setLoading(true);
-      fetchOrg().then(() => {
+      fetchOrgWithUsers().then(() => {
         setLoading(false);
       });
     } catch (error) {
@@ -74,7 +87,8 @@ export default function OrganizationDetail({ params }: any) {
     }
   }, [params.id]);
 
-  const handleSubmit = async (event: any) => {
+  // TODO figure out event type
+  const handleSaveOrg = async (event: any) => {
     event.preventDefault();
     try {
       setSaving(true);
@@ -85,7 +99,7 @@ export default function OrganizationDetail({ params }: any) {
             updateOrganization,
             {
               organization: {
-                id: organization!.id,
+                id: organization.id,
                 name: event.target.name.value,
                 type: event.target.type.value as OrganizationType,
               },
@@ -127,91 +141,122 @@ export default function OrganizationDetail({ params }: any) {
 
   return (
     <>
-      <div className="px-4 sm:px-0">
-        <h3 className="text-base font-semibold leading-7 text-gray-900">
-          Organization Details
-        </h3>
+      <div className="divide-y">
+        <div className="pb-10">
+          <form onSubmit={(e) => handleSaveOrg(e)}>
+            <div className="px-4 sm:px-0 flex items-center justify-between">
+              <h3 className="text-base font-semibold leading-7 text-gray-900 flex">
+                Organization Details
+              </h3>
+
+              <div className="flex justify-end gap-x-6">
+                <button
+                  type="button"
+                  onClick={() => router.push('/organizations')}
+                  className="text-sm font-semibold leading-6 text-gray-900">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isValid || saving}
+                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  {saving ? (
+                    <>
+                      Saving
+                      <svg
+                        className="animate-spin -mr-0.5 ml-2 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </>
+                  ) : (
+                    'Save'
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                <div className="sm:col-span-6">
+                  <TextInput
+                    label="Name"
+                    type="text"
+                    inputName="name"
+                    inputValue={organization?.name || ''}
+                    validate={validateOrgName}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="type"
+                    className="block text-sm font-medium leading-6 text-gray-900">
+                    Type
+                  </label>
+                  <select
+                    id="type"
+                    name="type"
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={organization?.type || OrganizationType.School}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      const type = e.target.value as OrganizationType;
+                      setOrganization({ ...organization!, type });
+                    }}>
+                    <option value={OrganizationType.State}>
+                      {orgTypeMap[OrganizationType.State]}
+                    </option>
+                    <option value={OrganizationType.District}>
+                      {orgTypeMap[OrganizationType.District]}
+                    </option>
+                    <option value={OrganizationType.School}>
+                      {orgTypeMap[OrganizationType.School]}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+
+        {organization?.id && (
+          <div>
+            {/* TODO move into user list component */}
+            <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              <div className="sm:col-span-6">
+                <h3 className="text-base font-semibold leading-7 text-gray-900">
+                  Users
+                </h3>
+              </div>
+            </div>
+
+            <UserList
+              users={users}
+              organizationId={organization.id}
+              onUserSaved={(user) => {
+                setNotificationTitle('Successfully saved!');
+                setNotificationMessage(
+                  `${user.firstName} ${user.lastName} saved`
+                );
+                setNotificationType('success');
+                setShowNotification(true);
+              }}
+            />
+          </div>
+        )}
       </div>
-
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <fieldset disabled={loading} aria-busy={loading}>
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-6">
-              <TextInput
-                label="Name"
-                type="text"
-                inputName="name"
-                inputValue={organization?.name || ''}
-                validate={validateOrgName}></TextInput>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="type"
-                className="block text-sm font-medium leading-6 text-gray-900">
-                Type
-              </label>
-              <select
-                id="type"
-                name="type"
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                value={organization?.type || OrganizationType.SCHOOL}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  const type = e.target.value as OrganizationType;
-                  setOrganization({ ...organization!, type });
-                }}>
-                <option value={OrganizationType.STATE}>
-                  {orgTypeMap[OrganizationType.STATE]}
-                </option>
-                <option value={OrganizationType.DISTRICT}>
-                  {orgTypeMap[OrganizationType.DISTRICT]}
-                </option>
-                <option value={OrganizationType.SCHOOL}>
-                  {orgTypeMap[OrganizationType.SCHOOL]}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-6 flex items-center justify-end gap-x-6">
-            <button
-              type="button"
-              onClick={() => router.push('/organizations')}
-              className="text-sm font-semibold leading-6 text-gray-900">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!isValid || saving}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              {saving ? (
-                <>
-                  Saving
-                  <svg
-                    className="animate-spin -mr-0.5 ml-2 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </>
-              ) : (
-                'Save'
-              )}
-            </button>
-          </div>
-        </fieldset>
-      </form>
 
       {showNotification && (
         <Notification
@@ -220,7 +265,8 @@ export default function OrganizationDetail({ params }: any) {
           show={showNotification}
           notificationType={notificationType}
           returnHref="/organizations"
-          onClose={() => setShowNotification(false)}></Notification>
+          onClose={() => setShowNotification(false)}
+        />
       )}
     </>
   );

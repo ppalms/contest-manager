@@ -1,4 +1,25 @@
 {
+  "sandbox": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-contestmanager-sandbox-232925-authRole",
+      "UnauthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-contestmanager-sandbox-232925-deployment",
+      "UnauthRoleName": "amplify-contestmanager-sandbox-232925-unauthRole",
+      "StackName": "amplify-contestmanager-sandbox-232925",
+      "StackId": "arn:aws:cloudformation:us-east-1:275316640779:stack/amplify-contestmanager-sandbox-232925/f9ed5b80-42ff-11ee-88a6-0e9a81a32a7b",
+      "AmplifyAppId": "d2gq3invfbyrye"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2gq3invfbyrye",
+          "type": "manual"
+        }
+      }
+    }
+  },
   "dev": {
     "awscloudformation": {
       "AuthRoleName": "amplify-contestmanager-dev-183332-authRole",
@@ -20,23 +41,23 @@
       }
     }
   },
-  "sandbox": {
+  "prod": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-contestmanager-sandbox-232925-authRole",
-      "UnauthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::275316640779:role/amplify-contestmanager-sandbox-232925-authRole",
+      "AuthRoleName": "amplify-contestmanager-prod-215602-authRole",
+      "UnauthRoleArn": "arn:aws:iam::215759557621:role/amplify-contestmanager-prod-215602-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::215759557621:role/amplify-contestmanager-prod-215602-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-contestmanager-sandbox-232925-deployment",
-      "UnauthRoleName": "amplify-contestmanager-sandbox-232925-unauthRole",
-      "StackName": "amplify-contestmanager-sandbox-232925",
-      "StackId": "arn:aws:cloudformation:us-east-1:275316640779:stack/amplify-contestmanager-sandbox-232925/f9ed5b80-42ff-11ee-88a6-0e9a81a32a7b",
-      "AmplifyAppId": "d2gq3invfbyrye"
+      "DeploymentBucketName": "amplify-contestmanager-prod-215602-deployment",
+      "UnauthRoleName": "amplify-contestmanager-prod-215602-unauthRole",
+      "StackName": "amplify-contestmanager-prod-215602",
+      "StackId": "arn:aws:cloudformation:us-east-1:215759557621:stack/amplify-contestmanager-prod-215602/e99e7e00-5117-11ee-b4ac-0e9facd4ee31",
+      "AmplifyAppId": "d34x4425wiu4v"
     },
     "categories": {
       "hosting": {
         "amplifyhosting": {
-          "appId": "d2gq3invfbyrye",
-          "type": "manual"
+          "appId": "d34x4425wiu4v",
+          "type": "cicd"
         }
       }
     }

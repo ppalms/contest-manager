@@ -6,7 +6,7 @@ export interface TextInputProps {
   type: string;
   inputName: string;
   inputValue: string;
-  validate: (s: string) => string | null;
+  validate?: (s: string) => string | null;
 }
 
 export default function TextInput(props: TextInputProps) {
@@ -24,6 +24,8 @@ export default function TextInput(props: TextInputProps) {
   }, [inputValue]);
 
   const handleChange = (e: { target: { value: any }; type: string }) => {
+    // TODO don't do anything if user clicked cancel
+
     const newValue = e.target.value;
     setValue(newValue);
 

@@ -1,0 +1,18 @@
+{
+  "toolchain": {
+    "profile": "tenant-mgmt-dev-cicd",
+    "accountId": "749738143297"
+  },
+  "network": {
+    "profile": "network-prod",
+    "accountId": "490240629122"
+  },
+  "development": {
+    "profile": "tenant-mgmt-dev",
+    "accountId": "417445681496"
+  },
+  "production": {
+    "profile": "tenant-mgmt-prod",
+    "accountId": "215759557621"
+  }
+}

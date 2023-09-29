@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Construct } from 'constructs';
-import { CfnOutput } from 'aws-cdk-lib';
+import { CfnOutput, Stack } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import {
   GraphqlApi,
@@ -10,13 +10,22 @@ import {
   MappingTemplate,
   PrimaryKey,
   Values,
+  AppsyncFunction,
+  FunctionRuntime,
+  Code,
 } from 'aws-cdk-lib/aws-appsync';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { Role } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Effect, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
+import {
+  Architecture,
+  Function as LambdaFunction,
+  Code as LambdaCode,
+  Runtime,
+} from 'aws-cdk-lib/aws-lambda';
 
 interface APIProps {
   organizationTable: ITable;
+  organizationUserMappingTable: ITable;
 }
 
 export class OrganizationAPI extends Construct {
@@ -26,7 +35,15 @@ export class OrganizationAPI extends Construct {
     const api = new GraphqlApi(this, 'OrganizationAPI', {
       name: 'OrganizationAPI',
       schema: SchemaFile.fromAsset(
-        path.join(__dirname, '..', '..', 'src', 'graphql', 'schema.graphql')
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'src',
+          'graphql',
+          'schema',
+          'schema.graphql'
+        )
       ),
       authorizationConfig: {
         defaultAuthorization: {
@@ -36,11 +53,13 @@ export class OrganizationAPI extends Construct {
           {
             authorizationType: AuthorizationType.LAMBDA,
             lambdaAuthorizerConfig: {
-              handler: new Function(this, 'OrganizationAPIAuthorizer', {
+              handler: new LambdaFunction(this, 'OrganizationAPIAuthorizer', {
+                code: LambdaCode.fromAsset(
+                  path.join(__dirname, '..', 'esbuild.out')
+                ),
+                handler: 'authorizer.handler',
                 runtime: Runtime.NODEJS_18_X,
                 architecture: Architecture.ARM_64,
-                handler: 'authorizer.handler',
-                code: Code.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
               }),
             },
           },
@@ -49,7 +68,7 @@ export class OrganizationAPI extends Construct {
       logConfig: {
         fieldLogLevel: FieldLogLevel.ALL,
       },
-      xrayEnabled: true,
+      xrayEnabled: false, // TODO
     });
 
     const pooledTenantRoleArn = StringParameter.fromStringParameterAttributes(
@@ -64,7 +83,6 @@ export class OrganizationAPI extends Construct {
       pooledTenantRoleArn.stringValue
     );
 
-    // TODO move policy creation to tenant stack
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
 
@@ -73,20 +91,109 @@ export class OrganizationAPI extends Construct {
       props.organizationTable
     );
 
+    const organizationUserMappingDataSource = api.addDynamoDbDataSource(
+      'OrganizationUserMappingDataSource',
+      props.organizationUserMappingTable
+    );
+
+    const stack = Stack.of(this);
+    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
+
+    const getOrganizationFunction = new AppsyncFunction(
+      this,
+      'GetOrganizationFunction',
+      {
+        api,
+        name: 'getOrganization',
+        dataSource: organizationDataSource,
+        code: Code.fromAsset(
+          path.join(__dirname, '..', 'src', 'resolvers', 'getOrganization.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      }
+    );
+
+    const getOrgUserMappingsFunction = new AppsyncFunction(
+      this,
+      'GetOrgUserMappingsFunction',
+      {
+        api,
+        name: 'getOrgUserMappings',
+        dataSource: organizationUserMappingDataSource,
+        code: Code.fromAsset(
+          path.join(
+            __dirname,
+            '..',
+            'src',
+            'resolvers',
+            'getOrgUserMappings.js'
+          )
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      }
+    );
+
+    const listUsersLambdaFunction = new LambdaFunction(
+      this,
+      'listUsersLambdaFunction',
+      {
+        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        handler: 'listUsers.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+      }
+    );
+
+    listUsersLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['dynamodb:GetItem', 'cognito-idp:ListUsersInGroup'],
+        resources: [props.organizationTable.tableArn, allUserPools],
+      })
+    );
+
+    const getUsersDataSource = api.addLambdaDataSource(
+      'GetUsersDataSource',
+      listUsersLambdaFunction
+    );
+
+    const getUsersFunction = new AppsyncFunction(this, 'GetUsersFunction', {
+      api,
+      name: 'getUsers',
+      dataSource: getUsersDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, '..', 'src', 'resolvers', 'getUsers.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    // TODO refactor to use single table for org and users
+    api.createResolver('getOrganizationWithUsersResolver', {
+      typeName: 'Query',
+      fieldName: 'getOrganizationWithUsers',
+      code: Code.fromAsset(
+        path.join(
+          __dirname,
+          '..',
+          'src',
+          'resolvers',
+          'getOrgWithUsersPipeline.js'
+        )
+      ),
+      pipelineConfig: [
+        getOrganizationFunction,
+        getOrgUserMappingsFunction,
+        getUsersFunction,
+      ],
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
     api.createResolver('listOrganizationsResolver', {
       typeName: 'Query',
       fieldName: 'listOrganizations',
       dataSource: organizationDataSource,
       requestMappingTemplate: MappingTemplate.dynamoDbScanTable(),
       responseMappingTemplate: MappingTemplate.dynamoDbResultList(),
-    });
-
-    api.createResolver('getOrganizationByIdResolver', {
-      typeName: 'Query',
-      fieldName: 'getOrganizationById',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbGetItem('id', 'id'),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
 
     api.createResolver('createOrganizationResolver', {
@@ -117,6 +224,55 @@ export class OrganizationAPI extends Construct {
       dataSource: organizationDataSource,
       requestMappingTemplate: MappingTemplate.dynamoDbDeleteItem('id', 'id'),
       responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
+    });
+
+    // ** Save User ** //
+    const saveUserLambdaFunction = new LambdaFunction(
+      this,
+      'saveUserLambdaFunction',
+      {
+        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        handler: 'saveUser.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+        environment: {
+          ORGUSERS_TABLE_NAME: props.organizationUserMappingTable.tableName,
+        },
+      }
+    );
+
+    saveUserLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+          'ssm:GetParameters',
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminAddUserToGroup',
+          'cognito-idp:AdminUpdateUserAttributes',
+          'cognito-idp:AdminGetUser',
+          'dynamodb:PutItem',
+        ],
+        resources: [
+          `arn:aws:ssm:${stack.region}:${stack.account}:parameter/shared/user-pool-id`,
+          allUserPools,
+          props.organizationUserMappingTable.tableArn,
+        ],
+      })
+    );
+
+    const saveUserDataSource = api.addLambdaDataSource(
+      'SaveUserDataSource',
+      saveUserLambdaFunction
+    );
+
+    api.createResolver('saveUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'saveUser',
+      dataSource: saveUserDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, '..', 'src', 'resolvers', 'saveUser.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
     });
 
     new CfnOutput(this, 'GraphQLAPIURL', {

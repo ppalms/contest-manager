@@ -4,11 +4,11 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { GraphQLResult } from '@aws-amplify/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { listOrganizations } from '@/graphql/queries';
+import { listOrganizations } from '@/graphql/resolvers/queries';
 import { Organization } from '@/graphql/API';
 import { getAuthHeader } from '@/helpers';
 import { FolderPlusIcon } from '@heroicons/react/20/solid';
-import { deleteOrganization } from '@/graphql/mutations';
+import { deleteOrganization } from '@/graphql/resolvers/mutations';
 import { orgTypeMap } from '../../org-type-map';
 
 const Index = () => {
