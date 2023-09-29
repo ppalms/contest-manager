@@ -24,6 +24,8 @@ export default function TextInput(props: TextInputProps) {
   }, [inputValue]);
 
   const handleChange = (e: { target: { value: any }; type: string }) => {
+    // TODO don't do anything if user clicked cancel
+
     const newValue = e.target.value;
     setValue(newValue);
 
