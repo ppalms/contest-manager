@@ -9,11 +9,11 @@ import {
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
 import { SaveUserInput } from '../../../src/graphql/API';
 
 export interface SaveUserRequest {
   tenantId: string;
-  userPoolId: string;
   user: SaveUserInput;
 }
 
@@ -57,17 +57,37 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
     return event.user;
   }
 
+  // TODO add pooled tenant to tenant table
+  const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+  // const tenantDetails = await dbClient.send(
+  //   new GetItemCommand({
+  //     TableName: process.env.TENANT_TABLE,
+  //     Key: {
+  //       tenantId: { S: event.tenantId },
+  //     },
+  //   })
+  // );
+  // const userPoolId = tenantDetails.Item!.userPoolId.S!;
+
+  const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
+
+  const ssmResult = await ssmClient.send(
+    new GetParametersCommand({
+      Names: ['/shared/user-pool-id'],
+    })
+  );
+  const userPoolId = ssmResult.Parameters![0].Value!;
+
   const idpClient = new CognitoIdentityProviderClient({
     region: process.env.AWS_REGION,
   });
 
   if (!id || id.length === 0) {
-    await createUser(event, userAttributes, idpClient);
+    await createUser(event, userAttributes, userPoolId, idpClient);
   } else {
-    await updateUser(event, userAttributes, idpClient);
+    await updateUser(event, userAttributes, userPoolId, idpClient);
   }
 
-  const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
   await dbClient.send(
     new PutItemCommand({
       TableName: process.env.ORGUSERS_TABLE_NAME,
@@ -80,7 +100,7 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
 
   const result = await idpClient.send(
     new AdminGetUserCommand({
-      UserPoolId: event.userPoolId,
+      UserPoolId: userPoolId,
       Username: username,
     })
   );
@@ -114,10 +134,11 @@ const getUserAttribute = (
 const createUser = async (
   event: SaveUserRequest,
   userAttributes: AttributeType[],
+  userPoolId: string,
   idpClient: CognitoIdentityProviderClient
 ) => {
   const createUserCommand = new AdminCreateUserCommand({
-    UserPoolId: event.userPoolId,
+    UserPoolId: userPoolId,
     Username: event.user.username,
     UserAttributes: userAttributes,
   });
@@ -136,7 +157,7 @@ const createUser = async (
   const addUserToGroupCommand = new AdminAddUserToGroupCommand({
     Username: event.user.username,
     GroupName: event.tenantId,
-    UserPoolId: event.userPoolId,
+    UserPoolId: userPoolId,
   });
 
   await idpClient.send(addUserToGroupCommand);
@@ -145,10 +166,11 @@ const createUser = async (
 const updateUser = async (
   event: SaveUserRequest,
   userAttributes: AttributeType[],
+  userPoolId: string,
   idpClient: CognitoIdentityProviderClient
 ) => {
   const updateUserAttributesCommand = new AdminUpdateUserAttributesCommand({
-    UserPoolId: event.userPoolId,
+    UserPoolId: userPoolId,
     Username: event.user.username,
     UserAttributes: userAttributes.filter((x) => x.Name !== 'custom:tenantId'),
   });

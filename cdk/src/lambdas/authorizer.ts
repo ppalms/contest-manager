@@ -56,7 +56,6 @@ export async function handler(
       isAuthorized: true,
       resolverContext: {
         tenantId: tenantId,
-        userPoolId: 'us-east-1_tXpGrpozQ', // TODO parameterize before merging to main
       },
     };
   } catch (error) {

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Construct } from 'constructs';
-import { CfnOutput } from 'aws-cdk-lib';
+import { CfnOutput, Stack } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import {
   GraphqlApi,
@@ -96,9 +96,8 @@ export class OrganizationAPI extends Construct {
       props.organizationUserMappingTable
     );
 
-    // TODO parameterize region and account
-    const userPoolResources =
-      'arn:aws:cognito-idp:us-east-1:275316640779:userpool/*';
+    const stack = Stack.of(this);
+    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
 
     const getOrganizationFunction = new AppsyncFunction(
       this,
@@ -149,7 +148,7 @@ export class OrganizationAPI extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         actions: ['dynamodb:GetItem', 'cognito-idp:ListUsersInGroup'],
-        resources: [props.organizationTable.tableArn, userPoolResources],
+        resources: [props.organizationTable.tableArn, allUserPools],
       })
     );
 
@@ -246,6 +245,7 @@ export class OrganizationAPI extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         actions: [
+          'ssm:GetParameters',
           'cognito-idp:AdminCreateUser',
           'cognito-idp:AdminAddUserToGroup',
           'cognito-idp:AdminUpdateUserAttributes',
@@ -253,7 +253,8 @@ export class OrganizationAPI extends Construct {
           'dynamodb:PutItem',
         ],
         resources: [
-          userPoolResources,
+          `arn:aws:ssm:${stack.region}:${stack.account}:parameter/shared/user-pool-id`,
+          allUserPools,
           props.organizationUserMappingTable.tableArn,
         ],
       })

@@ -9,14 +9,15 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
+    "bootstrap": "npx ts-node bootstrap.ts",
     "build:cjs": "node esbuild.cjs.config.js",
-    "package": "npm run build:cjs",
-    "deploy": "npm run package && cdk deploy AppStack --profile sandbox",
-    "cdk-watch": "npm run package && cdk watch AppStack --profile sandbox"
+    "deploy": "npm run build:cjs && cdk deploy ContestManagerStack --profile sandbox",
+    "cdk-watch": "npm run build:cjs && cdk watch ContestManagerStack --profile sandbox"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
     "@types/node": "20.5.3",
+    "@types/prompts": "^2.4.5",
     "aws-cdk": "2.93.0",
     "esbuild": "^0.19.2",
     "glob": "^10.3.3",
@@ -30,9 +31,12 @@
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.93.0-alpha.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.410.0",
     "@aws-sdk/client-dynamodb": "^3.410.0",
+    "@aws-sdk/client-ssm": "^3.421.0",
+    "@aws-sdk/credential-providers": "^3.421.0",
     "@aws-sdk/util-dynamodb": "^3.410.0",
     "aws-cdk-lib": "2.93.0",
     "constructs": "^10.0.0",
+    "prompts": "^2.4.2",
     "source-map-support": "^0.5.21"
   }
 }
