@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { AppStack } from '../lib/app-stack';
 import { Accounts } from '../accounts';
 import { PipelineStack } from '../lib/pipeline-stack';
 
