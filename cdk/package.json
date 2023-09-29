@@ -18,6 +18,7 @@
     "@types/jest": "^29.5.4",
     "@types/node": "20.5.3",
     "@types/prompts": "^2.4.5",
+    "@types/source-map-support": "^0.5.8",
     "aws-cdk": "2.93.0",
     "esbuild": "^0.19.2",
     "glob": "^10.3.3",
