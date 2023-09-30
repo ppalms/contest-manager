@@ -37,6 +37,8 @@
     "@aws-sdk/util-dynamodb": "^3.410.0",
     "aws-cdk-lib": "2.93.0",
     "constructs": "^10.0.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21"
   }
