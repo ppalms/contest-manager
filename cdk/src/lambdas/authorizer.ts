@@ -10,6 +10,7 @@ export async function handler(
     if (!payload) {
       throw new Error('Invalid JWT token');
     }
+    
     // TODO verify JWT with Cognito
 
     const tenantId = payload['custom:tenantId'];
