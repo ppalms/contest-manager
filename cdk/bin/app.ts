@@ -3,6 +3,8 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { Accounts } from '../accounts';
 import { PipelineStack } from '../lib/pipeline-stack';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: './.env.local' });
 
 const app = new cdk.App({ context: { appName: 'contest-manager' } });
 const accounts = Accounts.load();
