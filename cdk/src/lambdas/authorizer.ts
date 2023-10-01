@@ -1,3 +1,4 @@
+import { GetParametersCommand, SSMClient } from '@aws-sdk/client-ssm';
 import * as jwt from 'jsonwebtoken';
 
 export async function handler(
@@ -10,7 +11,7 @@ export async function handler(
     if (!payload) {
       throw new Error('Invalid JWT token');
     }
-    
+
     // TODO verify JWT with Cognito
 
     const tenantId = payload['custom:tenantId'];
@@ -53,10 +54,21 @@ export async function handler(
     const assumeRoleResult = await stsClient.send(command);
     const credentials = assumeRoleResult.Credentials!; */
 
+    // TODO get from tenant details in dynamodb
+    const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
+
+    const ssmResult = await ssmClient.send(
+      new GetParametersCommand({
+        Names: ['/shared/user-pool-id'],
+      })
+    );
+    const userPoolId = ssmResult.Parameters![0].Value!;
+
     return {
       isAuthorized: true,
       resolverContext: {
         tenantId: tenantId,
+        userPoolId: userPoolId,
       },
     };
   } catch (error) {

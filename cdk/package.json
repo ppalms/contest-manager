@@ -11,8 +11,9 @@
     "cdk": "cdk",
     "bootstrap": "npx ts-node bootstrap.ts",
     "build:cjs": "node esbuild.cjs.config.js",
-    "deploy": "npm run build:cjs && cdk deploy ContestManagerStack --profile sandbox",
-    "cdk-watch": "npm run build:cjs && cdk watch ContestManagerStack --profile sandbox"
+    "package": "npm run build:cjs",
+    "deploy": "npm run package && cdk deploy ContestManagerStack --profile sandbox",
+    "cdk-watch": "npm run package && cdk watch ContestManagerStack --profile sandbox"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
