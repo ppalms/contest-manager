@@ -264,14 +264,9 @@ export class OrganizationAPI extends Construct {
           'cognito-idp:AdminAddUserToGroup',
           'cognito-idp:AdminUpdateUserAttributes',
           'cognito-idp:AdminGetUser',
-          'dynamodb:PutItem',
-          'ssm:GetParameters',
+          'dynamodb:PutItem', // TODO get rid of orguser mapping table
         ],
-        resources: [
-          `arn:aws:ssm:${stack.region}:${stack.account}:parameter/shared/user-pool-id`,
-          allUserPools,
-          props.organizationUserMappingTable.tableArn,
-        ],
+        resources: [allUserPools, props.organizationUserMappingTable.tableArn],
       })
     );
 

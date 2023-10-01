@@ -1,7 +1,7 @@
 export function request(ctx) {
-  const organizationId = ctx.stash.organization?.id;
+  const organizationId = ctx.prev?.result?.id;
   if (!organizationId) {
-    console.error('Failed to get organizationId from stash');
+    console.error('Failed to get organization');
   }
 
   return {
@@ -16,5 +16,9 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
+  if (ctx.result && ctx.result.items && ctx.result.items.length === 0) {
+    return [];
+  }
+
   return ctx.result.items;
 }
