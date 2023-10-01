@@ -38,7 +38,9 @@ export class OrganizationAPI extends Construct {
       this,
       'AuthorizerLambda',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', 'esbuild.out', 'authorizer')
+        ),
         handler: 'authorizer.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -152,7 +154,9 @@ export class OrganizationAPI extends Construct {
       this,
       'listUsersLambdaFunction',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', 'esbuild.out', 'listUsers')
+        ),
         handler: 'listUsers.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -246,7 +250,9 @@ export class OrganizationAPI extends Construct {
       this,
       'saveUserLambdaFunction',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', 'esbuild.out', 'saveUser')
+        ),
         handler: 'saveUser.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
