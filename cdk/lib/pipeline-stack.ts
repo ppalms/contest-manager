@@ -4,6 +4,7 @@ import {
   CodePipelineSource,
   CodeBuildStep,
   CodePipeline,
+  ManualApprovalStep,
 } from 'aws-cdk-lib/pipelines';
 import { ContestManagerStage } from './pipeline-stage';
 import { Account, Accounts } from '../accounts';
@@ -80,7 +81,14 @@ export class PipelineStack extends Stack {
           account: Prod.account.accountId,
           region: Prod.region,
         },
-      })
+      }),
+      {
+        pre: [
+          new ManualApprovalStep('ApproveDeploy', {
+            comment: 'Please approve the deployment',
+          }),
+        ],
+      }
     );
   }
 }
