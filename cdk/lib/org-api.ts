@@ -32,6 +32,29 @@ export class OrganizationAPI extends Construct {
   constructor(scope: Construct, id: string, props: APIProps) {
     super(scope, id);
 
+    const stack = Stack.of(this);
+
+    const authorizerLambdaFunction = new LambdaFunction(
+      this,
+      'AuthorizerLambda',
+      {
+        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        handler: 'authorizer.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+      }
+    );
+
+    authorizerLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['ssm:GetParameters'],
+        resources: [
+          `arn:aws:ssm:${stack.region}:${stack.account}:parameter/shared/user-pool-id`,
+        ],
+      })
+    );
+
     const api = new GraphqlApi(this, 'OrganizationAPI', {
       name: 'OrganizationAPI',
       schema: SchemaFile.fromAsset(
@@ -53,14 +76,7 @@ export class OrganizationAPI extends Construct {
           {
             authorizationType: AuthorizationType.LAMBDA,
             lambdaAuthorizerConfig: {
-              handler: new LambdaFunction(this, 'OrganizationAPIAuthorizer', {
-                code: LambdaCode.fromAsset(
-                  path.join(__dirname, '..', 'esbuild.out')
-                ),
-                handler: 'authorizer.handler',
-                runtime: Runtime.NODEJS_18_X,
-                architecture: Architecture.ARM_64,
-              }),
+              handler: authorizerLambdaFunction,
             },
           },
         ],
@@ -96,7 +112,6 @@ export class OrganizationAPI extends Construct {
       props.organizationUserMappingTable
     );
 
-    const stack = Stack.of(this);
     const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
 
     const getOrganizationFunction = new AppsyncFunction(
@@ -245,12 +260,12 @@ export class OrganizationAPI extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         actions: [
-          'ssm:GetParameters',
           'cognito-idp:AdminCreateUser',
           'cognito-idp:AdminAddUserToGroup',
           'cognito-idp:AdminUpdateUserAttributes',
           'cognito-idp:AdminGetUser',
           'dynamodb:PutItem',
+          'ssm:GetParameters',
         ],
         resources: [
           `arn:aws:ssm:${stack.region}:${stack.account}:parameter/shared/user-pool-id`,
