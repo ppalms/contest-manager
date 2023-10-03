@@ -9,27 +9,17 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  // TODO define user roles and create user role mapping
-
   if (!Array.isArray(ctx.result)) {
     util.error('Failed to get users');
   }
 
+  // TODO Set is supposed to be faster than Array.includes() but it's not working
   // const orgUsers = new Set(ctx.prev.result.map((mapping) => mapping.userId));
   const orgUsers = ctx.prev.result.map((mapping) => mapping.userId);
 
   const users = ctx.result
     // .filter((user) => orgUsers.has(user.id))
-    .filter((user) => orgUsers.includes(user.id))
-    .map((user) => {
-      if (user.role === 'TenantAdmin') {
-        return {
-          ...user,
-          role: 'Administrator',
-        };
-      }
-      return user;
-    });
+    .filter((user) => orgUsers.includes(user.id));
 
   return users;
 }
