@@ -200,7 +200,7 @@ export default function OrganizationDetail({ params }: any) {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                <div className="sm:col-span-3">
                   <label
                     htmlFor="type"
                     className="block text-sm font-medium leading-6 text-gray-900">

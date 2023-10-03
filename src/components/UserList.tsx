@@ -39,8 +39,6 @@ export default function UserList(props: UserListProps) {
   // TODO validate email
 
   const validateUserRole: (role: UserRole) => boolean = (role: UserRole) => {
-    console.log(role);
-
     if (role === UserRole.Unknown) {
       setIsValidUser(false);
       setUserRoleError('User role is required');
@@ -67,8 +65,8 @@ export default function UserList(props: UserListProps) {
       throw new Error('No user to save');
     }
 
-    const isValidRole = validateUserRole(editUser.role);
-    if (!isValidRole) {
+    const hasValidRole = validateUserRole(editUser.role);
+    if (!hasValidRole) {
       setSaving(false);
       return;
     }
@@ -98,10 +96,6 @@ export default function UserList(props: UserListProps) {
         )
       )) as { data: SaveUserMutation };
 
-      if (!users?.length || users.length === 0) {
-        return;
-      }
-
       let savedUser: User;
       const i = users.findIndex((u) => u.id === result.data.saveUser!.id);
       if (i === -1) {
@@ -118,8 +112,10 @@ export default function UserList(props: UserListProps) {
       if (onUserSaved) {
         onUserSaved(savedUser);
       }
-    } finally {
       setEditUser(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsValidUser(false);
       setSaving(false);
     }
@@ -238,7 +234,7 @@ export default function UserList(props: UserListProps) {
                         <div className="space-y-12">
                           <div className="border-b border-gray-900/10 pb-12">
                             <h2 className="text-base font-semibold leading-7 text-gray-900">
-                              Personal Information
+                              User Information
                             </h2>
 
                             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
