@@ -95,7 +95,7 @@ export type SaveUserInput = {
   id?: InputMaybe<Scalars['ID']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   organizationId: Scalars['ID']['input'];
-  role?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<UserRole>;
   username: Scalars['String']['input'];
 };
 
@@ -112,9 +112,15 @@ export type User = {
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
-  role: Scalars['String']['output'];
+  role: UserRole;
   username: Scalars['String']['output'];
 };
+
+export enum UserRole {
+  ContestManager = 'CONTEST_MANAGER',
+  TenantAdmin = 'TENANT_ADMIN',
+  Unknown = 'UNKNOWN'
+}
 
 export type CreateOrganizationMutationVariables = Exact<{
   organization: OrganizationInput;
@@ -142,14 +148,14 @@ export type SaveUserMutationVariables = Exact<{
 }>;
 
 
-export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any } | null };
+export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
 
 export type GetOrganizationWithUsersQueryVariables = Exact<{
   id: Scalars['String']['input'];
 }>;
 
 
-export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null }, users?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: string, username: string, enabled: boolean } | null> | null } | null };
+export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null }, users?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null> | null } | null };
 
 export type ListOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 

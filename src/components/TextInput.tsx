@@ -45,6 +45,7 @@ export default function TextInput(props: TextInputProps) {
         className="block text-sm font-medium leading-6 text-gray-900">
         {label}
       </label>
+
       <div className="relative mt-2 rounded-md shadow-sm">
         <input
           type={type}
@@ -71,6 +72,7 @@ export default function TextInput(props: TextInputProps) {
           </div>
         ) : null}
       </div>
+
       {error ? (
         <p className="mt-2 text-sm text-red-600" id="input-error">
           {error}

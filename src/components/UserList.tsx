@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { Fragment, useState } from 'react';
-import { SaveUserMutation, User } from '@/graphql/API';
+import { SaveUserMutation, User, UserRole } from '@/graphql/API';
 import { Transition, Dialog } from '@headlessui/react';
-import { getAuthHeader } from '@/helpers';
+import { getAuthHeader, userRoleMap } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { saveUser } from '@/graphql/resolvers/mutations';
 import { UserPlusIcon } from '@heroicons/react/20/solid';
@@ -17,34 +17,63 @@ export interface UserListProps {
 
 export default function UserList(props: UserListProps) {
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [isValid, setIsValid] = useState(false);
+  const [isValidUser, setIsValidUser] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [userRoleError, setUserRoleError] = useState<string | null>(null);
 
   const { users, onUserSaved } = props;
 
   const validateFirstLastName = (value: string) => {
     if (!value || value.length === 0) {
-      setIsValid(false);
+      setIsValidUser(false);
       return 'Name is required';
     }
     if (value.length < 3) {
-      setIsValid(false);
+      setIsValidUser(false);
       return 'Name must be at least 3 characters long';
     }
-    setIsValid(true);
+    setIsValidUser(true);
     return null;
   };
 
   // TODO validate email
 
+  const validateUserRole: (role: UserRole) => boolean = (role: UserRole) => {
+    console.log(role);
+
+    if (role === UserRole.Unknown) {
+      setIsValidUser(false);
+      setUserRoleError('User role is required');
+      return false;
+    } else {
+      setIsValidUser(true);
+      setUserRoleError(null);
+      return true;
+    }
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const role = e.target.value as UserRole;
+    validateUserRole(role);
+    setEditUser({ ...editUser!, role });
+  };
+
+  // TODO fix event type
   const handleSaveUser = async (e: any) => {
     e.preventDefault();
     setSaving(true);
-    try {
-      if (!editUser) {
-        throw new Error('No user to save');
-      }
 
+    if (!editUser) {
+      throw new Error('No user to save');
+    }
+
+    const isValidRole = validateUserRole(editUser.role);
+    if (!isValidRole) {
+      setSaving(false);
+      return;
+    }
+
+    try {
       const authHeader = await getAuthHeader();
       const username =
         editUser!.username.length === 0
@@ -61,7 +90,7 @@ export default function UserList(props: UserListProps) {
               firstName: e.target['first-name'].value,
               lastName: e.target['last-name'].value,
               email: e.target.email.value,
-              role: 'TenantAdmin',
+              role: e.target['user-role'].value,
               organizationId: props.organizationId,
             },
           },
@@ -73,24 +102,15 @@ export default function UserList(props: UserListProps) {
         return;
       }
 
-      let savedUser;
+      let savedUser: User;
       const i = users.findIndex((u) => u.id === result.data.saveUser!.id);
       if (i === -1) {
-        savedUser = {
-          id: result.data.saveUser!.id,
-          firstName: result.data.saveUser!.firstName,
-          lastName: result.data.saveUser!.lastName,
-          email: result.data.saveUser!.email,
-          username: result.data.saveUser!.email,
-          enabled: true,
-          role: 'Administrator', // TODO get rid of role display text translation junk sprinkled throughout
-        };
+        savedUser = result.data.saveUser!;
         users.push(savedUser);
       } else {
         savedUser = {
           ...users[i],
           ...result.data.saveUser,
-          role: 'Administrator', // TODO get rid of role display text translation junk sprinkled throughout
         };
         users[i] = savedUser;
       }
@@ -100,7 +120,7 @@ export default function UserList(props: UserListProps) {
       }
     } finally {
       setEditUser(null);
-      setIsValid(false);
+      setIsValidUser(false);
       setSaving(false);
     }
   };
@@ -119,7 +139,7 @@ export default function UserList(props: UserListProps) {
               email: '',
               username: '',
               enabled: true,
-              role: 'TenantAdmin',
+              role: UserRole.Unknown,
             });
           }}>
           Add
@@ -151,10 +171,11 @@ export default function UserList(props: UserListProps) {
                   </span>
                 </div>
                 <p className="mt-1 truncate text-sm text-gray-500">
-                  {user.role}
+                  {userRoleMap[user.role]}
                 </p>
               </div>
             </div>
+
             <div>
               <div className="-mt-px flex divide-x divide-gray-200">
                 <div className="flex w-0 flex-1">
@@ -241,7 +262,43 @@ export default function UserList(props: UserListProps) {
                                 />
                               </div>
 
-                              <div className="sm:col-span-4">
+                              <div className="sm:col-span-3">
+                                <label
+                                  htmlFor="user-role"
+                                  className="block text-sm font-medium leading-6 text-gray-900">
+                                  Role
+                                </label>
+                                <select
+                                  id="user-role"
+                                  name="user-role"
+                                  className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                                    userRoleError
+                                      ? 'ring-red-300 text-red-900 focus:ring-red-500'
+                                      : ''
+                                  }`}
+                                  value={editUser?.role || UserRole.Unknown}
+                                  onChange={(e) => handleRoleChange(e)}>
+                                  <option value={UserRole.Unknown}>
+                                    Select a role
+                                  </option>
+                                  <option value={UserRole.ContestManager}>
+                                    {userRoleMap[UserRole.ContestManager]}
+                                  </option>
+                                  <option value={UserRole.TenantAdmin}>
+                                    {userRoleMap[UserRole.TenantAdmin]}
+                                  </option>
+                                </select>
+
+                                {userRoleError ? (
+                                  <p
+                                    className="mt-2 text-sm text-red-600"
+                                    id="input-error">
+                                    {userRoleError}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <div className="sm:col-span-6">
                                 <label
                                   htmlFor="email"
                                   className="block text-sm font-medium leading-6 text-gray-900">
@@ -273,7 +330,7 @@ export default function UserList(props: UserListProps) {
                           </button>
                           <button
                             type="submit"
-                            disabled={!isValid || saving}
+                            disabled={!isValidUser || saving}
                             className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                             {saving ? (
                               <>

@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import { orgTypeMap } from '@/org-type-map';
+import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
