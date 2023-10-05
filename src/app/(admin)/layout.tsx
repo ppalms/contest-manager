@@ -18,6 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import awsExports from '@/aws-exports';
 
+console.log(awsExports);
 Amplify.configure(awsExports);
 
 const navigation = [
@@ -37,6 +38,8 @@ const teams = [
 ];
 
 const NavLayout = ({ children }: { children: React.ReactNode }) => {
+  console.log(Amplify.Auth);
+  
   interface CognitoUser {
     username: string;
     attributes: {
