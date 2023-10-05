@@ -13,7 +13,7 @@ import {
   updateOrganization,
 } from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, Amplify, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
@@ -22,6 +22,7 @@ import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
+import awsExports from '@/aws-exports';
 
 export default function OrganizationDetail({ params }: any) {
   const [organization, setOrganization] = useState<Organization | null>(null);

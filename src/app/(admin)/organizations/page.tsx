@@ -1,6 +1,6 @@
 'use client';
 
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, Amplify, graphqlOperation } from 'aws-amplify';
 import { GraphQLResult } from '@aws-amplify/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { Organization } from '@/graphql/API';
 import { getAuthHeader, orgTypeMap } from '@/helpers';
 import { FolderPlusIcon } from '@heroicons/react/20/solid';
 import { deleteOrganization } from '@/graphql/resolvers/mutations';
+import awsExports from '@/aws-exports';
 
 const Index = () => {
   const [organizations, setOrganizations] = useState([]);

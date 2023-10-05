@@ -1,16 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
-import { Transition, Dialog, Menu } from '@headlessui/react';
+// These styles apply to every route in the application
+
+'use client';
+
+import { Amplify, Auth } from 'aws-amplify';
+import { classNames } from '@/helpers';
+import { Transition, Dialog } from '@headlessui/react';
 import {
   XMarkIcon,
   Cog6ToothIcon,
   Bars3Icon,
-  ChevronDownIcon,
   HomeIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
-import { usePathname } from 'next/navigation';
-import { useState, Fragment } from 'react';
-import { classNames } from '@/helpers';
+import { Fragment, useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ProfileDropdown } from '@/components/ProfileDropdown';
+import awsExports from '@/aws-exports';
+
+Amplify.configure(awsExports);
 
 const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon, current: true },
@@ -28,15 +36,42 @@ const teams = [
   { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
 ];
 
-const userNavigation = [{ name: 'Your profile', href: '/profile' }];
-
-const App = ({ children, user, signOut }: any) => {
+const NavLayout = ({ children }: { children: React.ReactNode }) => {
+  interface CognitoUser {
+    username: string;
+    attributes: {
+      family_name: string;
+      given_name: string;
+      email: string;
+    };
+  }
+  const [user, setUser] = useState<CognitoUser | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathName = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const currentUser = await Auth.currentAuthenticatedUser();
+        if (currentUser && !user) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        router.push('/login');
+      }
+    };
+
+    checkAuthStatus();
+  }, [router, user]);
 
   navigation.map((link) => {
     link.current = pathName === link.href;
   });
+
+  if (!user) {
+    return <></>;
+  }
 
   return (
     <>
@@ -284,61 +319,7 @@ const App = ({ children, user, signOut }: any) => {
                 /> */}
 
                 {/* Profile dropdown */}
-                <Menu as="div" className="relative">
-                  <Menu.Button className="-m-1.5 flex items-center p-1.5">
-                    <span className="sr-only">Open user menu</span>
-                    <img
-                      className="h-8 w-8 rounded-full bg-gray-50"
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      alt=""
-                    />
-                    <span className="hidden lg:flex lg:items-center">
-                      <span
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                        aria-hidden="true">
-                        {user.attributes.given_name}{' '}
-                        {user.attributes.family_name}
-                      </span>
-                      <ChevronDownIcon
-                        className="ml-2 h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Menu.Button>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95">
-                    <Menu.Items className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-                      {userNavigation.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <a
-                              href={item.href}
-                              className={classNames(
-                                active ? 'bg-gray-50' : '',
-                                'block px-3 py-1 text-sm leading-6 text-gray-900'
-                              )}>
-                              {item.name}
-                            </a>
-                          )}
-                        </Menu.Item>
-                      ))}
-                      <Menu.Item key="Sign out">
-                        <button
-                          type="button"
-                          onClick={signOut}
-                          className="block px-3 py-1 text-sm leading-6 text-gray-900">
-                          Sign out
-                        </button>
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                <ProfileDropdown user={user} />
               </div>
             </div>
           </div>
@@ -352,4 +333,4 @@ const App = ({ children, user, signOut }: any) => {
   );
 };
 
-export default App;
+export default NavLayout;
