@@ -1,14 +1,13 @@
 'use client';
 
-import awsExports from '@/aws-exports';
 import { Amplify } from 'aws-amplify';
+import AmplifyConfig from '@/amplify-config';
 
-console.log(awsExports);
-Amplify.configure(awsExports);
+Amplify.configure(AmplifyConfig);
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   console.log(Amplify.Auth);
-  
+
   return <>{children}</>;
 };
 

@@ -13,7 +13,7 @@ export function response(ctx) {
     util.error('Failed to get users');
   }
 
-  // TODO Set is supposed to be faster than Array.includes() but it's not working
+  // TODO Set is supposed to be faster than Array.includes() but Appsync doesn't like it
   // const orgUsers = new Set(ctx.prev.result.map((mapping) => mapping.userId));
   const orgUsers = ctx.prev.result.map((mapping) => mapping.userId);
 

@@ -23,7 +23,8 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
 
   const userAttributes = [];
 
-  if (username?.length === 0) {
+  // Username is always required, but other fields may not be provided
+  if (!username || username.length === 0) {
     throw new Error('Username is required');
   }
 

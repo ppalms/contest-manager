@@ -9,7 +9,6 @@ import { Organization } from '@/graphql/API';
 import { getAuthHeader, orgTypeMap } from '@/helpers';
 import { FolderPlusIcon } from '@heroicons/react/20/solid';
 import { deleteOrganization } from '@/graphql/resolvers/mutations';
-import awsExports from '@/aws-exports';
 
 const Index = () => {
   const [organizations, setOrganizations] = useState([]);
