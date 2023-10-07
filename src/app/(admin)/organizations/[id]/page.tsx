@@ -141,7 +141,7 @@ export default function OrganizationDetail({ params }: any) {
 
   return (
     <>
-      <div className="divide-y">
+      <div className="px-4 sm:px-6 lg:px-8 divide-y">
         <div className="pb-10">
           <form onSubmit={(e) => handleSaveOrg(e)}>
             <div className="px-4 sm:px-0 flex items-center justify-between">
