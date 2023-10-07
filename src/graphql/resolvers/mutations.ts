@@ -31,6 +31,9 @@ export const saveUser = /* GraphQL */ `
       firstName
       lastName
       email
+      role
+      username
+      enabled
     }
   }
 `;

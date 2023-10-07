@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { OrganizationAPI } from './org-api';
+import { AdministrationAPI } from '../src/admin/admin-api';
 
 interface AppStackProps extends StackProps {}
 
@@ -27,7 +27,7 @@ export class AppStack extends Stack {
       }
     );
 
-    new OrganizationAPI(this, 'OrganizationAPI', {
+    new AdministrationAPI(this, 'AdministrationAPI', {
       organizationTable: organizationTable,
       organizationUserMappingTable: organizationUserMappingTable,
     });

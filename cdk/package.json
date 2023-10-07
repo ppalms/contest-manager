@@ -12,7 +12,7 @@
     "bootstrap": "npx ts-node bootstrap.ts",
     "build:cjs": "node esbuild.cjs.config.js",
     "package": "npm run build:cjs",
-    "deploy": "npm run package && cdk deploy ContestManagerStack --profile sandbox",
+    "deploy": "npm run package && cdk deploy ContestManagerStack --profile sandbox --output-file outputs.json",
     "cdk-watch": "npm run package && cdk watch ContestManagerStack --profile sandbox"
   },
   "devDependencies": {

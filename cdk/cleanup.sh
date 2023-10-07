@@ -73,7 +73,7 @@ while true; do
 done
 
 echo "$(date) cleaning up buckets..."
-for i in $(aws s3 ls | awk '{print $3}' | grep -iE "^AppPipelineStack.*"); do
+for i in $(aws s3 ls | awk '{print $3}' | grep -iE "^ContestManagerPipelineStack.*"); do
 
     if [[ -z "${skip_flag}" ]]; then
         read -p "Delete bucket with name s3://${i} [Y/n] " -n 1 -r
@@ -90,7 +90,7 @@ for i in $(aws s3 ls | awk '{print $3}' | grep -iE "^AppPipelineStack.*"); do
     fi
 done
 
-delete_stack_after_confirming "AppPipelineStack"
+delete_stack_after_confirming "ContestManagerPipelineStack"
 
 echo "$(date) cleaning up log groups..."
 next_token=""

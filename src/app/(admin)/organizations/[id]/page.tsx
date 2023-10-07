@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import { orgTypeMap } from '@/org-type-map';
+import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
@@ -141,7 +141,7 @@ export default function OrganizationDetail({ params }: any) {
 
   return (
     <>
-      <div className="divide-y">
+      <div className="px-4 sm:px-6 lg:px-8 divide-y">
         <div className="pb-10">
           <form onSubmit={(e) => handleSaveOrg(e)}>
             <div className="px-4 sm:px-0 flex items-center justify-between">
@@ -200,7 +200,7 @@ export default function OrganizationDetail({ params }: any) {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                <div className="sm:col-span-3">
                   <label
                     htmlFor="type"
                     className="block text-sm font-medium leading-6 text-gray-900">
@@ -214,6 +214,7 @@ export default function OrganizationDetail({ params }: any) {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;
                       setOrganization({ ...organization!, type });
+                      setIsValid(true);
                     }}>
                     <option value={OrganizationType.State}>
                       {orgTypeMap[OrganizationType.State]}

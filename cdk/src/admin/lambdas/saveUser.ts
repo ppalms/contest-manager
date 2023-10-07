@@ -9,7 +9,7 @@ import {
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { SaveUserInput } from '../../../src/graphql/API';
+import { SaveUserInput } from '../../../../src/graphql/API';
 
 export interface SaveUserRequest {
   tenantId: string;
@@ -23,7 +23,8 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
 
   const userAttributes = [];
 
-  if (username?.length === 0) {
+  // Username is always required, but other fields may not be provided
+  if (!username || username.length === 0) {
     throw new Error('Username is required');
   }
 

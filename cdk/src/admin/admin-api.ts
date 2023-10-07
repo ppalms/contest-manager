@@ -28,7 +28,7 @@ interface APIProps {
   organizationUserMappingTable: ITable;
 }
 
-export class OrganizationAPI extends Construct {
+export class AdministrationAPI extends Construct {
   constructor(scope: Construct, id: string, props: APIProps) {
     super(scope, id);
 
@@ -38,7 +38,9 @@ export class OrganizationAPI extends Construct {
       this,
       'AuthorizerLambda',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', '..', 'esbuild.out', 'authorizer')
+        ),
         handler: 'authorizer.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -55,17 +57,18 @@ export class OrganizationAPI extends Construct {
       })
     );
 
-    const api = new GraphqlApi(this, 'OrganizationAPI', {
-      name: 'OrganizationAPI',
+    const api = new GraphqlApi(this, 'AdministrationAPI', {
+      name: 'AdministrationAPI',
       schema: SchemaFile.fromAsset(
         path.join(
           __dirname,
           '..',
           '..',
+          '..',
           'src',
           'graphql',
           'schema',
-          'schema.graphql'
+          'admin.graphql'
         )
       ),
       authorizationConfig: {
@@ -122,7 +125,7 @@ export class OrganizationAPI extends Construct {
         name: 'getOrganization',
         dataSource: organizationDataSource,
         code: Code.fromAsset(
-          path.join(__dirname, '..', 'src', 'resolvers', 'getOrganization.js')
+          path.join(__dirname, 'resolvers', 'getOrganization.js')
         ),
         runtime: FunctionRuntime.JS_1_0_0,
       }
@@ -136,13 +139,7 @@ export class OrganizationAPI extends Construct {
         name: 'getOrgUserMappings',
         dataSource: organizationUserMappingDataSource,
         code: Code.fromAsset(
-          path.join(
-            __dirname,
-            '..',
-            'src',
-            'resolvers',
-            'getOrgUserMappings.js'
-          )
+          path.join(__dirname, 'resolvers', 'getOrgUserMappings.js')
         ),
         runtime: FunctionRuntime.JS_1_0_0,
       }
@@ -152,7 +149,9 @@ export class OrganizationAPI extends Construct {
       this,
       'listUsersLambdaFunction',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', '..', 'esbuild.out', 'listUsers')
+        ),
         handler: 'listUsers.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -176,9 +175,7 @@ export class OrganizationAPI extends Construct {
       api,
       name: 'getUsers',
       dataSource: getUsersDataSource,
-      code: Code.fromAsset(
-        path.join(__dirname, '..', 'src', 'resolvers', 'getUsers.js')
-      ),
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getUsers.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -187,13 +184,7 @@ export class OrganizationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'getOrganizationWithUsers',
       code: Code.fromAsset(
-        path.join(
-          __dirname,
-          '..',
-          'src',
-          'resolvers',
-          'getOrgWithUsersPipeline.js'
-        )
+        path.join(__dirname, 'resolvers', 'getOrgWithUsersPipeline.js')
       ),
       pipelineConfig: [
         getOrganizationFunction,
@@ -246,7 +237,9 @@ export class OrganizationAPI extends Construct {
       this,
       'saveUserLambdaFunction',
       {
-        code: LambdaCode.fromAsset(path.join(__dirname, '..', 'esbuild.out')),
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
+        ),
         handler: 'saveUser.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -279,9 +272,7 @@ export class OrganizationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveUser',
       dataSource: saveUserDataSource,
-      code: Code.fromAsset(
-        path.join(__dirname, '..', 'src', 'resolvers', 'saveUser.js')
-      ),
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 

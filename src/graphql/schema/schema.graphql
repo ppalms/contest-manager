@@ -5,7 +5,6 @@ schema @aws_api_key @aws_lambda {
 
 # ** Organizations ** #
 type Query @aws_api_key @aws_lambda {
-  # getOrganization(id: String!): Organization
   getOrganizationWithUsers(id: String!): OrganizationWithUsers
   listOrganizations: [Organization]
 }
@@ -55,8 +54,14 @@ type User @aws_api_key @aws_lambda {
   firstName: String!
   lastName: String!
   email: AWSEmail!
-  role: String!
+  role: UserRole!
   enabled: Boolean!
+}
+
+enum UserRole {
+  TENANT_ADMIN
+  CONTEST_MANAGER
+  UNKNOWN
 }
 
 input SaveUserInput {
@@ -65,6 +70,6 @@ input SaveUserInput {
   firstName: String
   lastName: String
   email: AWSEmail
-  role: String
+  role: UserRole
   organizationId: ID!
 }
