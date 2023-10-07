@@ -3,7 +3,7 @@ const glob = require('glob');
 const path = require('path');
 const esbuild = require('esbuild');
 
-const entryPoints = glob.sync('./src/lambdas/*.ts');
+const entryPoints = glob.sync('./src/**/lambdas/*.ts');
 
 entryPoints.forEach((entry) => {
   const filename = path.basename(entry, '.ts');
@@ -12,6 +12,7 @@ entryPoints.forEach((entry) => {
     .build({
       entryPoints: [entry],
       bundle: true,
+      minify: true,
       platform: 'node',
       target: 'node18',
       outfile: `esbuild.out/${filename}/${filename}.js`,
