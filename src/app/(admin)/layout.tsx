@@ -37,8 +37,6 @@ const teams = [
 ];
 
 const NavLayout = ({ children }: { children: React.ReactNode }) => {
-  console.log(Amplify.Auth);
-
   interface CognitoUser {
     username: string;
     attributes: {

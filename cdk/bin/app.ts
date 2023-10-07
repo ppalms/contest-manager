@@ -21,6 +21,6 @@ new PipelineStack(app, 'ContestManagerPipelineStack', {
 });
 
 // Uncomment to use yarn deploy command
-new AppStack(app, 'ContestManagerStack', {});
+// new AppStack(app, 'ContestManagerStack', {});
 
 app.synth();
