@@ -214,6 +214,7 @@ export default function OrganizationDetail({ params }: any) {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;
                       setOrganization({ ...organization!, type });
+                      setIsValid(true);
                     }}>
                     <option value={OrganizationType.State}>
                       {orgTypeMap[OrganizationType.State]}
