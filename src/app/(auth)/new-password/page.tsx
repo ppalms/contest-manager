@@ -8,7 +8,10 @@ export default function ResetPassword({ user }: any) {
   const handleNewPassword = async (event: any) => {
     event.preventDefault();
 
-    await Auth.completeNewPassword(user, event.target['new-password'].value);
+    await Auth.completeNewPassword(
+      user,
+      event.target['confirm-password'].value
+    );
   };
 
   return (
