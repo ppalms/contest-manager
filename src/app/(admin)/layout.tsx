@@ -18,7 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import AmplifyConfig from '@/amplify-config';
 
-Amplify.configure(AmplifyConfig);
+Amplify.configure(AmplifyConfig); // TODO use AuthContext and get rid of Amplify.configure
 
 const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon, current: true },
@@ -37,6 +37,7 @@ const teams = [
 ];
 
 const NavLayout = ({ children }: { children: React.ReactNode }) => {
+  // TODO move auth/user state handling into AuthContext and pull user from there
   interface CognitoUser {
     username: string;
     attributes: {
