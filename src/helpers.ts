@@ -24,7 +24,8 @@ export const orgTypeMap = {
 };
 
 export const userRoleMap = {
-  [UserRole.TenantAdmin]: 'Administrator',
+  [UserRole.Director]: 'Director',
   [UserRole.ContestManager]: 'Contest Manager',
+  [UserRole.TenantAdmin]: 'Administrator',
   [UserRole.Unknown]: 'Unknown',
 };
