@@ -36,6 +36,7 @@ export default function Login() {
       }).catch((error) => {
         setError(error.message);
         setShowError(true);
+        setSigningIn(false);
       });
 
       if (user?.challengeName === 'NEW_PASSWORD_REQUIRED') {
