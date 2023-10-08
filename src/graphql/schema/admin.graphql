@@ -61,6 +61,7 @@ type User @aws_api_key @aws_lambda {
 enum UserRole {
   TENANT_ADMIN
   CONTEST_MANAGER
+  DIRECTOR
   UNKNOWN
 }
 

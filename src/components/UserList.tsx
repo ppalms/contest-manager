@@ -280,8 +280,8 @@ export default function UserList(props: UserListProps) {
                                   <option value={UserRole.ContestManager}>
                                     {userRoleMap[UserRole.ContestManager]}
                                   </option>
-                                  <option value={UserRole.TenantAdmin}>
-                                    {userRoleMap[UserRole.TenantAdmin]}
+                                  <option value={UserRole.Director}>
+                                    {userRoleMap[UserRole.Director]}
                                   </option>
                                 </select>
 

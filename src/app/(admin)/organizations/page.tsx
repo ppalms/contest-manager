@@ -1,6 +1,6 @@
 'use client';
 
-import { API, Amplify, graphqlOperation } from 'aws-amplify';
+import { API, graphqlOperation } from 'aws-amplify';
 import { GraphQLResult } from '@aws-amplify/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
