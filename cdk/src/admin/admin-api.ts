@@ -26,6 +26,7 @@ import {
 interface APIProps {
   organizationTable: ITable;
   organizationUserMappingTable: ITable;
+  contestsTable: ITable;
 }
 
 export class AdministrationAPI extends Construct {
@@ -147,7 +148,7 @@ export class AdministrationAPI extends Construct {
 
     const listUsersLambdaFunction = new LambdaFunction(
       this,
-      'listUsersLambdaFunction',
+      'ListUsersLambdaFunction',
       {
         code: LambdaCode.fromAsset(
           path.join(__dirname, '..', '..', 'esbuild.out', 'listUsers')
@@ -235,7 +236,7 @@ export class AdministrationAPI extends Construct {
     // ** Save User ** //
     const saveUserLambdaFunction = new LambdaFunction(
       this,
-      'saveUserLambdaFunction',
+      'SaveUserLambdaFunction',
       {
         code: LambdaCode.fromAsset(
           path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
