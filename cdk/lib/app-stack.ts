@@ -47,6 +47,7 @@ export class AppStack extends Stack {
       },
     });
 
+    contestsTable.grantReadData(seedContestsLambda);
     contestsTable.grantWriteData(seedContestsLambda);
 
     new AdministrationAPI(this, 'AdministrationAPI', {

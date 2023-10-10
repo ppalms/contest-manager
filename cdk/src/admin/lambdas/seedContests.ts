@@ -1,7 +1,11 @@
 import {
   BatchWriteItemCommand,
   DynamoDBClient,
+  QueryCommand,
 } from '@aws-sdk/client-dynamodb';
+
+// TODO env var
+const seedTenantId = 'cc690452-cf04-4207-906f-9129ab5179a2';
 
 export async function handler(_: any, __: any): Promise<any> {
   if (!process.env.CONTESTS_TABLE_NAME) {
@@ -9,6 +13,44 @@ export async function handler(_: any, __: any): Promise<any> {
   }
 
   const dbClient = new DynamoDBClient();
+
+  // Clean the table before seeding
+  const getSeedContestsCommand = new QueryCommand({
+    TableName: process.env.CONTESTS_TABLE_NAME,
+    KeyConditionExpression: 'PK = :pk',
+    ExpressionAttributeValues: {
+      ':pk': { S: `TENANT#${seedTenantId}` },
+    },
+  });
+
+  try {
+    const result = await dbClient.send(getSeedContestsCommand);
+    console.log(JSON.stringify(result, null, 2));
+    const items = result.Items;
+    if (items && items.length > 0) {
+      const deleteRequests = items.map((item) => {
+        return {
+          DeleteRequest: {
+            Key: {
+              PK: item.PK,
+              SK: item.SK,
+            },
+          },
+        };
+      });
+
+      const batchDeleteParams = {
+        RequestItems: {
+          [process.env.CONTESTS_TABLE_NAME]: deleteRequests,
+        },
+      };
+
+      await dbClient.send(new BatchWriteItemCommand(batchDeleteParams));
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 
   const contestItems = {
     [process.env.CONTESTS_TABLE_NAME]: contestSeedData.map((item) => ({
@@ -53,7 +95,7 @@ export async function handler(_: any, __: any): Promise<any> {
 
 const contestSeedData = [
   {
-    PK: { S: 'TENANT#cc690452-cf04-4207-906f-9129ab5179a2' },
+    PK: { S: `TENANT#${seedTenantId}` },
     SK: { S: 'CONTEST#646b640c-8bb3-47e4-9925-b09be9cb4698' },
     name: { S: 'Sand Springs' },
     type: { S: 'ORCHESTRA' },
@@ -65,7 +107,7 @@ const contestSeedData = [
     managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
   },
   {
-    PK: { S: 'TENANT#cc690452-cf04-4207-906f-9129ab5179a2' },
+    PK: { S: `TENANT#${seedTenantId}` },
     SK: { S: 'CONTEST#6c05f489-c714-4938-bb25-a1c179f81611' },
     name: { S: 'Mustang Invitational Marching Festival' },
     type: { S: 'MARCHING_BAND' },
@@ -77,7 +119,8 @@ const contestSeedData = [
     managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
   },
   {
-    PK: { S: 'TENANT#cc690452-cf04-4207-906f-9129ab5179a2' },
+    PK: { S: `TENANT#${seedTenantId}` },
+
     SK: { S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981' },
     name: { S: 'OBA Class 4A Marching Championships' },
     type: { S: 'MARCHING_BAND' },
@@ -92,7 +135,7 @@ const contestSeedData = [
 
 const entrySeedData = [
   {
-    PK: { S: 'TENANT#cc690452-cf04-4207-906f-9129ab5179a2' },
+    PK: { S: `TENANT#${seedTenantId}` },
     SK: {
       S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#b5277e7b-4e9e-4b86-b7ee-bc3dc97702f3',
     },
@@ -102,6 +145,30 @@ const entrySeedData = [
         { M: { title: { S: 'A Joyful Song' }, composer: { S: 'Lightfoot' } } },
         { M: { title: { S: 'Gypsy Rover' } } },
         { M: { title: { S: 'Sweet Kate' }, composer: { S: 'Jones' } } },
+      ],
+    },
+  },
+  {
+    PK: { S: `TENANT#${seedTenantId}` },
+    SK: {
+      S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#c0eff1fa-d81c-4b56-b3f3-c53b84c2d95d',
+    },
+    directorId: { S: 'dc19705c-363b-492d-a504-9994ec071647' },
+    musicSelections: {
+      L: [
+        {
+          M: {
+            title: { S: 'Song Of The River (with descant)' },
+            composer: { S: 'Patterson' },
+          },
+        },
+        {
+          M: {
+            title: { S: 'Non Nobis Domine (Rounds For Everyone)' },
+            composer: { S: 'Terri' },
+          },
+        },
+        { M: { title: { S: 'Candu' } } },
       ],
     },
   },
