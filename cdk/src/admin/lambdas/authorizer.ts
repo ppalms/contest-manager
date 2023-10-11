@@ -1,5 +1,34 @@
 import { GetParametersCommand, SSMClient } from '@aws-sdk/client-ssm';
 import * as jwt from 'jsonwebtoken';
+import * as https from 'https';
+import 'jwk-to-pem';
+import jwkToPem = require('jwk-to-pem');
+
+type JWK = {
+  alg: string;
+  e: string;
+  kid: string;
+  kty: 'RSA';
+  n: string;
+  use: string;
+};
+
+type JWKS = {
+  keys: JWK[];
+};
+
+const getJwks = async (userPoolId: string): Promise<JWKS> => {
+  const jwksUrl = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
+
+  return new Promise((resolve, reject) => {
+    https.get(jwksUrl, (response) => {
+      let data = '';
+      response.on('data', (chunk) => (data += chunk));
+      response.on('end', () => resolve(JSON.parse(data)));
+      response.on('error', reject);
+    });
+  });
+};
 
 export async function handler(
   event: any,
@@ -12,14 +41,27 @@ export async function handler(
       throw new Error('Invalid JWT token');
     }
 
-    // TODO verify JWT with Cognito
-
     const tenantId = payload['custom:tenantId'];
     if (!tenantId) {
       return {
         isAuthorized: false,
       };
     }
+
+    // TODO store tenant info in S3/cloudfront
+    const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
+    const ssmResult = await ssmClient.send(
+      new GetParametersCommand({
+        Names: ['/shared/user-pool-id'],
+      })
+    );
+    const userPoolId = ssmResult.Parameters![0].Value!;
+    const jwks = await getJwks(userPoolId);
+    const kid = decoded!.header.kid;
+    const jwk = jwks.keys.find((key) => key.kid === kid);
+    const pem = jwkToPem(jwk!);
+
+    jwt.verify(event.authorizationToken, pem, { algorithms: ['RS256'] });
 
     // TODO get tenant-scoped STS token
     /**
@@ -35,10 +77,10 @@ export async function handler(
             'dynamodb:Scan',
             'dynamodb:UpdateItem',
           ],
-          Resource: `arn:aws:dynamodb:${REGION}:${event.accountId}:table/*`,
+          Resource: `arn:aws:dynamodb:${process.env.AWS_REGION}:${process.env.AWS_ACCOUNT_ID}:table/*`,
           Condition: {
             'ForAllValues:StringEquals': {
-              'dynamodb:LeadingKeys': [tenantId],
+              'dynamodb:LeadingKeys': [`TENANT#${tenantId}`],
             },
           },
         },
@@ -53,16 +95,6 @@ export async function handler(
 
     const assumeRoleResult = await stsClient.send(command);
     const credentials = assumeRoleResult.Credentials!; */
-
-    // TODO get from tenant details in dynamodb
-    const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
-
-    const ssmResult = await ssmClient.send(
-      new GetParametersCommand({
-        Names: ['/shared/user-pool-id'],
-      })
-    );
-    const userPoolId = ssmResult.Parameters![0].Value!;
 
     return {
       isAuthorized: true,

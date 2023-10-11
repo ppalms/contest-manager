@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
+    "@types/jwk-to-pem": "^2.0.1",
     "@types/node": "20.5.3",
     "@types/prompts": "^2.4.5",
     "@types/source-map-support": "^0.5.8",
@@ -39,7 +40,9 @@
     "aws-cdk-lib": "2.93.0",
     "constructs": "^10.0.0",
     "jsonwebtoken": "^9.0.2",
+    "jwk-to-pem": "^2.0.5",
     "prompts": "^2.4.2",
+    "rimraf": "^5.0.5",
     "source-map-support": "^0.5.21"
   }
 }
