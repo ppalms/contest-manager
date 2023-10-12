@@ -5,18 +5,18 @@ import {
 } from '@aws-sdk/client-dynamodb';
 
 // TODO env var
-const seedTenantId = 'cc690452-cf04-4207-906f-9129ab5179a2';
+const seedTenantId = 'ec79c2bd-eeae-4891-a05e-22222a351273';
 
 export async function handler(_: any, __: any): Promise<any> {
-  if (!process.env.CONTESTS_TABLE_NAME) {
-    throw new Error('CONTESTS_TABLE_NAME not provided');
+  if (!process.env.CONTEST_TABLE_NAME) {
+    throw new Error('CONTEST_TABLE_NAME not provided');
   }
 
   const dbClient = new DynamoDBClient();
 
   // Clean the table before seeding
   const getSeedContestsCommand = new QueryCommand({
-    TableName: process.env.CONTESTS_TABLE_NAME,
+    TableName: process.env.CONTEST_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk',
     ExpressionAttributeValues: {
       ':pk': { S: `TENANT#${seedTenantId}` },
@@ -25,7 +25,6 @@ export async function handler(_: any, __: any): Promise<any> {
 
   try {
     const result = await dbClient.send(getSeedContestsCommand);
-    console.log(JSON.stringify(result, null, 2));
     const items = result.Items;
     if (items && items.length > 0) {
       const deleteRequests = items.map((item) => {
@@ -41,7 +40,7 @@ export async function handler(_: any, __: any): Promise<any> {
 
       const batchDeleteParams = {
         RequestItems: {
-          [process.env.CONTESTS_TABLE_NAME]: deleteRequests,
+          [process.env.CONTEST_TABLE_NAME]: deleteRequests,
         },
       };
 
@@ -53,11 +52,10 @@ export async function handler(_: any, __: any): Promise<any> {
   }
 
   const contestItems = {
-    [process.env.CONTESTS_TABLE_NAME]: contestSeedData.map((item) => ({
+    [process.env.CONTEST_TABLE_NAME]: contestSeedData.map((item) => ({
       PutRequest: { Item: item },
     })),
   };
-  console.log(JSON.stringify(contestItems, null, 2));
 
   const writeContests = new BatchWriteItemCommand({
     RequestItems: contestItems as any,
@@ -71,11 +69,10 @@ export async function handler(_: any, __: any): Promise<any> {
   }
 
   const entryItems = {
-    [process.env.CONTESTS_TABLE_NAME]: entrySeedData.map((item) => ({
+    [process.env.CONTEST_TABLE_NAME]: entrySeedData.map((item) => ({
       PutRequest: { Item: item },
     })),
   };
-  console.log(JSON.stringify(entryItems, null, 2));
 
   const writeEntries = new BatchWriteItemCommand({
     RequestItems: entryItems as any,
@@ -97,6 +94,7 @@ const contestSeedData = [
   {
     PK: { S: `TENANT#${seedTenantId}` },
     SK: { S: 'CONTEST#646b640c-8bb3-47e4-9925-b09be9cb4698' },
+    entityType: { S: 'CONTEST' },
     name: { S: 'Sand Springs' },
     type: { S: 'ORCHESTRA' },
     level: { S: 'DISTRICT' },
@@ -109,6 +107,7 @@ const contestSeedData = [
   {
     PK: { S: `TENANT#${seedTenantId}` },
     SK: { S: 'CONTEST#6c05f489-c714-4938-bb25-a1c179f81611' },
+    entityType: { S: 'CONTEST' },
     name: { S: 'Mustang Invitational Marching Festival' },
     type: { S: 'MARCHING_BAND' },
     level: { S: 'DISTRICT' },
@@ -120,8 +119,8 @@ const contestSeedData = [
   },
   {
     PK: { S: `TENANT#${seedTenantId}` },
-
     SK: { S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981' },
+    entityType: { S: 'CONTEST' },
     name: { S: 'OBA Class 4A Marching Championships' },
     type: { S: 'MARCHING_BAND' },
     level: { S: 'STATE' },
@@ -139,6 +138,7 @@ const entrySeedData = [
     SK: {
       S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#b5277e7b-4e9e-4b86-b7ee-bc3dc97702f3',
     },
+    entityType: { S: 'ENTRY' },
     directorId: { S: '5b480f84-da3f-4d5c-abc0-24334a074f1a' },
     musicSelections: {
       L: [
@@ -153,6 +153,7 @@ const entrySeedData = [
     SK: {
       S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#c0eff1fa-d81c-4b56-b3f3-c53b84c2d95d',
     },
+    entityType: { S: 'ENTRY' },
     directorId: { S: 'dc19705c-363b-492d-a504-9994ec071647' },
     musicSelections: {
       L: [

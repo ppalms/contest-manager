@@ -29,7 +29,7 @@ export class AppStack extends Stack {
       }
     );
 
-    const contestsTable = new Table(this, 'ContestsTable', {
+    const contestTable = new Table(this, 'ContestTable', {
       partitionKey: { name: 'PK', type: AttributeType.STRING },
       sortKey: { name: 'SK', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -43,17 +43,17 @@ export class AppStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
-        CONTESTS_TABLE_NAME: contestsTable.tableName,
+        CONTEST_TABLE_NAME: contestTable.tableName,
       },
     });
 
-    contestsTable.grantReadData(seedContestsLambda);
-    contestsTable.grantWriteData(seedContestsLambda);
+    contestTable.grantReadData(seedContestsLambda);
+    contestTable.grantWriteData(seedContestsLambda);
 
     new AdministrationAPI(this, 'AdministrationAPI', {
       organizationTable: organizationTable,
       organizationUserMappingTable: organizationUserMappingTable,
-      contestsTable: contestsTable,
+      contestTable: contestTable,
     });
   }
 }

@@ -26,7 +26,7 @@ import {
 interface APIProps {
   organizationTable: ITable;
   organizationUserMappingTable: ITable;
-  contestsTable: ITable;
+  contestTable: ITable;
 }
 
 export class AdministrationAPI extends Construct {
@@ -274,6 +274,22 @@ export class AdministrationAPI extends Construct {
       fieldName: 'saveUser',
       dataSource: saveUserDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    // ** CONTESTS ** //
+    const contestDataSource = api.addDynamoDbDataSource(
+      'ContestDataSource',
+      props.contestTable
+    );
+
+    api.createResolver('listContestsResolver', {
+      typeName: 'Query',
+      fieldName: 'listContests',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'listContests.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
