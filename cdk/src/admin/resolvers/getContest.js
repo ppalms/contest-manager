@@ -20,26 +20,19 @@ export function request(ctx) {
 export function response(ctx) {
   let contest = ctx.result.items
     .filter((entity) => entity.entityType === 'CONTEST')
-    .map((contest) => {
+    .map((entity) => {
       return {
-        id: contest.SK.split('#')[1],
-        name: contest.name,
-        type: contest.type,
-        level: contest.level,
-        startDate: contest.startDate,
-        endDate: contest.endDate,
-        signUpStartDate: contest.signUpStartDate,
-        signUpEndDate: contest.signUpEndDate,
+        ...entity,
+        id: entity.SK.split('#')[1],
       };
     })[0];
 
   const entries = ctx.result.items
     .filter((entity) => entity.entityType === 'ENTRY')
-    .map((entry) => {
+    .map((entity) => {
       return {
-        id: entry.SK.split('#')[2],
-        directorId: entry.directorId,
-        musicSelections: entry.musicSelections,
+        ...entity,
+        id: entity.SK.split('#')[2],
       };
     });
 

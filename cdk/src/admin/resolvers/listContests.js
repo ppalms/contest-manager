@@ -21,14 +21,8 @@ export function response(ctx) {
     ?.filter((entity) => entity.entityType === 'CONTEST')
     .map((entity) => {
       return {
+        ...entity,
         id: entity.SK.split('#')[1],
-        name: entity.name,
-        type: entity.type,
-        level: entity.level,
-        startDate: entity.startDate,
-        endDate: entity.endDate,
-        signUpStartDate: entity.signUpStartDate,
-        signUpEndDate: entity.signUpEndDate,
       };
     });
 
