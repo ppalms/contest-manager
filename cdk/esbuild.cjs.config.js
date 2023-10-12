@@ -4,9 +4,13 @@ const path = require('path');
 const esbuild = require('esbuild');
 
 const entryPoints = glob.sync('./src/**/lambdas/*.ts');
+const outputDir = 'esbuild.out';
+
+const rimraf = require('rimraf');
+rimraf.sync(outputDir);
 
 entryPoints.forEach((entry) => {
-  const filename = path.basename(entry, '.ts');
+  const functionName = path.basename(entry, '.ts');
 
   esbuild
     .build({
@@ -15,8 +19,10 @@ entryPoints.forEach((entry) => {
       minify: true,
       platform: 'node',
       target: 'node18',
-      outfile: `esbuild.out/${filename}/${filename}.js`,
+      external: ['aws-sdk'],
+      outfile: `${outputDir}/${functionName}/${functionName}.js`,
       format: 'cjs',
+      // sourcemap: true,
     })
     .catch(() => process.exit(1));
 });

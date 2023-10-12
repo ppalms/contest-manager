@@ -23,10 +23,49 @@ export type Scalars = {
   AWSURL: { input: any; output: any; }
 };
 
+export type Contest = {
+  __typename?: 'Contest';
+  endDate?: Maybe<Scalars['AWSDateTime']['output']>;
+  entries?: Maybe<Array<Maybe<Entry>>>;
+  id: Scalars['ID']['output'];
+  level?: Maybe<ContestLevel>;
+  manager?: Maybe<User>;
+  name: Scalars['String']['output'];
+  signUpEndDate?: Maybe<Scalars['AWSDateTime']['output']>;
+  signUpStartDate?: Maybe<Scalars['AWSDateTime']['output']>;
+  startDate?: Maybe<Scalars['AWSDateTime']['output']>;
+  type: ContestType;
+};
+
+export enum ContestLevel {
+  District = 'DISTRICT',
+  State = 'STATE'
+}
+
+export enum ContestType {
+  MarchingBand = 'MARCHING_BAND',
+  Orchestra = 'ORCHESTRA'
+}
+
+export type Entry = {
+  __typename?: 'Entry';
+  directorId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  musicSelections?: Maybe<Array<Maybe<MusicSelection>>>;
+};
+
+export type MusicSelection = {
+  __typename?: 'MusicSelection';
+  composerFirstName?: Maybe<Scalars['String']['output']>;
+  composerLastName?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createOrganization?: Maybe<Organization>;
   deleteOrganization?: Maybe<Scalars['String']['output']>;
+  saveContest?: Maybe<Contest>;
   saveUser?: Maybe<User>;
   updateOrganization?: Maybe<Organization>;
 };
@@ -42,8 +81,13 @@ export type MutationDeleteOrganizationArgs = {
 };
 
 
+export type MutationSaveContestArgs = {
+  contest: SaveContestInput;
+};
+
+
 export type MutationSaveUserArgs = {
-  user?: InputMaybe<SaveUserInput>;
+  user: SaveUserInput;
 };
 
 
@@ -80,13 +124,31 @@ export type OrganizationWithUsers = {
 
 export type Query = {
   __typename?: 'Query';
+  getContest?: Maybe<Contest>;
   getOrganizationWithUsers?: Maybe<OrganizationWithUsers>;
+  listContests?: Maybe<Array<Maybe<Contest>>>;
   listOrganizations?: Maybe<Array<Maybe<Organization>>>;
+};
+
+
+export type QueryGetContestArgs = {
+  id: Scalars['String']['input'];
 };
 
 
 export type QueryGetOrganizationWithUsersArgs = {
   id: Scalars['String']['input'];
+};
+
+export type SaveContestInput = {
+  endDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  level?: InputMaybe<ContestLevel>;
+  name: Scalars['String']['input'];
+  signUpEndDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
+  signUpStartDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
+  startDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
+  type: ContestType;
 };
 
 export type SaveUserInput = {
@@ -162,3 +224,8 @@ export type ListOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ListOrganizationsQuery = { __typename?: 'Query', listOrganizations?: Array<{ __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null } | null> | null };
+
+export type ListContestsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ListContestsQuery = { __typename?: 'Query', listContests?: Array<{ __typename?: 'Contest', id: string, name: string, type: ContestType, startDate?: any | null, endDate?: any | null } | null> | null };

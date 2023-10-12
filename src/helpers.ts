@@ -1,5 +1,5 @@
 import { Auth } from 'aws-amplify';
-import { OrganizationType, UserRole } from './graphql/API';
+import { ContestType, OrganizationType, UserRole } from './graphql/API';
 
 export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ');
@@ -28,4 +28,9 @@ export const userRoleMap = {
   [UserRole.ContestManager]: 'Contest Manager',
   [UserRole.TenantAdmin]: 'Administrator',
   [UserRole.Unknown]: 'Unknown',
+};
+
+export const contestTypeMap = {
+  [ContestType.Orchestra]: 'Orchestra',
+  [ContestType.MarchingBand]: 'Marching Band',
 };

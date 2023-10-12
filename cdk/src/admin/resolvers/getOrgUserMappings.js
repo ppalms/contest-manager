@@ -1,7 +1,7 @@
 export function request(ctx) {
   const organizationId = ctx.prev?.result?.id;
   if (!organizationId) {
-    console.error('Failed to get organization');
+    util.error('Failed to get organization');
   }
 
   return {
@@ -16,9 +16,5 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  if (ctx.result && ctx.result.items && ctx.result.items.length === 0) {
-    return [];
-  }
-
-  return ctx.result.items;
+  return ctx.result?.items ?? [];
 }

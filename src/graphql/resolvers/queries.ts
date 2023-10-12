@@ -28,3 +28,15 @@ export const listOrganizations = /* GraphQL */ `
     }
   }
 `;
+
+export const listContests = /* GraphQL */ `
+  query ListContests {
+    listContests {
+      id
+      name
+      type
+      startDate
+      endDate
+    }
+  }
+`;

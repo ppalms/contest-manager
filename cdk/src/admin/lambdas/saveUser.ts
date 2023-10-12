@@ -21,38 +21,28 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
   const { id, username, firstName, lastName, email, role, organizationId } =
     event.user;
 
-  const userAttributes = [];
+  const userAttributes = [{ Name: 'custom:tenantId', Value: event.tenantId }];
 
   // Username is always required, but other fields may not be provided
   if (!username || username.length === 0) {
     throw new Error('Username is required');
   }
 
-  if (firstName?.length === 0) {
-    throw new Error('First name is required');
-  } else if (firstName) {
+  if (firstName) {
     userAttributes.push({ Name: 'given_name', Value: firstName });
   }
 
-  if (lastName?.length === 0) {
-    throw new Error('Last name is required');
-  } else if (lastName) {
+  if (lastName) {
     userAttributes.push({ Name: 'family_name', Value: lastName });
   }
 
-  if (email?.length === 0) {
-    throw new Error('Email is required');
-  } else if (email) {
+  if (email) {
     userAttributes.push({ Name: 'email', Value: email });
   }
 
-  if (role?.length === 0) {
-    throw new Error('Role is required');
-  } else if (role) {
+  if (role) {
     userAttributes.push({ Name: 'custom:userRole', Value: role });
   }
-
-  userAttributes.push({ Name: 'custom:tenantId', Value: event.tenantId });
 
   if (userAttributes.length === 0) {
     return event.user;

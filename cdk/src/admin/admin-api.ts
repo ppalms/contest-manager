@@ -26,6 +26,7 @@ import {
 interface APIProps {
   organizationTable: ITable;
   organizationUserMappingTable: ITable;
+  contestTable: ITable;
 }
 
 export class AdministrationAPI extends Construct {
@@ -147,7 +148,7 @@ export class AdministrationAPI extends Construct {
 
     const listUsersLambdaFunction = new LambdaFunction(
       this,
-      'listUsersLambdaFunction',
+      'ListUsersLambdaFunction',
       {
         code: LambdaCode.fromAsset(
           path.join(__dirname, '..', '..', 'esbuild.out', 'listUsers')
@@ -166,16 +167,16 @@ export class AdministrationAPI extends Construct {
       })
     );
 
-    const getUsersDataSource = api.addLambdaDataSource(
-      'GetUsersDataSource',
+    const listUsersDataSource = api.addLambdaDataSource(
+      'ListUsersDataSource',
       listUsersLambdaFunction
     );
 
-    const getUsersFunction = new AppsyncFunction(this, 'GetUsersFunction', {
+    const listUsersFunction = new AppsyncFunction(this, 'ListUsersFunction', {
       api,
-      name: 'getUsers',
-      dataSource: getUsersDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getUsers.js')),
+      name: 'listUsers',
+      dataSource: listUsersDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -189,7 +190,7 @@ export class AdministrationAPI extends Construct {
       pipelineConfig: [
         getOrganizationFunction,
         getOrgUserMappingsFunction,
-        getUsersFunction,
+        listUsersFunction,
       ],
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -235,7 +236,7 @@ export class AdministrationAPI extends Construct {
     // ** Save User ** //
     const saveUserLambdaFunction = new LambdaFunction(
       this,
-      'saveUserLambdaFunction',
+      'SaveUserLambdaFunction',
       {
         code: LambdaCode.fromAsset(
           path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
@@ -273,6 +274,38 @@ export class AdministrationAPI extends Construct {
       fieldName: 'saveUser',
       dataSource: saveUserDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    // ** CONTESTS ** //
+    const contestDataSource = api.addDynamoDbDataSource(
+      'ContestDataSource',
+      props.contestTable
+    );
+
+    api.createResolver('listContestsResolver', {
+      typeName: 'Query',
+      fieldName: 'listContests',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'listContests.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api.createResolver('getContestResolver', {
+      typeName: 'Query',
+      fieldName: 'getContest',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api.createResolver('saveContestResolver', {
+      typeName: 'Mutation',
+      fieldName: 'saveContest',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveContest.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
