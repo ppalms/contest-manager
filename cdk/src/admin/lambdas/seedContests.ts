@@ -142,9 +142,14 @@ const entrySeedData = [
     directorId: { S: '5b480f84-da3f-4d5c-abc0-24334a074f1a' },
     musicSelections: {
       L: [
-        { M: { title: { S: 'A Joyful Song' }, composer: { S: 'Lightfoot' } } },
+        {
+          M: {
+            title: { S: 'A Joyful Song' },
+            composerLastName: { S: 'Lightfoot' },
+          },
+        },
         { M: { title: { S: 'Gypsy Rover' } } },
-        { M: { title: { S: 'Sweet Kate' }, composer: { S: 'Jones' } } },
+        { M: { title: { S: 'Sweet Kate' }, composerLastName: { S: 'Jones' } } },
       ],
     },
   },
@@ -160,13 +165,13 @@ const entrySeedData = [
         {
           M: {
             title: { S: 'Song Of The River (with descant)' },
-            composer: { S: 'Patterson' },
+            composerLastName: { S: 'Patterson' },
           },
         },
         {
           M: {
             title: { S: 'Non Nobis Domine (Rounds For Everyone)' },
-            composer: { S: 'Terri' },
+            composerLastName: { S: 'Terri' },
           },
         },
         { M: { title: { S: 'Candu' } } },

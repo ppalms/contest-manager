@@ -23,14 +23,12 @@ export function response(ctx) {
       return {
         id: entity.SK.split('#')[1],
         name: entity.name,
+        type: entity.type,
+        level: entity.level,
         startDate: entity.startDate,
         endDate: entity.endDate,
         signUpStartDate: entity.signUpStartDate,
         signUpEndDate: entity.signUpEndDate,
-        type: entity.type,
-        level: entity.level,
-        directorId: entity.directorId,
-        musicSelections: entity.musicSelections,
       };
     });
 

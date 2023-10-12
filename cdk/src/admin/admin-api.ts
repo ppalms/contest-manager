@@ -293,6 +293,14 @@ export class AdministrationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
+    api.createResolver('getContestResolver', {
+      typeName: 'Query',
+      fieldName: 'getContest',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
     new CfnOutput(this, 'GraphQLAPIURL', {
       value: api.graphqlUrl,
     });
