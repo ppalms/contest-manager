@@ -1,8 +1,7 @@
 import { GetParametersCommand, SSMClient } from '@aws-sdk/client-ssm';
 import * as jwt from 'jsonwebtoken';
 import * as https from 'https';
-import 'jwk-to-pem';
-import jwkToPem = require('jwk-to-pem');
+import jwkToPem from 'jwk-to-pem';
 
 type JWK = {
   alg: string;
