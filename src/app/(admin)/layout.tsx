@@ -12,6 +12,7 @@ import {
   Bars3Icon,
   HomeIcon,
   UsersIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline';
 import { Fragment, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,6 +23,7 @@ Amplify.configure(AmplifyConfig); // TODO use AuthContext and get rid of Amplify
 
 const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon, current: true },
+  { name: 'Contests', href: '/contests', icon: TrophyIcon, current: false },
   {
     name: 'Organizations',
     href: '/organizations',
@@ -30,6 +32,7 @@ const navigation = [
   },
 ];
 
+// TODO this might not be useful
 const teams = [
   { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
   { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
@@ -162,7 +165,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
                             ))}
                           </ul>
                         </li>
-                        <li>
+                        <li hidden={true}>
                           <div className="text-xs font-semibold leading-6 text-indigo-200">
                             Your teams
                           </div>
@@ -186,7 +189,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
                             ))}
                           </ul>
                         </li>
-                        <li className="mt-auto">
+                        <li className="mt-auto" hidden={true}>
                           <a
                             href="#"
                             className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white">
@@ -246,7 +249,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
                     ))}
                   </ul>
                 </li>
-                <li>
+                <li hidden={true}>
                   <div className="text-xs font-semibold leading-6 text-indigo-200">
                     Your teams
                   </div>
@@ -270,7 +273,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
                     ))}
                   </ul>
                 </li>
-                <li className="mt-auto">
+                <li className="mt-auto" hidden={true}>
                   <a
                     href="#"
                     className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white">

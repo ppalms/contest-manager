@@ -3,19 +3,22 @@ schema @aws_api_key @aws_lambda {
   mutation: Mutation
 }
 
-# ** Organizations ** #
 type Query @aws_api_key @aws_lambda {
-  getOrganizationWithUsers(id: String!): OrganizationWithUsers
   listOrganizations: [Organization]
+  getOrganizationWithUsers(id: String!): OrganizationWithUsers
+  listContests: [Contest]
+  getContest(id: String!): Contest
 }
 
 type Mutation @aws_api_key @aws_lambda {
   createOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: String!): String
   updateOrganization(organization: UpdateOrganizationInput!): Organization
-  saveUser(user: SaveUserInput): User
+  saveUser(user: SaveUserInput!): User
+  saveContest(contest: SaveContestInput!): Contest
 }
 
+# ** Organizations ** #
 type Organization @aws_api_key @aws_lambda {
   id: ID!
   name: String!
@@ -73,4 +76,51 @@ input SaveUserInput {
   email: AWSEmail
   role: UserRole
   organizationId: ID!
+}
+
+# ** Contests ** #
+type Contest @aws_api_key @aws_lambda {
+  id: ID!
+  name: String!
+  type: ContestType!
+  level: ContestLevel
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  signUpStartDate: AWSDateTime
+  signUpEndDate: AWSDateTime
+  manager: User
+  entries: [Entry]
+}
+
+type Entry @aws_api_key @aws_lambda {
+  id: ID!
+  directorId: ID!
+  musicSelections: [MusicSelection]
+}
+
+type MusicSelection @aws_api_key @aws_lambda {
+  title: String!
+  composerFirstName: String
+  composerLastName: String
+}
+
+input SaveContestInput {
+  id: ID
+  name: String!
+  type: ContestType!
+  level: ContestLevel
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  signUpStartDate: AWSDateTime
+  signUpEndDate: AWSDateTime
+}
+
+enum ContestType {
+  ORCHESTRA
+  MARCHING_BAND
+}
+
+enum ContestLevel {
+  DISTRICT
+  STATE
 }
