@@ -167,16 +167,16 @@ export class AdministrationAPI extends Construct {
       })
     );
 
-    const getUsersDataSource = api.addLambdaDataSource(
-      'GetUsersDataSource',
+    const listUsersDataSource = api.addLambdaDataSource(
+      'ListUsersDataSource',
       listUsersLambdaFunction
     );
 
-    const getUsersFunction = new AppsyncFunction(this, 'GetUsersFunction', {
+    const listUsersFunction = new AppsyncFunction(this, 'ListUsersFunction', {
       api,
-      name: 'getUsers',
-      dataSource: getUsersDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getUsers.js')),
+      name: 'listUsers',
+      dataSource: listUsersDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -190,7 +190,7 @@ export class AdministrationAPI extends Construct {
       pipelineConfig: [
         getOrganizationFunction,
         getOrgUserMappingsFunction,
-        getUsersFunction,
+        listUsersFunction,
       ],
       runtime: FunctionRuntime.JS_1_0_0,
     });
