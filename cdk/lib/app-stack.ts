@@ -3,7 +3,7 @@ import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { AdministrationAPI } from '../src/admin/admin-api';
-import path = require('path');
+import * as path from 'path';
 
 interface AppStackProps extends StackProps {}
 
