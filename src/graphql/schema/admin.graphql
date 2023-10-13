@@ -5,17 +5,18 @@ schema @aws_api_key @aws_lambda {
 
 type Query @aws_api_key @aws_lambda {
   listOrganizations: [Organization]
-  getOrganizationWithUsers(id: String!): OrganizationWithUsers
+  getOrganizationWithUsers(id: ID!): OrganizationWithUsers
   listContests: [Contest]
-  getContest(id: String!): Contest
+  getContest(id: ID!): Contest
 }
 
 type Mutation @aws_api_key @aws_lambda {
   createOrganization(organization: OrganizationInput!): Organization
-  deleteOrganization(id: String!): String
+  deleteOrganization(id: ID!): String
   updateOrganization(organization: UpdateOrganizationInput!): Organization
   saveUser(user: SaveUserInput!): User
   saveContest(contest: SaveContestInput!): Contest
+  deleteContest(id: ID!): String
 }
 
 # ** Organizations ** #
@@ -118,9 +119,11 @@ input SaveContestInput {
 enum ContestType {
   ORCHESTRA
   MARCHING_BAND
+  UNKNOWN
 }
 
 enum ContestLevel {
   DISTRICT
   STATE
+  UNKNOWN
 }

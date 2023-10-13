@@ -1,17 +1,12 @@
 'use client';
 
 import {
-  UpdateOrganizationMutation,
-  OrganizationType,
-  CreateOrganizationMutation,
-  GetOrganizationWithUsersQuery,
-  User,
-  Organization,
+  Contest,
+  ContestType,
+  GetContestQuery,
+  SaveContestMutation,
 } from '@/graphql/API';
-import {
-  createOrganization,
-  updateOrganization,
-} from '@/graphql/resolvers/mutations';
+import { saveContest } from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
@@ -19,17 +14,16 @@ import { useState, useEffect } from 'react';
 import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import { orgTypeMap } from '@/helpers';
-import UserList from '@/components/UserList';
-import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
+import { contestTypeMap } from '@/helpers';
+import { getContest } from '@/graphql/resolvers/queries';
 
-export default function OrganizationDetail({ params }: any) {
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
+export default function ContestDetail({ params }: any) {
+  const [contest, setContest] = useState<Contest | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [contestTypeError, setContestTypeError] = useState<string | null>(null);
 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -39,7 +33,7 @@ export default function OrganizationDetail({ params }: any) {
   const router = useRouter();
 
   useEffect(() => {
-    const loadOrgWithUsers = async () => {
+    const loadContest = async () => {
       if (params.id === 'new') {
         setIsValid(false);
         setLoading(false);
@@ -49,24 +43,18 @@ export default function OrganizationDetail({ params }: any) {
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
-          getOrganizationWithUsers,
+          getContest,
           { id: params.id },
           authHeader.Authorization
         )
-      )) as { data: GetOrganizationWithUsersQuery };
+      )) as { data: GetContestQuery };
 
-      setOrganization(
-        result.data.getOrganizationWithUsers?.organization ?? null
-      );
-
-      if (result.data.getOrganizationWithUsers?.users) {
-        setUsers(result.data.getOrganizationWithUsers.users as User[]);
-      }
+      setContest(result.data.getContest ?? null);
     };
 
     try {
       setLoading(true);
-      loadOrgWithUsers().then(() => {
+      loadContest().then(() => {
         setLoading(false);
       });
     } catch (error) {
@@ -75,7 +63,13 @@ export default function OrganizationDetail({ params }: any) {
     }
   }, [params.id]);
 
-  const validateOrgName = (value: string) => {
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const type = e.target.value as ContestType;
+    validateContestType(type);
+    setContest({ ...contest!, type });
+  };
+
+  const validateContestName = (value: string) => {
     if (!value || value.length === 0) {
       setIsValid(false);
       return 'Name is required';
@@ -88,45 +82,49 @@ export default function OrganizationDetail({ params }: any) {
     return null;
   };
 
+  const validateContestType: (type: ContestType) => boolean = (
+    type: ContestType
+  ) => {
+    if (type === ContestType.Unknown) {
+      setIsValid(false);
+      setContestTypeError('Contest type is required');
+      return false;
+    } else {
+      setIsValid(true);
+      setContestTypeError(null);
+      return true;
+    }
+  };
+
   // TODO figure out event type
-  const handleSaveOrg = async (event: any) => {
+  const handleSaveContest = async (event: any) => {
     event.preventDefault();
+    setSaving(true);
+
+    const hasValidType = validateContestType(contest!.type);
+    if (!hasValidType) {
+      setSaving(false);
+      return;
+    }
+
     try {
-      setSaving(true);
       const authHeader = await getAuthHeader();
-      if (organization?.id) {
-        const result = (await API.graphql(
-          graphqlOperation(
-            updateOrganization,
-            {
-              organization: {
-                id: organization.id,
-                name: event.target.name.value,
-                type: event.target.type.value as OrganizationType,
-              },
+      const result = (await API.graphql(
+        graphqlOperation(
+          saveContest,
+          {
+            contest: {
+              id: contest?.id ?? v4(),
+              name: event.target.name.value,
+              type: event.target.type.value as ContestType,
             },
-            authHeader.Authorization
-          )
-        )) as { data: UpdateOrganizationMutation };
+          },
+          authHeader.Authorization
+        )
+      )) as { data: SaveContestMutation };
 
-        setOrganization(result.data.updateOrganization!);
-      } else {
-        const result = (await API.graphql(
-          graphqlOperation(
-            createOrganization,
-            {
-              organization: {
-                id: v4(),
-                name: event.target.name.value,
-                type: event.target.type.value as OrganizationType,
-              },
-            },
-            authHeader.Authorization
-          )
-        )) as { data: CreateOrganizationMutation };
+      setContest(result.data.saveContest!);
 
-        setOrganization(result.data.createOrganization!);
-      }
       setNotificationTitle('Successfully saved!');
       setNotificationMessage(`${event.target.name.value} saved`);
       setNotificationType('success');
@@ -144,16 +142,16 @@ export default function OrganizationDetail({ params }: any) {
     <>
       <div className="px-4 sm:px-6 lg:px-8 divide-y flex flex-col flex-grow">
         <div className="pb-10">
-          <form onSubmit={(e) => handleSaveOrg(e)}>
+          <form onSubmit={(e) => handleSaveContest(e)}>
             <div className="px-4 sm:px-0 flex items-center justify-between">
               <h3 className="text-base font-semibold leading-7 text-gray-900 flex">
-                Organization Details
+                Contest Details
               </h3>
 
               <div className="flex justify-end gap-x-6">
                 <button
                   type="button"
-                  onClick={() => router.push('/organizations')}
+                  onClick={() => router.push('/contests')}
                   className="text-sm font-semibold leading-6 text-gray-900">
                   Cancel
                 </button>
@@ -196,8 +194,8 @@ export default function OrganizationDetail({ params }: any) {
                     label="Name"
                     type="text"
                     inputName="name"
-                    inputValue={organization?.name || ''}
-                    validate={validateOrgName}
+                    inputValue={contest?.name || ''}
+                    validate={validateContestName}
                   />
                 </div>
 
@@ -210,26 +208,29 @@ export default function OrganizationDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
-                    value={organization?.type || OrganizationType.Unknown}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const type = e.target.value as OrganizationType;
-                      setOrganization({ ...organization!, type });
-                      setIsValid(true);
-                    }}>
-                    <option value={OrganizationType.Unknown}>
+                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+                      contestTypeError
+                        ? 'ring-red-300 text-red-900 focus:ring-red-500'
+                        : ''
+                    }`}
+                    value={contest?.type || ContestType.Unknown}
+                    onChange={handleTypeChange}>
+                    <option value={ContestType.Unknown}>
                       {loading ? '' : 'Select a type'}
                     </option>
-                    <option value={OrganizationType.State}>
-                      {orgTypeMap[OrganizationType.State]}
+                    <option value={ContestType.Orchestra}>
+                      {contestTypeMap[ContestType.Orchestra]}
                     </option>
-                    <option value={OrganizationType.District}>
-                      {orgTypeMap[OrganizationType.District]}
-                    </option>
-                    <option value={OrganizationType.School}>
-                      {orgTypeMap[OrganizationType.School]}
+                    <option value={ContestType.MarchingBand}>
+                      {contestTypeMap[ContestType.MarchingBand]}
                     </option>
                   </select>
+
+                  {contestTypeError ? (
+                    <p className="mt-2 text-sm text-red-600" id="input-error">
+                      {contestTypeError}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </fieldset>
@@ -237,20 +238,20 @@ export default function OrganizationDetail({ params }: any) {
         </div>
 
         <div className="flex-grow">
-          {!loading && organization?.id ? (
+          {!loading && contest?.id ? (
             <>
               {/* TODO move into user list component */}
               <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-base font-semibold leading-7 text-gray-900">
-                    Users
+                    Entries
                   </h3>
                 </div>
               </div>
 
-              <UserList
-                users={users}
-                organizationId={organization.id}
+              {/* <UserList
+                users={[]}
+                organizationId={contest.id}
                 onUserSaved={(user) => {
                   setNotificationTitle('Successfully saved!');
                   setNotificationMessage(
@@ -259,7 +260,7 @@ export default function OrganizationDetail({ params }: any) {
                   setNotificationType('success');
                   setShowNotification(true);
                 }}
-              />
+              /> */}
             </>
           ) : (
             <></>
@@ -279,7 +280,7 @@ export default function OrganizationDetail({ params }: any) {
           message={notificationMessage}
           show={showNotification}
           notificationType={notificationType}
-          returnHref="/organizations"
+          returnHref="/contests"
           onClose={() => setShowNotification(false)}
         />
       )}

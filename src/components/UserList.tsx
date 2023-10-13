@@ -269,7 +269,7 @@ export default function UserList(props: UserListProps) {
                                       : ''
                                   }`}
                                   value={editUser?.role || UserRole.Unknown}
-                                  onChange={(e) => handleRoleChange(e)}>
+                                  onChange={handleRoleChange}>
                                   <option value={UserRole.Unknown}>
                                     Select a role
                                   </option>
