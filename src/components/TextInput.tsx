@@ -23,7 +23,7 @@ export default function TextInput(props: TextInputProps) {
     }
   }, [inputValue]);
 
-  const handleChange = (e: { target: { value: any }; type: string }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // TODO don't do anything if user clicked cancel
 
     const newValue = e.target.value;
@@ -38,6 +38,13 @@ export default function TextInput(props: TextInputProps) {
     }
   };
 
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    handleChange(e);
+    setTouched(true);
+  };
+
+  const formattedValue = type === 'date' ? value.split('T')[0] : value;
+
   return (
     <div>
       <label
@@ -51,16 +58,13 @@ export default function TextInput(props: TextInputProps) {
           type={type}
           name={inputName}
           id={inputName}
-          className={`block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+          className={`placeholder-gray-300 block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
             error ? 'ring-red-300 text-red-900 focus:ring-red-500' : ''
           }`}
-          value={value}
+          value={formattedValue}
           onChange={handleChange}
-          onBlur={(e) => {
-            handleChange(e);
-            setTouched(true);
-          }}
-          aria-invalid={(error && error.length > 0) || false}
+          onBlur={handleBlur}
+          aria-invalid={Boolean(error)}
           aria-describedby="input-error"
         />
         {error ? (
