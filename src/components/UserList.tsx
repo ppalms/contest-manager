@@ -28,10 +28,6 @@ export default function UserList(props: UserListProps) {
       setIsValidUser(false);
       return 'Name is required';
     }
-    if (value.length < 3) {
-      setIsValidUser(false);
-      return 'Name must be at least 3 characters long';
-    }
     setIsValidUser(true);
     return null;
   };
@@ -273,7 +269,7 @@ export default function UserList(props: UserListProps) {
                                       : ''
                                   }`}
                                   value={editUser?.role || UserRole.Unknown}
-                                  onChange={(e) => handleRoleChange(e)}>
+                                  onChange={handleRoleChange}>
                                   <option value={UserRole.Unknown}>
                                     Select a role
                                   </option>

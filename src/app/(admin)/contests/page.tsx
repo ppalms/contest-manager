@@ -8,7 +8,7 @@ import { listContests } from '@/graphql/resolvers/queries';
 import { Contest } from '@/graphql/API';
 import { contestTypeMap, getAuthHeader } from '@/helpers';
 import { FolderPlusIcon } from '@heroicons/react/20/solid';
-// import { deleteContest } from '@/graphql/resolvers/mutations';
+import { deleteContest } from '@/graphql/resolvers/mutations';
 
 const Page = () => {
   const [contests, setContests] = useState([]);
@@ -25,16 +25,16 @@ const Page = () => {
     fetchContests();
   }, []);
 
-  // const handleDelete = async (id: string) => {
-  //   if (!confirm('Are you sure?')) {
-  //     return;
-  //   }
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure?')) {
+      return;
+    }
 
-  //   const authHeader = await getAuthHeader();
-  //   await API.graphql(graphqlOperation(deleteContest, { id }), authHeader);
+    const authHeader = await getAuthHeader();
+    await API.graphql(graphqlOperation(deleteContest, { id }), authHeader);
 
-  //   setContests(contests.filter((contest: Contest) => contest.id !== id));
-  // };
+    setContests(contests.filter((contest: Contest) => contest.id !== id));
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -45,7 +45,7 @@ const Page = () => {
           </h1>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          {/* <Link href="/contests/new">
+          <Link href="/contests/new">
             <button
               type="button"
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -55,7 +55,7 @@ const Page = () => {
                 aria-hidden="true"
               />
             </button>
-          </Link> */}
+          </Link>
         </div>
       </div>
       <div className="mt-8 flow-root">
@@ -93,7 +93,7 @@ const Page = () => {
                         {contestTypeMap[contest.type!]}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        {/* <Link
+                        <Link
                           href={`/contests/${contest.id}`}
                           className="text-indigo-600 hover:text-indigo-900 mr-2">
                           Edit<span className="sr-only">, {contest.name}</span>
@@ -107,7 +107,7 @@ const Page = () => {
                           className="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer">
                           Delete
                           <span className="sr-only">, {contest.name}</span>
-                        </button> */}
+                        </button>
                       </td>
                     </tr>
                   ))}

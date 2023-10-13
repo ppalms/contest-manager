@@ -33,4 +33,5 @@ export const userRoleMap = {
 export const contestTypeMap = {
   [ContestType.Orchestra]: 'Orchestra',
   [ContestType.MarchingBand]: 'Marching Band',
+  [ContestType.Unknown]: 'Unknown',
 };

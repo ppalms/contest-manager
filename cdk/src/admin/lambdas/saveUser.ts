@@ -28,19 +28,19 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
     throw new Error('Username is required');
   }
 
-  if (firstName) {
+  if (firstName && firstName.length > 0) {
     userAttributes.push({ Name: 'given_name', Value: firstName });
   }
 
-  if (lastName) {
+  if (lastName && lastName.length > 0) {
     userAttributes.push({ Name: 'family_name', Value: lastName });
   }
 
-  if (email) {
+  if (email && email.length > 0) {
     userAttributes.push({ Name: 'email', Value: email });
   }
 
-  if (role) {
+  if (role && role.length > 0) {
     userAttributes.push({ Name: 'custom:userRole', Value: role });
   }
 

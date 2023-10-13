@@ -309,6 +309,16 @@ export class AdministrationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
+    api.createResolver('deleteContestResolver', {
+      typeName: 'Mutation',
+      fieldName: 'deleteContest',
+      dataSource: contestDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'deleteContest.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
     new CfnOutput(this, 'GraphQLAPIURL', {
       value: api.graphqlUrl,
     });

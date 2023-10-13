@@ -1,5 +1,5 @@
 export const getOrganizationWithUsers = /* GraphQL */ `
-  query GetOrganizationWithUsers($id: String!) {
+  query GetOrganizationWithUsers($id: ID!) {
     getOrganizationWithUsers(id: $id) {
       organization {
         id
@@ -37,6 +37,21 @@ export const listContests = /* GraphQL */ `
       type
       startDate
       endDate
+    }
+  }
+`;
+
+export const getContest = /* GraphQL */ `
+  query GetContest($id: ID!) {
+    getContest(id: $id) {
+      id
+      name
+      type
+      level
+      startDate
+      endDate
+      signUpStartDate
+      signUpEndDate
     }
   }
 `;
