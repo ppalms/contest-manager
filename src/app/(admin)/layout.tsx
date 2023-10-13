@@ -328,7 +328,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
 
-          <main className="py-10 flex flex-col flex-grow">{children}</main>
+          <main className="p-10 flex flex-col flex-grow">{children}</main>
         </div>
       </div>
     </>
