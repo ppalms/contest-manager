@@ -28,10 +28,6 @@ export default function UserList(props: UserListProps) {
       setIsValidUser(false);
       return 'Name is required';
     }
-    if (value.length < 3) {
-      setIsValidUser(false);
-      return 'Name must be at least 3 characters long';
-    }
     setIsValidUser(true);
     return null;
   };
