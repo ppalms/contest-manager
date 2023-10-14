@@ -45,10 +45,10 @@ export default function ContestDetail({ params }: any) {
           name: '',
           type: ContestType.Unknown,
           level: ContestLevel.Unknown,
-          startDate: new Date().toISOString(),
-          endDate: new Date().toISOString(),
-          signUpStartDate: new Date().toISOString(),
-          signUpEndDate: new Date().toISOString(),
+          startDate: new Date(),
+          endDate: new Date(),
+          signUpStartDate: new Date(),
+          signUpEndDate: new Date(),
         });
 
         setIsValid(false);

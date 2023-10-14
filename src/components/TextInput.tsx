@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import { getDatePickerValue } from '@/helpers';
 
 export interface TextInputProps {
   label: string;
@@ -17,11 +18,16 @@ export default function TextInput(props: TextInputProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setValue(inputValue);
+    if (type === 'date') {
+      setValue(getDatePickerValue(inputValue));
+    } else {
+      setValue(inputValue);
+    }
+
     if (inputValue.length > 0) {
       setTouched(true);
     }
-  }, [inputValue]);
+  }, [inputValue, type]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // TODO don't do anything if user clicked cancel
@@ -43,8 +49,6 @@ export default function TextInput(props: TextInputProps) {
     setTouched(true);
   };
 
-  const formattedValue = type === 'date' ? value.split('T')[0] : value;
-
   return (
     <div>
       <label
@@ -61,7 +65,7 @@ export default function TextInput(props: TextInputProps) {
           className={`placeholder-gray-300 block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
             error ? 'ring-red-300 text-red-900 focus:ring-red-500' : ''
           }`}
-          value={formattedValue}
+          value={value}
           onChange={handleChange}
           onBlur={handleBlur}
           aria-invalid={Boolean(error)}

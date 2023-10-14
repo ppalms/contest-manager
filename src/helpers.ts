@@ -20,6 +20,24 @@ export const getAuthHeader = async () => {
   };
 };
 
+export const getDatePickerValue = (value: string) => {
+  if (!value || value.length === 0) {
+    return '';
+  }
+
+  const localDate = new Date(value);
+  const year = localDate.getFullYear();
+
+  // Months are zero-indexed, so need to add 1 to get the human friendly month number
+  // padStart() ensures it's always 2 characters, so 3 becomes 03
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');
+
+  // padStart() ensures the day is always 2 characters.
+  const day = String(localDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 export const orgTypeMap = {
   [OrganizationType.District]: 'District',
   [OrganizationType.National]: 'National',
