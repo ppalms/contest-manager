@@ -29,7 +29,8 @@ export class AppStack extends Stack {
       }
     );
 
-    const contestTable = new Table(this, 'ContestTable', {
+    // Single table backing the admin module (orgs, users, contests, etc.)
+    const adminTable = new Table(this, 'AdministrationTable', {
       partitionKey: { name: 'PK', type: AttributeType.STRING },
       sortKey: { name: 'SK', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -43,17 +44,17 @@ export class AppStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
-        CONTEST_TABLE_NAME: contestTable.tableName,
+        ADMINISTRATION_TABLE_NAME: adminTable.tableName,
       },
     });
 
-    contestTable.grantReadData(seedContestsLambda);
-    contestTable.grantWriteData(seedContestsLambda);
+    adminTable.grantReadData(seedContestsLambda);
+    adminTable.grantWriteData(seedContestsLambda);
 
     new AdministrationAPI(this, 'AdministrationAPI', {
       organizationTable: organizationTable,
       organizationUserMappingTable: organizationUserMappingTable,
-      contestTable: contestTable,
+      adminTable: adminTable,
     });
   }
 }

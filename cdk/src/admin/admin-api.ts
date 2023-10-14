@@ -26,7 +26,7 @@ import {
 interface APIProps {
   organizationTable: ITable;
   organizationUserMappingTable: ITable;
-  contestTable: ITable;
+  adminTable: ITable;
 }
 
 export class AdministrationAPI extends Construct {
@@ -105,6 +105,11 @@ export class AdministrationAPI extends Construct {
 
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
+
+    const adminTableDataSource = api.addDynamoDbDataSource(
+      'AdminTableDataSource',
+      props.adminTable
+    );
 
     const organizationDataSource = api.addDynamoDbDataSource(
       'OrganizationDataSource',
@@ -278,15 +283,10 @@ export class AdministrationAPI extends Construct {
     });
 
     // ** CONTESTS ** //
-    const contestDataSource = api.addDynamoDbDataSource(
-      'ContestDataSource',
-      props.contestTable
-    );
-
     api.createResolver('listContestsResolver', {
       typeName: 'Query',
       fieldName: 'listContests',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(
         path.join(__dirname, 'resolvers', 'listContests.js')
       ),
@@ -296,7 +296,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('getContestResolver', {
       typeName: 'Query',
       fieldName: 'getContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -304,7 +304,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('saveContestResolver', {
       typeName: 'Mutation',
       fieldName: 'saveContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveContest.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -312,7 +312,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('deleteContestResolver', {
       typeName: 'Mutation',
       fieldName: 'deleteContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(
         path.join(__dirname, 'resolvers', 'deleteContest.js')
       ),

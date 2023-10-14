@@ -397,7 +397,7 @@ export default function ContestDetail({ params }: any) {
               <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-base font-semibold leading-7 text-gray-900">
-                    Entries
+                    Managers
                   </h3>
                 </div>
               </div>

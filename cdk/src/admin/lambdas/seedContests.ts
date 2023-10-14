@@ -8,15 +8,15 @@ import {
 const seedTenantId = 'ec79c2bd-eeae-4891-a05e-22222a351273';
 
 export async function handler(_: any, __: any): Promise<any> {
-  if (!process.env.CONTEST_TABLE_NAME) {
-    throw new Error('CONTEST_TABLE_NAME not provided');
+  if (!process.env.ADMINISTRATION_TABLE_NAME) {
+    throw new Error('ADMINISTRATION_TABLE_NAME not provided');
   }
 
   const dbClient = new DynamoDBClient();
 
   // Clean the table before seeding
   const getSeedContestsCommand = new QueryCommand({
-    TableName: process.env.CONTEST_TABLE_NAME,
+    TableName: process.env.ADMINISTRATION_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk',
     ExpressionAttributeValues: {
       ':pk': { S: `TENANT#${seedTenantId}` },
@@ -40,7 +40,7 @@ export async function handler(_: any, __: any): Promise<any> {
 
       const batchDeleteParams = {
         RequestItems: {
-          [process.env.CONTEST_TABLE_NAME]: deleteRequests,
+          [process.env.ADMINISTRATION_TABLE_NAME]: deleteRequests,
         },
       };
 
@@ -52,7 +52,7 @@ export async function handler(_: any, __: any): Promise<any> {
   }
 
   const contestItems = {
-    [process.env.CONTEST_TABLE_NAME]: contestSeedData.map((item) => ({
+    [process.env.ADMINISTRATION_TABLE_NAME]: contestSeedData.map((item) => ({
       PutRequest: { Item: item },
     })),
   };
@@ -63,23 +63,6 @@ export async function handler(_: any, __: any): Promise<any> {
 
   try {
     await dbClient.send(writeContests);
-  } catch (error) {
-    console.error('Error writing batch to DynamoDB', error);
-    throw error;
-  }
-
-  const entryItems = {
-    [process.env.CONTEST_TABLE_NAME]: entrySeedData.map((item) => ({
-      PutRequest: { Item: item },
-    })),
-  };
-
-  const writeEntries = new BatchWriteItemCommand({
-    RequestItems: entryItems as any,
-  });
-
-  try {
-    await dbClient.send(writeEntries);
   } catch (error) {
     console.error('Error writing batch to DynamoDB', error);
     throw error;
@@ -102,7 +85,6 @@ const contestSeedData = [
     endDate: { S: '2023-04-01T20:00:00.000Z' },
     signUpStartDate: { S: '2023-03-01T05:00:00.000Z' },
     signUpEndDate: { S: '2023-03-25T05:00:00.000Z' },
-    managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
   },
   {
     PK: { S: `TENANT#${seedTenantId}` },
@@ -114,8 +96,7 @@ const contestSeedData = [
     startDate: { S: '2023-10-07T12:00:00.000Z' },
     endDate: { S: '2023-10-07T20:00:00.000Z' },
     signUpStartDate: { S: '2023-03-01T05:00:00.000Z' },
-    signUpEndDate: { S: '2023-03-25T05:00:00.000Z' },
-    managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
+    signUpEndDate: { S: '2023-03-25T22:00:00.000Z' },
   },
   {
     PK: { S: `TENANT#${seedTenantId}` },
@@ -128,7 +109,6 @@ const contestSeedData = [
     endDate: { S: '2023-10-14T20:00:00.000Z' },
     signUpStartDate: { S: '2023-08-01T05:00:00.000Z' },
     signUpEndDate: { S: '2023-09-25T05:00:00.000Z' },
-    managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
   },
   {
     PK: { S: `TENANT#${seedTenantId}` },
@@ -138,57 +118,10 @@ const contestSeedData = [
     type: { S: 'MARCHING_BAND' },
     level: { S: 'DISTRICT' },
     startDate: { S: '2023-10-07T12:00:00.000Z' },
-    endDate: { S: '2023-10-07T20:00:00.000Z' },
+    endDate: { S: '2023-10-07T20:30:00.000Z' },
     signUpStartDate: { S: '2023-09-04T05:00:00.000Z' },
     signUpEndDate: { S: '2023-09-30T05:00:00.000Z' },
-    managerId: { S: '95d74d08-9001-4c89-8d9f-3219feb89400' },
   },
 ];
 
-const entrySeedData = [
-  {
-    PK: { S: `TENANT#${seedTenantId}` },
-    SK: {
-      S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#b5277e7b-4e9e-4b86-b7ee-bc3dc97702f3',
-    },
-    entityType: { S: 'ENTRY' },
-    directorId: { S: '5b480f84-da3f-4d5c-abc0-24334a074f1a' },
-    musicSelections: {
-      L: [
-        {
-          M: {
-            title: { S: 'A Joyful Song' },
-            composerLastName: { S: 'Lightfoot' },
-          },
-        },
-        { M: { title: { S: 'Gypsy Rover' } } },
-        { M: { title: { S: 'Sweet Kate' }, composerLastName: { S: 'Jones' } } },
-      ],
-    },
-  },
-  {
-    PK: { S: `TENANT#${seedTenantId}` },
-    SK: {
-      S: 'CONTEST#266a60c0-b6d9-484f-87ea-ac8343b53981ENTRY#c0eff1fa-d81c-4b56-b3f3-c53b84c2d95d',
-    },
-    entityType: { S: 'ENTRY' },
-    directorId: { S: 'dc19705c-363b-492d-a504-9994ec071647' },
-    musicSelections: {
-      L: [
-        {
-          M: {
-            title: { S: 'Song Of The River (with descant)' },
-            composerLastName: { S: 'Patterson' },
-          },
-        },
-        {
-          M: {
-            title: { S: 'Non Nobis Domine (Rounds For Everyone)' },
-            composerLastName: { S: 'Terri' },
-          },
-        },
-        { M: { title: { S: 'Candu' } } },
-      ],
-    },
-  },
-];
+// TODO refactor away the Organization and OrgUserMapping tables and store ORGANIZATION and USER data here
