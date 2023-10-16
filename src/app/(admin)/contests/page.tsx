@@ -48,7 +48,7 @@ const Page = () => {
           <Link href="/contests/new">
             <button
               type="button"
-              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
               Add
               <FolderPlusIcon
                 className="-mr-0.5 ml-1 h-5 w-5"
@@ -95,7 +95,7 @@ const Page = () => {
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link
                           href={`/contests/${contest.id}`}
-                          className="text-indigo-600 hover:text-indigo-900 mr-2">
+                          className="text-rose-600 hover:text-rose-900 mr-2">
                           Edit<span className="sr-only">, {contest.name}</span>
                         </Link>
                         <button
@@ -104,7 +104,7 @@ const Page = () => {
                             e.preventDefault();
                             handleDelete(contest.id);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900 hover:cursor-pointer">
+                          className="text-rose-600 hover:text-rose-900 hover:cursor-pointer">
                           Delete
                           <span className="sr-only">, {contest.name}</span>
                         </button>

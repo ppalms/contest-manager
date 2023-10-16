@@ -168,7 +168,7 @@ export default function OrganizationDetail({ params }: any) {
                 <button
                   type="submit"
                   disabled={!isValid || saving}
-                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                   {saving ? (
                     <>
                       Saving
@@ -218,7 +218,7 @@ export default function OrganizationDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
                     value={organization?.type || OrganizationType.Unknown}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;
@@ -275,7 +275,7 @@ export default function OrganizationDetail({ params }: any) {
 
           {loading && (
             <div className="flex justify-center h-full pt-32">
-              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-indigo-700" />
+              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-rose-700" />
             </div>
           )}
         </div>

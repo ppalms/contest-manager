@@ -122,7 +122,7 @@ export default function UserList(props: UserListProps) {
       <div className="sm:flex flex-row-reverse">
         <button
           type="button"
-          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
           onClick={() => {
             setEditUser({
               id: '',
@@ -177,14 +177,14 @@ export default function UserList(props: UserListProps) {
                     onClick={() => {
                       setEditUser(user);
                     }}
-                    className="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-indigo-100">
+                    className="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-rose-100">
                     Edit
                   </a>
                 </div>
                 <div className="-ml-px flex w-0 flex-1">
                   {/* <a
                     href="#"
-                    className="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-indigo-100">
+                    className="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-rose-100">
                     {user.enabled === true ? 'Deactivate' : 'Activate'}
                   </a> */}
                 </div>
@@ -263,7 +263,7 @@ export default function UserList(props: UserListProps) {
                                 <select
                                   id="user-role"
                                   name="user-role"
-                                  className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                                  className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 ${
                                     userRoleError
                                       ? 'ring-red-300 text-red-900 focus:ring-red-500'
                                       : ''
@@ -302,7 +302,7 @@ export default function UserList(props: UserListProps) {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rose-600 sm:text-sm sm:leading-6"
                                     defaultValue={editUser?.email}
                                   />
                                 </div>
@@ -323,7 +323,7 @@ export default function UserList(props: UserListProps) {
                           <button
                             type="submit"
                             disabled={!isValidUser || saving}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                             {saving ? (
                               <>
                                 Saving
