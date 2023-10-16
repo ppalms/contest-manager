@@ -187,7 +187,7 @@ export type User = {
 };
 
 export enum UserRole {
-  ContestManager = 'CONTEST_MANAGER',
+  ContestManager = 'MANAGER',
   Director = 'DIRECTOR',
   TenantAdmin = 'TENANT_ADMIN',
   Unknown = 'UNKNOWN'

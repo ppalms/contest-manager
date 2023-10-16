@@ -8,35 +8,25 @@ export function request(ctx) {
   return {
     operation: 'Query',
     query: {
-      expression: 'PK = :pk and begins_with(SK, :sk)',
+      expression: 'PK = :pk',
       expressionValues: util.dynamodb.toMapValues({
-        ':pk': `TENANT#${tenantId}`,
-        ':sk': `CONTEST#${ctx.arguments.id}`,
+        ':pk': `TENANT#${tenantId}#CONTEST#${ctx.arguments.id}`,
       }),
     },
   };
 }
 
 export function response(ctx) {
-  let contest = ctx.result.items
-    .filter((entity) => entity.entityType === 'CONTEST')
-    .map((entity) => {
-      return {
-        ...entity,
-        id: entity.SK.split('#')[1],
-      };
-    })[0];
+  let contest = null;
+  const managers = [];
 
-  const entries = ctx.result.items
-    .filter((entity) => entity.entityType === 'ENTRY')
-    .map((entity) => {
-      return {
-        ...entity,
-        id: entity.SK.split('#')[2],
-      };
-    });
+  for (const item of ctx.result.items) {
+    if (item.entityType === 'CONTEST') {
+      contest = { ...item, id: item.PK.split('#')[3] };
+    } else if (item.entityType === 'MANAGER') {
+      managers.push({ ...item, id: item.SK.split('#')[1] });
+    }
+  }
 
-  contest = { ...contest, entries: entries };
-
-  return contest;
+  return { ...contest, managers: managers };
 }

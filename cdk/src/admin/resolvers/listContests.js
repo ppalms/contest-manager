@@ -6,25 +6,23 @@ export function request(ctx) {
 
   return {
     operation: 'Query',
+    index: 'GSI1',
     query: {
-      expression: 'PK = :pk and begins_with(SK, :sk)',
+      expression: 'GSI1PK = :pk',
       expressionValues: util.dynamodb.toMapValues({
-        ':pk': `TENANT#${tenantId}`,
-        ':sk': `CONTEST#`,
+        ':pk': `TENANT#${tenantId}#CONTESTS`,
       }),
     },
   };
 }
 
 export function response(ctx) {
-  const contests = ctx.result.items
-    ?.filter((entity) => entity.entityType === 'CONTEST')
-    .map((entity) => {
-      return {
-        ...entity,
-        id: entity.SK.split('#')[1],
-      };
-    });
+  const contests = ctx.result.items.map((entity) => {
+    return {
+      ...entity,
+      id: entity.PK.split('#')[3],
+    };
+  });
 
   return contests;
 }

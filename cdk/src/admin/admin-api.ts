@@ -111,6 +111,14 @@ export class AdministrationAPI extends Construct {
       props.adminTable
     );
 
+    const gsiArn = `${props.adminTable.tableArn}/index/*`;
+    const gsiPolicy = new PolicyStatement({
+      actions: ['dynamodb:Query'],
+      resources: [gsiArn],
+    });
+
+    adminTableDataSource.grantPrincipal.addToPrincipalPolicy(gsiPolicy);
+
     const organizationDataSource = api.addDynamoDbDataSource(
       'OrganizationDataSource',
       props.organizationTable

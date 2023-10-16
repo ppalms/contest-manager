@@ -64,7 +64,7 @@ type User @aws_api_key @aws_lambda {
 
 enum UserRole {
   TENANT_ADMIN
-  CONTEST_MANAGER
+  MANAGER
   DIRECTOR
   UNKNOWN
 }
@@ -89,21 +89,28 @@ type Contest @aws_api_key @aws_lambda {
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
   signUpEndDate: AWSDateTime
-  manager: User
-  entries: [Entry]
+  managers: [Manager]
 }
 
-type Entry @aws_api_key @aws_lambda {
+type Manager @aws_api_key @aws_lambda {
   id: ID!
-  directorId: ID!
-  musicSelections: [MusicSelection]
+  firstName: String!
+  lastName: String!
+  email: AWSEmail!
 }
 
-type MusicSelection @aws_api_key @aws_lambda {
-  title: String!
-  composerFirstName: String
-  composerLastName: String
-}
+# TODO create registration schema
+# type Entry @aws_api_key @aws_lambda {
+#   id: ID!
+#   directorId: ID!
+#   musicSelections: [MusicSelection]
+# }
+
+# type MusicSelection @aws_api_key @aws_lambda {
+#   title: String!
+#   composerFirstName: String
+#   composerLastName: String
+# }
 
 input SaveContestInput {
   id: ID
