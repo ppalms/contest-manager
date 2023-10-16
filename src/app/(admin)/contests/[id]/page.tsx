@@ -70,9 +70,17 @@ export default function ContestDetail({ params }: any) {
 
     try {
       setLoading(true);
-      loadContest().then(() => {
-        setLoading(false);
-      });
+      loadContest()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setNotificationTitle('Error loading contest'); // TODO better message
+          setNotificationType('error');
+          setShowNotification(true);
+          setLoading(false);
+        });
     } catch (error) {
       console.error(error);
       setLoading(false);

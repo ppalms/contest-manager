@@ -66,9 +66,17 @@ export default function OrganizationDetail({ params }: any) {
 
     try {
       setLoading(true);
-      loadOrgWithUsers().then(() => {
-        setLoading(false);
-      });
+      loadOrgWithUsers()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setNotificationTitle('Error loading organization'); // TODO better message
+          setNotificationType('error');
+          setShowNotification(true);
+          setLoading(false);
+        });
     } catch (error) {
       console.error(error);
       setLoading(false);
