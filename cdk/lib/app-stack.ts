@@ -16,13 +16,14 @@ export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    // TODO refactor to single table
+    // TODO move to AdministrationTable under TENANT#<TenantId>ORG#<OrgId>#DETAILS
     const organizationTable = new Table(this, 'OrganizationTable', {
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
       partitionKey: { name: 'id', type: AttributeType.STRING },
     });
 
+    // TODO move to GSI1 under GSI1PK: TENANT#<TenantId>#ORG#<OrgId>#USERS, GSI1SK: <RoleName>
     const organizationUserMappingTable = new Table(
       this,
       'OrganizationUserMappingTable',

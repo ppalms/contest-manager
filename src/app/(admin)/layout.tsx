@@ -10,8 +10,9 @@ import {
   Cog6ToothIcon,
   Bars3Icon,
   HomeIcon,
-  UsersIcon,
   TrophyIcon,
+  UserGroupIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Fragment, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -27,9 +28,15 @@ const navigation = [
   {
     name: 'Organizations',
     href: '/organizations',
-    icon: UsersIcon,
+    icon: UserGroupIcon,
     current: false,
   },
+  // {
+  //   name: 'Users',
+  //   href: '/users',
+  //   icon: UserCircleIcon,
+  //   current: false,
+  // },
 ];
 
 // TODO this might not be useful
@@ -93,7 +100,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
               leave="transition-opacity ease-linear duration-300"
               leaveFrom="opacity-100"
               leaveTo="opacity-0">
-              <div className="fixed inset-0 bg-neutral-900/80" />
+              <div className="fixed inset-0 bg-neutral-500 bg-opacity-70" />
             </Transition.Child>
 
             <div className="fixed inset-0 flex">
