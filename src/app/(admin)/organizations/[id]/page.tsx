@@ -23,6 +23,14 @@ import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 
+// TODO pull this out into a shared file and use in contests/[id] page
+interface Notification {
+  title: string;
+  type: string;
+  message: string;
+  show: boolean;
+}
+
 export default function OrganizationDetail({ params }: any) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -31,10 +39,12 @@ export default function OrganizationDetail({ params }: any) {
   const [saving, setSaving] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationTitle, setNotificationTitle] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [notificationType, setNotificationType] = useState('success');
+  const [notification, setNotification] = useState<Notification>({
+    title: '',
+    message: '',
+    type: '',
+    show: false,
+  });
 
   const router = useRouter();
 
@@ -72,9 +82,13 @@ export default function OrganizationDetail({ params }: any) {
         })
         .catch((error) => {
           console.error(error);
-          setNotificationTitle('Error loading organization'); // TODO better message
-          setNotificationType('error');
-          setShowNotification(true);
+          setNotification({
+            title: 'Error loading organization', // TODO better message
+            type: 'error',
+            message: '',
+            show: true,
+          });
+
           setLoading(false);
         });
     } catch (error) {
@@ -135,16 +149,21 @@ export default function OrganizationDetail({ params }: any) {
 
         setOrganization(result.data.createOrganization!);
       }
-      setNotificationTitle('Successfully saved!');
-      setNotificationMessage(`${event.target.name.value} saved`);
-      setNotificationType('success');
+      setNotification({
+        title: 'Successfully saved!',
+        type: 'success',
+        message: `${event.target.name.value} saved`,
+        show: true,
+      });
     } catch (error: any) {
-      setNotificationTitle('Error saving');
-      setNotificationMessage(error.message);
-      setNotificationType('error');
+      setNotification({
+        title: 'Error saving',
+        type: 'error',
+        message: error.message,
+        show: true,
+      });
     } finally {
       setSaving(false);
-      setShowNotification(true);
     }
   };
 
@@ -260,12 +279,12 @@ export default function OrganizationDetail({ params }: any) {
                 users={users}
                 organizationId={organization.id}
                 onUserSaved={(user) => {
-                  setNotificationTitle('Successfully saved!');
-                  setNotificationMessage(
-                    `${user.firstName} ${user.lastName} saved`
-                  );
-                  setNotificationType('success');
-                  setShowNotification(true);
+                  setNotification({
+                    title: 'Successfully saved!',
+                    type: 'success',
+                    message: `${user.firstName} ${user.lastName} saved`,
+                    show: true,
+                  });
                 }}
               />
             </>
@@ -281,14 +300,15 @@ export default function OrganizationDetail({ params }: any) {
         </div>
       </div>
 
-      {showNotification && (
+      {notification.show && (
         <Notification
-          title={notificationTitle}
-          message={notificationMessage}
-          show={showNotification}
-          notificationType={notificationType}
+          title={notification.title}
+          message={notification.message || ''}
+          show={notification.show}
+          notificationType={notification.type}
           returnHref="/organizations"
-          onClose={() => setShowNotification(false)}
+          returnDescription="organization list"
+          onClose={() => setNotification({ ...notification, show: false })}
         />
       )}
     </>

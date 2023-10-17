@@ -10,13 +10,22 @@ export interface NotificationProps {
   show: boolean;
   notificationType: string;
   returnHref?: string;
+  returnDescription?: string;
   onClose?: () => void;
 }
 
 export default function Notification(props: NotificationProps) {
   const router = useRouter();
 
-  const { title, message, show, notificationType, returnHref, onClose } = props;
+  const {
+    title,
+    message,
+    show,
+    notificationType,
+    returnHref,
+    returnDescription,
+    onClose,
+  } = props;
 
   return (
     <>
@@ -73,7 +82,7 @@ export default function Notification(props: NotificationProps) {
                               clipRule="evenodd"
                             />
                           </svg>
-                          Return to list
+                          Return to {returnDescription || 'list'}
                         </button>
                       </div>
                     )}
