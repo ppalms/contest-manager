@@ -5,9 +5,7 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-// TODO env var
-const seedTenantId = 'ec79c2bd-eeae-4891-a05e-22222a351273';
-
+const seedTenantId = process.env.TEST_TENANT_ID;
 const contestIds = [
   '646b640c-8bb3-47e4-9925-b09be9cb4698',
   '6c05f489-c714-4938-bb25-a1c179f81611',

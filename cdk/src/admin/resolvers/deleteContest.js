@@ -2,14 +2,13 @@ import { util } from '@aws-appsync/utils';
 
 export function request(ctx) {
   const tenantId =
-    ctx.identity?.resolverContext.tenantId ??
-    'ec79c2bd-eeae-4891-a05e-22222a351273';
+    ctx.identity?.resolverContext.tenantId ?? process.env.TEST_TENANT_ID;
 
   return {
     operation: 'DeleteItem',
     key: util.dynamodb.toMapValues({
-      PK: `TENANT#${tenantId}`,
-      SK: `CONTEST#${ctx.arguments.id}`,
+      PK: `TENANT#${tenantId}#CONTEST#${ctx.arguments.id}`,
+      SK: `DETAILS`,
     }),
   };
 }
