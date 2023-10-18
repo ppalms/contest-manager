@@ -86,7 +86,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div>
+      <div className='bg-neutral-100'>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"

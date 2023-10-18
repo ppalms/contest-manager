@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Fragment, useContext, useState } from 'react';
 import { AuthContext } from '../layout';
 import LoginButton from '@/components/LoginButton';
+import AppLogo from '@/components/AppLogo';
 
 export default function Login() {
   const authContext = useContext(AuthContext);
@@ -56,13 +57,60 @@ export default function Login() {
 
   return (
     <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            className="mx-auto h-10 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=rose&shade=600"
-            alt="Your Company"
-          />
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 lg:px-8 bg-neutral-200">
+        <div className="-mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
+          <div className="flex justify-center">
+            <svg
+              fill="#000000"
+              width="100px"
+              height="100px"
+              viewBox="0 0 24 24"
+              id="music"
+              data-name="Flat Line"
+              xmlns="http://www.w3.org/2000/svg"
+              className="icon flat-line">
+              <path
+                id="secondary"
+                d="M12,3a9,9,0,1,0,9,9A9,9,0,0,0,12,3Z"
+                style={{
+                  fill: 'rgb(44, 169, 188)',
+                }}
+              />
+              <path
+                id="primary"
+                d="M15,8H12v6"
+                style={{
+                  fill: 'none',
+                  stroke: 'rgb(0, 0, 0)',
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  strokeWidth: 2,
+                }}
+              />
+              <circle
+                id="note-flag-fill"
+                cx="10"
+                cy="14"
+                r="2"
+                style={{
+                  fill: 'white',
+                  stroke: 'none',
+                }}
+              />
+              <path
+                id="primary-2"
+                data-name="primary"
+                d="M12,14a2,2,0,1,1-2-2A2,2,0,0,1,12,14ZM12,3a9,9,0,1,0,9,9A9,9,0,0,0,12,3Z"
+                style={{
+                  fill: 'none',
+                  stroke: 'rgb(0, 0, 0)',
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  strokeWidth: 2,
+                }}
+              />
+            </svg>
+          </div>
 
           <h1 className="mt-10 text-center text-4xl font-bold leading-9 tracking-tight text-gray-900">
             Contest Manager

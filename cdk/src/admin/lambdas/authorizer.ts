@@ -3,35 +3,9 @@ import * as jwt from 'jsonwebtoken';
 import * as https from 'https';
 import jwkToPem from 'jwk-to-pem';
 
-type JWK = {
-  alg: string;
-  e: string;
-  kid: string;
-  kty: 'RSA';
-  n: string;
-  use: string;
-};
-
-type JWKS = {
-  keys: JWK[];
-};
-
-const getJwks = async (userPoolId: string): Promise<JWKS> => {
-  const jwksUrl = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
-
-  return new Promise((resolve, reject) => {
-    https.get(jwksUrl, (response) => {
-      let data = '';
-      response.on('data', (chunk) => (data += chunk));
-      response.on('end', () => resolve(JSON.parse(data)));
-      response.on('error', reject);
-    });
-  });
-};
-
 export async function handler(
   event: any,
-  _context: any
+  _: any
 ): Promise<{ isAuthorized: boolean; resolverContext?: any }> {
   try {
     const decoded = jwt.decode(event.authorizationToken, { complete: true });
@@ -74,7 +48,6 @@ export async function handler(
             'dynamodb:GetItem',
             'dynamodb:PutItem',
             'dynamodb:Scan',
-            'dynamodb:UpdateItem',
           ],
           Resource: `arn:aws:dynamodb:${process.env.AWS_REGION}:${process.env.AWS_ACCOUNT_ID}:table/*`,
           Condition: {
@@ -109,3 +82,29 @@ export async function handler(
     };
   }
 }
+
+type JWK = {
+  alg: string;
+  e: string;
+  kid: string;
+  kty: 'RSA';
+  n: string;
+  use: string;
+};
+
+type JWKS = {
+  keys: JWK[];
+};
+
+const getJwks = async (userPoolId: string): Promise<JWKS> => {
+  const jwksUrl = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
+
+  return new Promise((resolve, reject) => {
+    https.get(jwksUrl, (response) => {
+      let data = '';
+      response.on('data', (chunk) => (data += chunk));
+      response.on('end', () => resolve(JSON.parse(data)));
+      response.on('error', reject);
+    });
+  });
+};
