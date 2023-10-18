@@ -111,14 +111,15 @@ export class AdministrationAPI extends Construct {
       props.adminTable
     );
 
+    // Have to explicitly allow querying GSIs
     const gsiArn = `${props.adminTable.tableArn}/index/*`;
     const gsiPolicy = new PolicyStatement({
       actions: ['dynamodb:Query'],
       resources: [gsiArn],
     });
-
     adminTableDataSource.grantPrincipal.addToPrincipalPolicy(gsiPolicy);
 
+    // ** ORGANIZATION ** //
     const organizationDataSource = api.addDynamoDbDataSource(
       'OrganizationDataSource',
       props.organizationTable
@@ -128,8 +129,6 @@ export class AdministrationAPI extends Construct {
       'OrganizationUserMappingDataSource',
       props.organizationUserMappingTable
     );
-
-    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
 
     const getOrganizationFunction = new AppsyncFunction(
       this,
@@ -172,6 +171,7 @@ export class AdministrationAPI extends Construct {
       }
     );
 
+    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
     listUsersLambdaFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
@@ -246,7 +246,7 @@ export class AdministrationAPI extends Construct {
       responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
 
-    // ** Save User ** //
+    // ** CONGITO USER ** //
     const saveUserLambdaFunction = new LambdaFunction(
       this,
       'SaveUserLambdaFunction',
