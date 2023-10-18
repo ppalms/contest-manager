@@ -32,7 +32,7 @@ export const getDatePickerValue = (value: string) => {
   // padStart() ensures it's always 2 characters, so 3 becomes 03
   const month = String(localDate.getMonth() + 1).padStart(2, '0');
 
-  // padStart() ensures the day is always 2 characters.
+  // padStart() ensures the day is always 2 characters
   const day = String(localDate.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
@@ -48,7 +48,7 @@ export const orgTypeMap = {
 
 export const userRoleMap = {
   [UserRole.Director]: 'Director',
-  [UserRole.ContestManager]: 'Contest Manager',
+  [UserRole.Manager]: 'Contest Manager',
   [UserRole.TenantAdmin]: 'Administrator',
   [UserRole.Unknown]: 'Unknown',
 };

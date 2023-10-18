@@ -11,12 +11,14 @@ export function request(ctx) {
   const command = {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({
-      PK: `TENANT#${tenantId}`,
-      SK: `CONTEST#${contestId}`,
+      PK: `TENANT#${tenantId}#CONTEST#${contestId}`,
+      SK: `DETAILS`,
     }),
     attributeValues: util.dynamodb.toMapValues({
-      entityType: 'CONTEST',
       ...values,
+      entityType: 'CONTEST',
+      GSI1PK: `TENANT#${tenantId}#CONTESTS`,
+      GSI1SK: values.type,
     }),
   };
 
@@ -24,6 +26,6 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  const contest = { ...ctx.result, id: ctx.result.SK.split('#')[1] };
+  const contest = { ...ctx.result, id: ctx.result.PK.split('#')[3] };
   return contest;
 }

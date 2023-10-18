@@ -26,10 +26,9 @@ export type Scalars = {
 export type Contest = {
   __typename?: 'Contest';
   endDate?: Maybe<Scalars['AWSDateTime']['output']>;
-  entries?: Maybe<Array<Maybe<Entry>>>;
   id: Scalars['ID']['output'];
   level?: Maybe<ContestLevel>;
-  manager?: Maybe<User>;
+  managers?: Maybe<Array<Maybe<Manager>>>;
   name: Scalars['String']['output'];
   signUpEndDate?: Maybe<Scalars['AWSDateTime']['output']>;
   signUpStartDate?: Maybe<Scalars['AWSDateTime']['output']>;
@@ -49,18 +48,12 @@ export enum ContestType {
   Unknown = 'UNKNOWN'
 }
 
-export type Entry = {
-  __typename?: 'Entry';
-  directorId: Scalars['ID']['output'];
+export type Manager = {
+  __typename?: 'Manager';
+  email: Scalars['AWSEmail']['output'];
+  firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  musicSelections?: Maybe<Array<Maybe<MusicSelection>>>;
-};
-
-export type MusicSelection = {
-  __typename?: 'MusicSelection';
-  composerFirstName?: Maybe<Scalars['String']['output']>;
-  composerLastName?: Maybe<Scalars['String']['output']>;
-  title: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
 };
 
 export type Mutation = {
@@ -187,8 +180,8 @@ export type User = {
 };
 
 export enum UserRole {
-  ContestManager = 'CONTEST_MANAGER',
   Director = 'DIRECTOR',
+  Manager = 'MANAGER',
   TenantAdmin = 'TENANT_ADMIN',
   Unknown = 'UNKNOWN'
 }

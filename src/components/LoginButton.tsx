@@ -10,7 +10,7 @@ const LoginButton = (props: LoginButtonProps) => {
       <button
         type="submit"
         disabled={props.disabled}
-        className="relative flex w-full justify-center items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 disabled:bg-indigo-300 disabled:hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        className="relative flex w-full justify-center items-center rounded-md bg-rose-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-rose-500 disabled:bg-rose-300 disabled:hover:bg-rose-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
         {props.loading ? (
           <>
             {props.buttonText}

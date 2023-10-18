@@ -26,7 +26,7 @@ import {
 interface APIProps {
   organizationTable: ITable;
   organizationUserMappingTable: ITable;
-  contestTable: ITable;
+  adminTable: ITable;
 }
 
 export class AdministrationAPI extends Construct {
@@ -106,6 +106,20 @@ export class AdministrationAPI extends Construct {
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
 
+    const adminTableDataSource = api.addDynamoDbDataSource(
+      'AdminTableDataSource',
+      props.adminTable
+    );
+
+    // Have to explicitly allow querying GSIs
+    const gsiArn = `${props.adminTable.tableArn}/index/*`;
+    const gsiPolicy = new PolicyStatement({
+      actions: ['dynamodb:Query'],
+      resources: [gsiArn],
+    });
+    adminTableDataSource.grantPrincipal.addToPrincipalPolicy(gsiPolicy);
+
+    // ** ORGANIZATION ** //
     const organizationDataSource = api.addDynamoDbDataSource(
       'OrganizationDataSource',
       props.organizationTable
@@ -115,8 +129,6 @@ export class AdministrationAPI extends Construct {
       'OrganizationUserMappingDataSource',
       props.organizationUserMappingTable
     );
-
-    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
 
     const getOrganizationFunction = new AppsyncFunction(
       this,
@@ -159,6 +171,7 @@ export class AdministrationAPI extends Construct {
       }
     );
 
+    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
     listUsersLambdaFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
@@ -233,7 +246,7 @@ export class AdministrationAPI extends Construct {
       responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
     });
 
-    // ** Save User ** //
+    // ** CONGITO USER ** //
     const saveUserLambdaFunction = new LambdaFunction(
       this,
       'SaveUserLambdaFunction',
@@ -278,15 +291,10 @@ export class AdministrationAPI extends Construct {
     });
 
     // ** CONTESTS ** //
-    const contestDataSource = api.addDynamoDbDataSource(
-      'ContestDataSource',
-      props.contestTable
-    );
-
     api.createResolver('listContestsResolver', {
       typeName: 'Query',
       fieldName: 'listContests',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(
         path.join(__dirname, 'resolvers', 'listContests.js')
       ),
@@ -296,7 +304,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('getContestResolver', {
       typeName: 'Query',
       fieldName: 'getContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -304,7 +312,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('saveContestResolver', {
       typeName: 'Mutation',
       fieldName: 'saveContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveContest.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -312,7 +320,7 @@ export class AdministrationAPI extends Construct {
     api.createResolver('deleteContestResolver', {
       typeName: 'Mutation',
       fieldName: 'deleteContest',
-      dataSource: contestDataSource,
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(
         path.join(__dirname, 'resolvers', 'deleteContest.js')
       ),

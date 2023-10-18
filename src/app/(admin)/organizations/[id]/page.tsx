@@ -22,6 +22,15 @@ import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
+import { CheckCircleIcon } from '@heroicons/react/20/solid';
+
+// TODO pull this out into a shared file and use in contests/[id] page
+interface Notification {
+  title: string;
+  type: string;
+  message: string;
+  show: boolean;
+}
 
 export default function OrganizationDetail({ params }: any) {
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -29,19 +38,19 @@ export default function OrganizationDetail({ params }: any) {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationTitle, setNotificationTitle] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [notificationType, setNotificationType] = useState('success');
+  const [notification, setNotification] = useState<Notification>({
+    title: '',
+    message: '',
+    type: '',
+    show: false,
+  });
 
   const router = useRouter();
 
   useEffect(() => {
     const loadOrgWithUsers = async () => {
       if (params.id === 'new') {
-        setIsValid(false);
         setLoading(false);
         return;
       }
@@ -66,9 +75,21 @@ export default function OrganizationDetail({ params }: any) {
 
     try {
       setLoading(true);
-      loadOrgWithUsers().then(() => {
-        setLoading(false);
-      });
+      loadOrgWithUsers()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setNotification({
+            title: 'Error loading organization', // TODO better message
+            type: 'error',
+            message: '',
+            show: true,
+          });
+
+          setLoading(false);
+        });
     } catch (error) {
       console.error(error);
       setLoading(false);
@@ -77,14 +98,11 @@ export default function OrganizationDetail({ params }: any) {
 
   const validateOrgName = (value: string) => {
     if (!value || value.length === 0) {
-      setIsValid(false);
       return 'Name is required';
     }
     if (value.length < 3) {
-      setIsValid(false);
       return 'Name must be at least 3 characters long';
     }
-    setIsValid(true);
     return null;
   };
 
@@ -127,16 +145,21 @@ export default function OrganizationDetail({ params }: any) {
 
         setOrganization(result.data.createOrganization!);
       }
-      setNotificationTitle('Successfully saved!');
-      setNotificationMessage(`${event.target.name.value} saved`);
-      setNotificationType('success');
+      setNotification({
+        title: 'Successfully saved!',
+        type: 'success',
+        message: `${event.target.name.value} saved`,
+        show: true,
+      });
     } catch (error: any) {
-      setNotificationTitle('Error saving');
-      setNotificationMessage(error.message);
-      setNotificationType('error');
+      setNotification({
+        title: 'Error saving',
+        type: 'error',
+        message: error.message,
+        show: true,
+      });
     } finally {
       setSaving(false);
-      setShowNotification(true);
     }
   };
 
@@ -145,10 +168,10 @@ export default function OrganizationDetail({ params }: any) {
       <div className="px-4 sm:px-6 lg:px-8 divide-y flex flex-col flex-grow">
         <div className="pb-10">
           <form onSubmit={(e) => handleSaveOrg(e)}>
-            <div className="px-4 sm:px-0 flex items-center justify-between">
-              <h3 className="text-base font-semibold leading-7 text-gray-900 flex">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold leading-7 text-gray-900 flex">
                 Organization Details
-              </h3>
+              </h1>
 
               <div className="flex justify-end gap-x-6">
                 <button
@@ -159,8 +182,8 @@ export default function OrganizationDetail({ params }: any) {
                 </button>
                 <button
                   type="submit"
-                  disabled={!isValid || saving}
-                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  disabled={saving}
+                  className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                   {saving ? (
                     <>
                       Saving
@@ -183,7 +206,13 @@ export default function OrganizationDetail({ params }: any) {
                       </svg>
                     </>
                   ) : (
-                    'Save'
+                    <>
+                      Save
+                      <CheckCircleIcon
+                        className="-mr-0.5 ml-1 h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </>
                   )}
                 </button>
               </div>
@@ -210,12 +239,11 @@ export default function OrganizationDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
                     value={organization?.type || OrganizationType.Unknown}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;
                       setOrganization({ ...organization!, type });
-                      setIsValid(true);
                     }}>
                     <option value={OrganizationType.Unknown}>
                       {loading ? '' : 'Select a type'}
@@ -252,12 +280,12 @@ export default function OrganizationDetail({ params }: any) {
                 users={users}
                 organizationId={organization.id}
                 onUserSaved={(user) => {
-                  setNotificationTitle('Successfully saved!');
-                  setNotificationMessage(
-                    `${user.firstName} ${user.lastName} saved`
-                  );
-                  setNotificationType('success');
-                  setShowNotification(true);
+                  setNotification({
+                    title: 'Successfully saved!',
+                    type: 'success',
+                    message: `${user.firstName} ${user.lastName} saved`,
+                    show: true,
+                  });
                 }}
               />
             </>
@@ -267,20 +295,21 @@ export default function OrganizationDetail({ params }: any) {
 
           {loading && (
             <div className="flex justify-center h-full pt-32">
-              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-indigo-700" />
+              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-rose-700" />
             </div>
           )}
         </div>
       </div>
 
-      {showNotification && (
+      {notification.show && (
         <Notification
-          title={notificationTitle}
-          message={notificationMessage}
-          show={showNotification}
-          notificationType={notificationType}
+          title={notification.title}
+          message={notification.message || ''}
+          show={notification.show}
+          notificationType={notification.type}
           returnHref="/organizations"
-          onClose={() => setShowNotification(false)}
+          returnDescription="organization list"
+          onClose={() => setNotification({ ...notification, show: false })}
         />
       )}
     </>

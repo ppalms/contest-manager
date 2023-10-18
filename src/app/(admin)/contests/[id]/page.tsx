@@ -17,13 +17,13 @@ import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getContest } from '@/graphql/resolvers/queries';
+import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
 export default function ContestDetail({ params }: any) {
   const [contest, setContest] = useState<Contest | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
   const [contestTypeError, setContestTypeError] = useState<string | null>(null);
   const [contestLevelError, setContestLevelError] = useState<string | null>(
@@ -51,7 +51,6 @@ export default function ContestDetail({ params }: any) {
           signUpEndDate: new Date(),
         });
 
-        setIsValid(false);
         setLoading(false);
         return;
       }
@@ -70,9 +69,17 @@ export default function ContestDetail({ params }: any) {
 
     try {
       setLoading(true);
-      loadContest().then(() => {
-        setLoading(false);
-      });
+      loadContest()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setNotificationTitle('Error loading contest'); // TODO better message
+          setNotificationType('error');
+          setShowNotification(true);
+          setLoading(false);
+        });
     } catch (error) {
       console.error(error);
       setLoading(false);
@@ -93,14 +100,11 @@ export default function ContestDetail({ params }: any) {
 
   const validateContestName = (value: string) => {
     if (!value || value.length === 0) {
-      setIsValid(false);
       return 'Name is required';
     }
     if (value.length < 3) {
-      setIsValid(false);
       return 'Name must be at least 3 characters long';
     }
-    setIsValid(true);
     return null;
   };
 
@@ -108,11 +112,9 @@ export default function ContestDetail({ params }: any) {
     type: ContestType
   ) => {
     if (type === ContestType.Unknown) {
-      setIsValid(false);
       setContestTypeError('Contest type is required');
       return false;
     } else {
-      setIsValid(true);
       setContestTypeError(null);
       return true;
     }
@@ -122,11 +124,9 @@ export default function ContestDetail({ params }: any) {
     level: ContestLevel
   ) => {
     if (level === ContestLevel.Unknown) {
-      setIsValid(false);
       setContestLevelError('Contest level is required');
       return false;
     } else {
-      setIsValid(true);
       setContestLevelError(null);
       return true;
     }
@@ -157,16 +157,9 @@ export default function ContestDetail({ params }: any) {
     event.preventDefault();
     setSaving(true);
 
-    const hasValidType = validateContestType(contest!.type);
-    if (!hasValidType) {
-      setSaving(false);
-      return;
-    }
-
-    const hasValidLevel = validateContestLevel(
-      contest!.level ?? ContestLevel.Unknown
-    );
-    if (!hasValidLevel) {
+    let isValid = validateContestType(contest!.type);
+    isValid = validateContestLevel(contest!.level!) && isValid;
+    if (!isValid) {
       setSaving(false);
       return;
     }
@@ -214,10 +207,10 @@ export default function ContestDetail({ params }: any) {
       {/* Contest Details */}
       <div className="px-4 sm:px-6 lg:px-8 divide-y flex flex-col flex-grow">
         <form onSubmit={(e) => handleSaveContest(e)}>
-          <div className="px-4 sm:px-0 flex items-center justify-between">
-            <h3 className="text-base font-semibold leading-7 text-gray-900 flex">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 flex">
               Contest Details
-            </h3>
+            </h1>
 
             <div className="flex justify-end gap-x-6">
               <button
@@ -228,8 +221,8 @@ export default function ContestDetail({ params }: any) {
               </button>
               <button
                 type="submit"
-                disabled={!isValid || saving}
-                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                disabled={saving}
+                className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                 {saving ? (
                   <>
                     Saving
@@ -252,7 +245,13 @@ export default function ContestDetail({ params }: any) {
                     </svg>
                   </>
                 ) : (
-                  'Save'
+                  <>
+                    Save
+                    <CheckCircleIcon
+                      className="-mr-0.5 ml-1 h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </>
                 )}
               </button>
             </div>
@@ -282,7 +281,7 @@ export default function ContestDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
                       contestTypeError
                         ? 'ring-red-300 text-red-900 focus:ring-red-500'
                         : ''
@@ -317,7 +316,7 @@ export default function ContestDetail({ params }: any) {
                   <select
                     id="level"
                     name="level"
-                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
                       contestLevelError
                         ? 'ring-red-300 text-red-900 focus:ring-red-500'
                         : ''
@@ -394,13 +393,13 @@ export default function ContestDetail({ params }: any) {
           {!loading && contest?.id ? (
             <>
               {/* TODO move into user list component */}
-              <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              {/* <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-base font-semibold leading-7 text-gray-900">
-                    Entries
+                    Managers
                   </h3>
                 </div>
-              </div>
+              </div> */}
 
               {/* <UserList
                 users={[]}
@@ -421,7 +420,7 @@ export default function ContestDetail({ params }: any) {
 
           {loading && (
             <div className="flex justify-center h-full pt-32">
-              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-indigo-700" />
+              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-rose-700" />
             </div>
           )}
         </div>
