@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { listContests } from '@/graphql/resolvers/queries';
 import { Contest } from '@/graphql/API';
 import { contestTypeMap, getAuthHeader } from '@/helpers';
-import { FolderPlusIcon } from '@heroicons/react/20/solid';
+import { PlusCircleIcon } from '@heroicons/react/20/solid';
 import { deleteContest } from '@/graphql/resolvers/mutations';
 
 const Page = () => {
@@ -51,7 +51,7 @@ const Page = () => {
                 type="button"
                 className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                 Create
-                <FolderPlusIcon
+                <PlusCircleIcon
                   className="-mr-0.5 ml-1 h-5 w-5"
                   aria-hidden="true"
                 />
@@ -97,7 +97,8 @@ const Page = () => {
                           <Link
                             href={`/contests/${contest.id}`}
                             className="text-rose-600 hover:text-rose-900 mr-2">
-                            Edit<span className="sr-only">, {contest.name}</span>
+                            Edit
+                            <span className="sr-only">, {contest.name}</span>
                           </Link>
                           <button
                             type="button"

@@ -7,7 +7,7 @@ export interface TextInputProps {
   type: string;
   inputName: string;
   inputValue: string;
-  validate?: (s: string) => string | null;
+  validate?: (value: string) => string | null;
 }
 
 export default function TextInput(props: TextInputProps) {

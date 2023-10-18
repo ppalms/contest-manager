@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { listOrganizations } from '@/graphql/resolvers/queries';
 import { Organization } from '@/graphql/API';
 import { getAuthHeader, orgTypeMap } from '@/helpers';
-import { FolderPlusIcon } from '@heroicons/react/20/solid';
+import { PlusCircleIcon } from '@heroicons/react/20/solid';
 import { deleteOrganization } from '@/graphql/resolvers/mutations';
 
 const Index = () => {
@@ -55,7 +55,7 @@ const Index = () => {
               type="button"
               className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
               Create
-              <FolderPlusIcon
+              <PlusCircleIcon
                 className="-mr-0.5 ml-1 h-5 w-5"
                 aria-hidden="true"
               />

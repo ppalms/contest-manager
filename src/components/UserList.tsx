@@ -6,7 +6,7 @@ import { Transition, Dialog } from '@headlessui/react';
 import { getAuthHeader, userRoleMap } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { saveUser } from '@/graphql/resolvers/mutations';
-import { UserPlusIcon } from '@heroicons/react/20/solid';
+import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from './TextInput';
 
 export interface UserListProps {
@@ -273,8 +273,8 @@ export default function UserList(props: UserListProps) {
                                   <option value={UserRole.Unknown}>
                                     Select a role
                                   </option>
-                                  <option value={UserRole.ContestManager}>
-                                    {userRoleMap[UserRole.ContestManager]}
+                                  <option value={UserRole.Manager}>
+                                    {userRoleMap[UserRole.Manager]}
                                   </option>
                                   <option value={UserRole.Director}>
                                     {userRoleMap[UserRole.Director]}
@@ -346,7 +346,13 @@ export default function UserList(props: UserListProps) {
                                 </svg>
                               </>
                             ) : (
-                              'Save'
+                              <>
+                                Save
+                                <CheckCircleIcon
+                                  className="-mr-0.5 ml-1 h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              </>
                             )}
                           </button>
                         </div>

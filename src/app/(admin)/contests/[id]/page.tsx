@@ -17,13 +17,13 @@ import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getContest } from '@/graphql/resolvers/queries';
+import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
 export default function ContestDetail({ params }: any) {
   const [contest, setContest] = useState<Contest | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
   const [contestTypeError, setContestTypeError] = useState<string | null>(null);
   const [contestLevelError, setContestLevelError] = useState<string | null>(
@@ -51,7 +51,6 @@ export default function ContestDetail({ params }: any) {
           signUpEndDate: new Date(),
         });
 
-        setIsValid(false);
         setLoading(false);
         return;
       }
@@ -101,14 +100,11 @@ export default function ContestDetail({ params }: any) {
 
   const validateContestName = (value: string) => {
     if (!value || value.length === 0) {
-      setIsValid(false);
       return 'Name is required';
     }
     if (value.length < 3) {
-      setIsValid(false);
       return 'Name must be at least 3 characters long';
     }
-    setIsValid(true);
     return null;
   };
 
@@ -116,11 +112,9 @@ export default function ContestDetail({ params }: any) {
     type: ContestType
   ) => {
     if (type === ContestType.Unknown) {
-      setIsValid(false);
       setContestTypeError('Contest type is required');
       return false;
     } else {
-      setIsValid(true);
       setContestTypeError(null);
       return true;
     }
@@ -130,11 +124,9 @@ export default function ContestDetail({ params }: any) {
     level: ContestLevel
   ) => {
     if (level === ContestLevel.Unknown) {
-      setIsValid(false);
       setContestLevelError('Contest level is required');
       return false;
     } else {
-      setIsValid(true);
       setContestLevelError(null);
       return true;
     }
@@ -157,8 +149,6 @@ export default function ContestDetail({ params }: any) {
     if (!dateStr || dateStr.length === 0) {
       return `${fieldName} is required`;
     }
-
-    setIsValid(true);
     return null;
   };
 
@@ -167,16 +157,9 @@ export default function ContestDetail({ params }: any) {
     event.preventDefault();
     setSaving(true);
 
-    const hasValidType = validateContestType(contest!.type);
-    if (!hasValidType) {
-      setSaving(false);
-      return;
-    }
-
-    const hasValidLevel = validateContestLevel(
-      contest!.level ?? ContestLevel.Unknown
-    );
-    if (!hasValidLevel) {
+    let isValid = validateContestType(contest!.type);
+    isValid = validateContestLevel(contest!.level!) && isValid;
+    if (!isValid) {
       setSaving(false);
       return;
     }
@@ -238,7 +221,7 @@ export default function ContestDetail({ params }: any) {
               </button>
               <button
                 type="submit"
-                disabled={!isValid || saving}
+                disabled={saving}
                 className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                 {saving ? (
                   <>
@@ -262,7 +245,13 @@ export default function ContestDetail({ params }: any) {
                     </svg>
                   </>
                 ) : (
-                  'Save'
+                  <>
+                    Save
+                    <CheckCircleIcon
+                      className="-mr-0.5 ml-1 h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </>
                 )}
               </button>
             </div>

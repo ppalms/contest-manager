@@ -22,6 +22,7 @@ import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
 import UserList from '@/components/UserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
+import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
 // TODO pull this out into a shared file and use in contests/[id] page
 interface Notification {
@@ -37,7 +38,6 @@ export default function OrganizationDetail({ params }: any) {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
   const [notification, setNotification] = useState<Notification>({
     title: '',
@@ -51,7 +51,6 @@ export default function OrganizationDetail({ params }: any) {
   useEffect(() => {
     const loadOrgWithUsers = async () => {
       if (params.id === 'new') {
-        setIsValid(false);
         setLoading(false);
         return;
       }
@@ -99,14 +98,11 @@ export default function OrganizationDetail({ params }: any) {
 
   const validateOrgName = (value: string) => {
     if (!value || value.length === 0) {
-      setIsValid(false);
       return 'Name is required';
     }
     if (value.length < 3) {
-      setIsValid(false);
       return 'Name must be at least 3 characters long';
     }
-    setIsValid(true);
     return null;
   };
 
@@ -186,7 +182,7 @@ export default function OrganizationDetail({ params }: any) {
                 </button>
                 <button
                   type="submit"
-                  disabled={!isValid || saving}
+                  disabled={saving}
                   className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                   {saving ? (
                     <>
@@ -210,7 +206,13 @@ export default function OrganizationDetail({ params }: any) {
                       </svg>
                     </>
                   ) : (
-                    'Save'
+                    <>
+                      Save
+                      <CheckCircleIcon
+                        className="-mr-0.5 ml-1 h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </>
                   )}
                 </button>
               </div>
@@ -242,7 +244,6 @@ export default function OrganizationDetail({ params }: any) {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;
                       setOrganization({ ...organization!, type });
-                      setIsValid(true);
                     }}>
                     <option value={OrganizationType.Unknown}>
                       {loading ? '' : 'Select a type'}
