@@ -225,9 +225,9 @@ export default function ContestDetail({ params }: any) {
       <div className="px-4 sm:px-6 lg:px-8 divide-y flex flex-col flex-grow">
         <form onSubmit={(e) => handleSaveContest(e)}>
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold leading-7 text-gray-900 flex">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 flex">
               Contest Details
-            </h3>
+            </h1>
 
             <div className="flex justify-end gap-x-6">
               <button

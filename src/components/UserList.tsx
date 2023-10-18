@@ -134,7 +134,7 @@ export default function UserList(props: UserListProps) {
               role: UserRole.Unknown,
             });
           }}>
-          Add
+          Add User
           <UserPlusIcon className="-mr-0.5 ml-1 h-5 w-5" aria-hidden="true" />
         </button>
       </div>
