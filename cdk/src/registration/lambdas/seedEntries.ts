@@ -4,7 +4,8 @@ import {
   QueryCommand,
 } from '@aws-sdk/client-dynamodb';
 
-const seedTenantId = process.env.TEST_TENANT_ID;
+// TODO env var
+const seedTenantId = 'ec79c2bd-eeae-4891-a05e-22222a351273';
 
 export async function handler(_: any, __: any): Promise<any> {
   if (!process.env.REGISTRATION_TABLE_NAME) {
@@ -81,8 +82,6 @@ const entrySeedData = [
     SK: { S: 'ENTRY#b5277e7b-4e9e-4b86-b7ee-bc3dc97702f3' },
     entityType: { S: 'ENTRY' },
     directorId: { S: '5b480f84-da3f-4d5c-abc0-24334a074f1a' },
-    directorFirstName: { S: 'John' },
-    directorLastName: { S: 'Smith' },
     musicSelections: {
       L: [
         {
@@ -103,8 +102,6 @@ const entrySeedData = [
     SK: { S: 'ENTRY#c0eff1fa-d81c-4b56-b3f3-c53b84c2d95d' },
     entityType: { S: 'ENTRY' },
     directorId: { S: 'dc19705c-363b-492d-a504-9994ec071647' },
-    directorFirstName: { S: 'Jane' },
-    directorLastName: { S: 'Doe' },
     musicSelections: {
       L: [
         {
