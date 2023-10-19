@@ -250,4 +250,4 @@ export type GetContestQueryVariables = Exact<{
 }>;
 
 
-export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level?: ContestLevel | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null } | null };
+export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level?: ContestLevel | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, managers?: Array<{ __typename?: 'Manager', id: string, firstName: string, lastName: string, email: any } | null> | null } | null };

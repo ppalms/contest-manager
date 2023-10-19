@@ -52,6 +52,12 @@ export const getContest = /* GraphQL */ `
       endDate
       signUpStartDate
       signUpEndDate
+      managers {
+        id
+        firstName
+        lastName
+        email
+      }
     }
   }
 `;
