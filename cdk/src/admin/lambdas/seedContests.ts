@@ -20,44 +20,7 @@ export async function handler(_: any, __: any): Promise<any> {
     throw new Error('ADMINISTRATION_TABLE_NAME not provided');
   }
 
-  const dbClient = new DynamoDBClient();
-
-  // Clean up users
-  const getUsersCommand = new QueryCommand({
-    TableName: process.env.ADMINISTRATION_TABLE_NAME,
-    KeyConditionExpression: 'PK = :pk',
-    ExpressionAttributeValues: {
-      ':pk': { S: `TENANT#${seedTenantId}` },
-    },
-  });
-
-  try {
-    const result = await dbClient.send(getUsersCommand);
-    const items = result.Items;
-    if (items && items.length > 0) {
-      const deleteRequests = items.map((item) => {
-        return {
-          DeleteRequest: {
-            Key: {
-              PK: item.PK,
-              SK: item.SK,
-            },
-          },
-        };
-      });
-
-      const batchDeleteParams = {
-        RequestItems: {
-          [process.env.ADMINISTRATION_TABLE_NAME]: deleteRequests,
-        },
-      };
-
-      await dbClient.send(new BatchWriteItemCommand(batchDeleteParams));
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // Clean up contests
   for (const contestPK of contestIds) {
@@ -139,6 +102,7 @@ export async function handler(_: any, __: any): Promise<any> {
   };
 }
 
+// TODO move seed data to JSON files
 const contestSeedData = [
   {
     PK: {
@@ -207,18 +171,6 @@ const contestSeedData = [
 ];
 
 const managerSeedData = [
-  // Patrick Palmer
-  {
-    PK: { S: `TENANT#${seedTenantId}` },
-    SK: { S: 'USER#94680468-80a1-704e-f22c-579f27997d4a' },
-    firstName: { S: 'Patrick' },
-    lastName: { S: 'Palmer' },
-    email: { S: 'pjittles+sandboxtest@gmail.com' },
-    userRole: { S: 'MANAGER' },
-    username: { S: 'pjittles+sandboxadmin@gmail.com' },
-    GSI1PK: { S: `TENANT#${seedTenantId}#USERS` },
-    GSI1SK: { S: 'MANAGER' },
-  },
   {
     PK: {
       S: `TENANT#${seedTenantId}#CONTEST#646b640c-8bb3-47e4-9925-b09be9cb4698`,
@@ -228,20 +180,9 @@ const managerSeedData = [
     firstName: { S: 'Patrick' },
     lastName: { S: 'Palmer' },
     email: { S: 'pjittles+sandboxtest@gmail.com' },
-    GSI1PK: { S: 'USER#94680468-80a1-704e-f22c-579f27997d4a' },
-    GSI1SK: { S: 'REFERENCES' },
-  },
-  // Turd Ferguson
-  {
-    PK: { S: `TENANT#${seedTenantId}` },
-    SK: { S: 'USER#24a83408-3021-70b2-b58a-af712d067885' },
-    firstName: { S: 'Testy' },
-    lastName: { S: 'McTesterson' },
-    email: { S: 'pjittles+testysandbox@gmail.com' },
-    userRole: { S: 'MANAGER' },
-    username: { S: 'pjittles+testysandbox@gmail.com' },
-    GSI1PK: { S: `TENANT#${seedTenantId}#USERS` },
-    GSI1SK: { S: 'MANAGER' },
+    GSI1PK: {
+      S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USER#94680468-80a1-704e-f22c-579f27997d4a',
+    },
   },
   {
     PK: {
@@ -252,7 +193,8 @@ const managerSeedData = [
     firstName: { S: 'Testy' },
     lastName: { S: 'McTesterson' },
     email: { S: 'pjittles+testysandbox@gmail.com' },
-    GSI1PK: { S: 'USER#24a83408-3021-70b2-b58a-af712d067885' },
-    GSI1SK: { S: 'REFERENCES' },
+    GSI1PK: {
+      S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USER#24a83408-3021-70b2-b58a-af712d067885',
+    },
   },
 ];
