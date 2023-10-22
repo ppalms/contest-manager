@@ -214,6 +214,7 @@ const directorSeedData = [
     firstName: { S: 'Patrick' },
     lastName: { S: 'Palmer' },
     email: { S: 'pjittles+sandboxadmin@gmail.com' },
+    enabled: { BOOL: true },
     GSI1PK: {
       S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USER#94680468-80a1-704e-f22c-579f27997d4a',
     },
@@ -229,6 +230,7 @@ const directorSeedData = [
     firstName: { S: 'Testy' },
     lastName: { S: 'McTesterson' },
     email: { S: 'pjittles+testysandbox@gmail.com' },
+    enabled: { BOOL: true },
     GSI1PK: {
       S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USER#24a83408-3021-70b2-b58a-af712d067885',
     },
@@ -245,6 +247,7 @@ const userSeedData = [
     email: { S: 'pjittles+sandboxadmin@gmail.com' },
     userRole: { S: 'MANAGER' },
     username: { S: 'pjittles+sandboxadmin@gmail.com' },
+    enabled: { BOOL: true },
     GSI1PK: { S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USERS' },
     GSI1SK: { S: 'MANAGER' },
   },
@@ -257,6 +260,7 @@ const userSeedData = [
     email: { S: 'pjittles+testysandbox@gmail.com' },
     userRole: { S: 'DIRECTOR' },
     username: { S: 'pjittles+testysandbox@gmail.com' },
+    enabled: { BOOL: true },
     GSI1PK: { S: 'TENANT#ec79c2bd-eeae-4891-a05e-22222a351273#USERS' },
     GSI1SK: { S: 'DIRECTOR' },
   },
