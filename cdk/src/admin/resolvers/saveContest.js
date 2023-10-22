@@ -1,5 +1,3 @@
-import { util } from '@aws-appsync/utils';
-
 export function request(ctx) {
   const tenantId =
     ctx.identity?.resolverContext.tenantId ??
