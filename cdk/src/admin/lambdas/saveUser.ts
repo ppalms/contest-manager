@@ -8,7 +8,6 @@ import {
   AttributeType,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { SaveUserInput } from '../../../../src/graphql/API';
 
 export interface SaveUserRequest {
@@ -18,15 +17,14 @@ export interface SaveUserRequest {
 }
 
 export async function handler(event: SaveUserRequest, _: any): Promise<any> {
-  const { id, username, firstName, lastName, email, role, organizationId } =
-    event.user;
-
-  const userAttributes = [{ Name: 'custom:tenantId', Value: event.tenantId }];
+  const { id, username, firstName, lastName, email, role } = event.user;
 
   // Username is always required, but other fields may not be provided
   if (!username || username.length === 0) {
     throw new Error('Username is required');
   }
+
+  const userAttributes = [{ Name: 'custom:tenantId', Value: event.tenantId }];
 
   if (firstName && firstName.length > 0) {
     userAttributes.push({ Name: 'given_name', Value: firstName });
@@ -57,17 +55,6 @@ export async function handler(event: SaveUserRequest, _: any): Promise<any> {
   } else {
     await updateUser(event, userAttributes, idpClient);
   }
-
-  const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
-  await dbClient.send(
-    new PutItemCommand({
-      TableName: process.env.ORGUSERS_TABLE_NAME,
-      Item: {
-        organizationId: { S: organizationId },
-        userId: { S: event.user.id! },
-      },
-    })
-  );
 
   const result = await idpClient.send(
     new AdminGetUserCommand({
