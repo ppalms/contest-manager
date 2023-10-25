@@ -58,17 +58,11 @@ export type Manager = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createOrganization?: Maybe<Organization>;
   deleteContest?: Maybe<Scalars['String']['output']>;
   deleteOrganization?: Maybe<Scalars['String']['output']>;
   saveContest?: Maybe<Contest>;
-  saveUser?: Maybe<User>;
-  updateOrganization?: Maybe<Organization>;
-};
-
-
-export type MutationCreateOrganizationArgs = {
-  organization: OrganizationInput;
+  saveOrgUser?: Maybe<User>;
+  saveOrganization?: Maybe<Organization>;
 };
 
 
@@ -87,13 +81,13 @@ export type MutationSaveContestArgs = {
 };
 
 
-export type MutationSaveUserArgs = {
-  user: SaveUserInput;
+export type MutationSaveOrgUserArgs = {
+  user: SaveOrgUserInput;
 };
 
 
-export type MutationUpdateOrganizationArgs = {
-  organization: UpdateOrganizationInput;
+export type MutationSaveOrganizationArgs = {
+  organization: OrganizationInput;
 };
 
 export type Organization = {
@@ -129,6 +123,7 @@ export type Query = {
   getOrganizationWithUsers?: Maybe<OrganizationWithUsers>;
   listContests?: Maybe<Array<Maybe<Contest>>>;
   listOrganizations?: Maybe<Array<Maybe<Organization>>>;
+  listUsersByRole?: Maybe<Array<Maybe<User>>>;
 };
 
 
@@ -139,6 +134,11 @@ export type QueryGetContestArgs = {
 
 export type QueryGetOrganizationWithUsersArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryListUsersByRoleArgs = {
+  role?: InputMaybe<UserRole>;
 };
 
 export type SaveContestInput = {
@@ -152,20 +152,25 @@ export type SaveContestInput = {
   type: ContestType;
 };
 
-export type SaveUserInput = {
+export type SaveOrgUserInput = {
   email?: InputMaybe<Scalars['AWSEmail']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
-  organizationId: Scalars['ID']['input'];
-  role?: InputMaybe<UserRole>;
+  orgId: Scalars['String']['input'];
+  role: UserRole;
   username: Scalars['String']['input'];
 };
 
-export type UpdateOrganizationInput = {
-  id: Scalars['ID']['input'];
-  name: Scalars['String']['input'];
-  type: OrganizationType;
+export type SaveUserInput = {
+  email?: InputMaybe<Scalars['AWSEmail']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  role: UserRole;
+  username: Scalars['String']['input'];
 };
 
 export type User = {
@@ -186,12 +191,12 @@ export enum UserRole {
   Unknown = 'UNKNOWN'
 }
 
-export type CreateOrganizationMutationVariables = Exact<{
+export type SaveOrganizationMutationVariables = Exact<{
   organization: OrganizationInput;
 }>;
 
 
-export type CreateOrganizationMutation = { __typename?: 'Mutation', createOrganization?: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null } | null };
+export type SaveOrganizationMutation = { __typename?: 'Mutation', saveOrganization?: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null } | null };
 
 export type DeleteOrganizationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -200,19 +205,12 @@ export type DeleteOrganizationMutationVariables = Exact<{
 
 export type DeleteOrganizationMutation = { __typename?: 'Mutation', deleteOrganization?: string | null };
 
-export type UpdateOrganizationMutationVariables = Exact<{
-  organization: UpdateOrganizationInput;
+export type SaveOrgUserMutationVariables = Exact<{
+  user: SaveOrgUserInput;
 }>;
 
 
-export type UpdateOrganizationMutation = { __typename?: 'Mutation', updateOrganization?: { __typename?: 'Organization', id: string, name: string, type?: OrganizationType | null } | null };
-
-export type SaveUserMutationVariables = Exact<{
-  user: SaveUserInput;
-}>;
-
-
-export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
+export type SaveOrgUserMutation = { __typename?: 'Mutation', saveOrgUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
 
 export type SaveContestMutationVariables = Exact<{
   contest: SaveContestInput;

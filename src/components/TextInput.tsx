@@ -7,11 +7,12 @@ export interface TextInputProps {
   type: string;
   inputName: string;
   inputValue: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   validate?: (value: string) => string | null;
 }
 
 export default function TextInput(props: TextInputProps) {
-  const { label, type, inputName, inputValue, validate } = props;
+  const { label, type, inputName, inputValue, onChange, validate } = props;
 
   const [value, setValue] = useState<string>(inputValue);
   const [touched, setTouched] = useState(false);
@@ -30,18 +31,16 @@ export default function TextInput(props: TextInputProps) {
   }, [inputValue, type]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // TODO don't do anything if user clicked cancel
-
-    const newValue = e.target.value;
-    setValue(newValue);
-
-    // No validation function was provided
-    if (!validate) return;
-
-    if (touched || e.type == 'blur') {
-      const errorMessage = validate(newValue);
-      setError(errorMessage);
+    if (validate) {
+      const newValue = e.target.value;
+      if (touched || e.type == 'blur') {
+        const errorMessage = validate(newValue);
+        setError(errorMessage);
+      }
     }
+
+    // Run provided onChange handler
+    onChange(e);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {

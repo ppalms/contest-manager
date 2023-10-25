@@ -6,15 +6,15 @@ schema @aws_api_key @aws_lambda {
 type Query @aws_api_key @aws_lambda {
   listOrganizations: [Organization]
   getOrganizationWithUsers(id: ID!): OrganizationWithUsers
+  listUsersByRole(role: UserRole): [User]
   listContests: [Contest]
   getContest(id: ID!): Contest
 }
 
 type Mutation @aws_api_key @aws_lambda {
-  createOrganization(organization: OrganizationInput!): Organization
+  saveOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: ID!): String
-  updateOrganization(organization: UpdateOrganizationInput!): Organization
-  saveUser(user: SaveUserInput!): User
+  saveOrgUser(user: SaveOrgUserInput!): User
   saveContest(contest: SaveContestInput!): Contest
   deleteContest(id: ID!): String
 }
@@ -45,20 +45,25 @@ input OrganizationInput {
   type: OrganizationType!
 }
 
-input UpdateOrganizationInput {
-  id: ID!
-  name: String!
-  type: OrganizationType!
+input SaveOrgUserInput {
+  id: ID
+  firstName: String
+  lastName: String
+  email: AWSEmail
+  role: UserRole!
+  username: String!
+  enabled: Boolean
+  orgId: String!
 }
 
 # ** Users ** #
 type User @aws_api_key @aws_lambda {
   id: ID!
-  username: String!
   firstName: String!
   lastName: String!
   email: AWSEmail!
   role: UserRole!
+  username: String!
   enabled: Boolean!
 }
 
@@ -71,12 +76,12 @@ enum UserRole {
 
 input SaveUserInput {
   id: ID
-  username: String!
   firstName: String
   lastName: String
   email: AWSEmail
-  role: UserRole
-  organizationId: ID!
+  role: UserRole!
+  username: String!
+  enabled: Boolean
 }
 
 # ** Contests ** #

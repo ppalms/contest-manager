@@ -7,10 +7,6 @@ import {
   SchemaFile,
   AuthorizationType,
   FieldLogLevel,
-  MappingTemplate,
-  PrimaryKey,
-  Values,
-  AppsyncFunction,
   FunctionRuntime,
   Code,
 } from 'aws-cdk-lib/aws-appsync';
@@ -119,176 +115,85 @@ export class AdministrationAPI extends Construct {
     });
     adminTableDataSource.grantPrincipal.addToPrincipalPolicy(gsiPolicy);
 
-    // ** ORGANIZATION ** //
-    const organizationDataSource = api.addDynamoDbDataSource(
-      'OrganizationDataSource',
-      props.organizationTable
-    );
-
-    const organizationUserMappingDataSource = api.addDynamoDbDataSource(
-      'OrganizationUserMappingDataSource',
-      props.organizationUserMappingTable
-    );
-
-    const getOrganizationFunction = new AppsyncFunction(
-      this,
-      'GetOrganizationFunction',
-      {
-        api,
-        name: 'getOrganization',
-        dataSource: organizationDataSource,
-        code: Code.fromAsset(
-          path.join(__dirname, 'resolvers', 'getOrganization.js')
-        ),
-        runtime: FunctionRuntime.JS_1_0_0,
-      }
-    );
-
-    const getOrgUserMappingsFunction = new AppsyncFunction(
-      this,
-      'GetOrgUserMappingsFunction',
-      {
-        api,
-        name: 'getOrgUserMappings',
-        dataSource: organizationUserMappingDataSource,
-        code: Code.fromAsset(
-          path.join(__dirname, 'resolvers', 'getOrgUserMappings.js')
-        ),
-        runtime: FunctionRuntime.JS_1_0_0,
-      }
-    );
-
-    const listUsersLambdaFunction = new LambdaFunction(
-      this,
-      'ListUsersLambdaFunction',
-      {
-        code: LambdaCode.fromAsset(
-          path.join(__dirname, '..', '..', 'esbuild.out', 'listUsers')
-        ),
-        handler: 'listUsers.handler',
-        runtime: Runtime.NODEJS_18_X,
-        architecture: Architecture.ARM_64,
-      }
-    );
-
-    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
-    listUsersLambdaFunction.addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: ['dynamodb:GetItem', 'cognito-idp:ListUsersInGroup'],
-        resources: [props.organizationTable.tableArn, allUserPools],
-      })
-    );
-
-    const listUsersDataSource = api.addLambdaDataSource(
-      'ListUsersDataSource',
-      listUsersLambdaFunction
-    );
-
-    const listUsersFunction = new AppsyncFunction(this, 'ListUsersFunction', {
-      api,
-      name: 'listUsers',
-      dataSource: listUsersDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
-      runtime: FunctionRuntime.JS_1_0_0,
-    });
-
-    // TODO refactor to use single table for org and users
+    // ** ORGANIZATIONS ** //
     api.createResolver('getOrganizationWithUsersResolver', {
       typeName: 'Query',
       fieldName: 'getOrganizationWithUsers',
+      dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'getOrgWithUsersPipeline.js')
+        path.join(__dirname, 'resolvers', 'getOrgWithUsers.js')
       ),
-      pipelineConfig: [
-        getOrganizationFunction,
-        getOrgUserMappingsFunction,
-        listUsersFunction,
-      ],
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
     api.createResolver('listOrganizationsResolver', {
       typeName: 'Query',
       fieldName: 'listOrganizations',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbScanTable(),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultList(),
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listOrgs.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    api.createResolver('createOrganizationResolver', {
+    api.createResolver('saveOrganizationResolver', {
       typeName: 'Mutation',
-      fieldName: 'createOrganization',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbPutItem(
-        PrimaryKey.partition('id').auto(),
-        Values.projecting('organization')
-      ),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
-    });
-
-    api.createResolver('updateOrganizationResolver', {
-      typeName: 'Mutation',
-      fieldName: 'updateOrganization',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbPutItem(
-        PrimaryKey.partition('id').is('organization.id'),
-        Values.projecting('organization')
-      ),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
+      fieldName: 'saveOrganization',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrg.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
     });
 
     api.createResolver('deleteOrganizationResolver', {
       typeName: 'Mutation',
       fieldName: 'deleteOrganization',
-      dataSource: organizationDataSource,
-      requestMappingTemplate: MappingTemplate.dynamoDbDeleteItem('id', 'id'),
-      responseMappingTemplate: MappingTemplate.dynamoDbResultItem(),
-    });
-
-    // ** CONGITO USER ** //
-    const saveUserLambdaFunction = new LambdaFunction(
-      this,
-      'SaveUserLambdaFunction',
-      {
-        code: LambdaCode.fromAsset(
-          path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
-        ),
-        handler: 'saveUser.handler',
-        runtime: Runtime.NODEJS_18_X,
-        architecture: Architecture.ARM_64,
-        environment: {
-          ORGUSERS_TABLE_NAME: props.organizationUserMappingTable.tableName,
-        },
-      }
-    );
-
-    saveUserLambdaFunction.addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: [
-          'cognito-idp:AdminCreateUser',
-          'cognito-idp:AdminAddUserToGroup',
-          'cognito-idp:AdminUpdateUserAttributes',
-          'cognito-idp:AdminGetUser',
-          'dynamodb:PutItem', // TODO get rid of orguser mapping table
-        ],
-        resources: [allUserPools, props.organizationUserMappingTable.tableArn],
-      })
-    );
-
-    const saveUserDataSource = api.addLambdaDataSource(
-      'SaveUserDataSource',
-      saveUserLambdaFunction
-    );
-
-    api.createResolver('saveUserResolver', {
-      typeName: 'Mutation',
-      fieldName: 'saveUser',
-      dataSource: saveUserDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'deleteOrg.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
+
+    api.createResolver('saveOrgUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'saveOrgUser',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrgUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    // TODO create user management UI and wire up eventbridge or org page
+    // ** CONGITO USERS ** //
+    // const saveUserLambdaFunction = new LambdaFunction(
+    //   this,
+    //   'SaveUserLambdaFunction',
+    //   {
+    //     code: LambdaCode.fromAsset(
+    //       path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
+    //     ),
+    //     handler: 'saveUser.handler',
+    //     runtime: Runtime.NODEJS_18_X,
+    //     architecture: Architecture.ARM_64,
+    //     environment: {
+    //       ORGUSERS_TABLE_NAME: props.organizationUserMappingTable.tableName,
+    //     },
+    //   }
+    // );
+
+    // const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
+    // saveUserLambdaFunction.addToRolePolicy(
+    //   new PolicyStatement({
+    //     effect: Effect.ALLOW,
+    //     actions: [
+    //       'cognito-idp:AdminCreateUser',
+    //       'cognito-idp:AdminAddUserToGroup',
+    //       'cognito-idp:AdminUpdateUserAttributes',
+    //       'cognito-idp:AdminGetUser',
+    //     ],
+    //     resources: [allUserPools, props.organizationUserMappingTable.tableArn],
+    //   })
+    // );
+
+    // const saveUserDataSource = api.addLambdaDataSource(
+    //   'SaveUserDataSource',
+    //   saveUserLambdaFunction
+    // );
 
     // ** CONTESTS ** //
     api.createResolver('listContestsResolver', {

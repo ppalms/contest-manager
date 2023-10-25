@@ -1,27 +1,29 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { Fragment, useState } from 'react';
-import { SaveUserMutation, User, UserRole } from '@/graphql/API';
+import { SaveOrgUserMutation, User, UserRole } from '@/graphql/API';
 import { Transition, Dialog } from '@headlessui/react';
 import { getAuthHeader, userRoleMap } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
-import { saveUser } from '@/graphql/resolvers/mutations';
+import { saveOrgUser } from '@/graphql/resolvers/mutations';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from './TextInput';
 
 export interface UserListProps {
   users: User[];
-  organizationId: string;
+  orgId: string;
+  title?: string | undefined;
   onUserSaved?: (user: User) => void;
 }
 
 export default function UserList(props: UserListProps) {
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isValidUser, setIsValidUser] = useState(false);
   const [saving, setSaving] = useState(false);
   const [userRoleError, setUserRoleError] = useState<string | null>(null);
 
-  const { users, onUserSaved } = props;
+  const { users, orgId, title, onUserSaved } = props;
 
   const validateFirstLastName = (value: string) => {
     if (!value || value.length === 0) {
@@ -52,8 +54,12 @@ export default function UserList(props: UserListProps) {
     setEditUser({ ...editUser!, role });
   };
 
-  // TODO fix event type
-  const handleSaveUser = async (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditUser({ ...editUser!, [name]: value });
+  };
+
+  const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
 
@@ -70,37 +76,25 @@ export default function UserList(props: UserListProps) {
     try {
       const authHeader = await getAuthHeader();
       const username =
-        editUser!.username.length === 0
-          ? e.target.email.value
-          : editUser!.username;
+        editUser.username.length === 0 ? editUser.email : editUser.username;
 
       const result = (await API.graphql(
         graphqlOperation(
-          saveUser,
-          {
-            user: {
-              id: editUser!.id,
-              username: username,
-              firstName: e.target['first-name'].value,
-              lastName: e.target['last-name'].value,
-              email: e.target.email.value,
-              role: e.target['user-role'].value,
-              organizationId: props.organizationId,
-            },
-          },
+          saveOrgUser,
+          { user: { ...editUser, username, orgId } },
           authHeader.Authorization
         )
-      )) as { data: SaveUserMutation };
+      )) as { data: SaveOrgUserMutation };
 
       let savedUser: User;
-      const i = users.findIndex((u) => u.id === result.data.saveUser!.id);
+      const i = users.findIndex((u) => u.id === result.data.saveOrgUser!.id);
       if (i === -1) {
-        savedUser = result.data.saveUser!;
+        savedUser = result.data.saveOrgUser!;
         users.push(savedUser);
       } else {
         savedUser = {
           ...users[i],
-          ...result.data.saveUser,
+          ...result.data.saveOrgUser,
         };
         users[i] = savedUser;
       }
@@ -108,10 +102,11 @@ export default function UserList(props: UserListProps) {
       if (onUserSaved) {
         onUserSaved(savedUser);
       }
-      setEditUser(null);
     } catch (error) {
       console.error(error);
     } finally {
+      setShowEditModal(false);
+      setEditUser(null);
       setIsValidUser(false);
       setSaving(false);
     }
@@ -119,6 +114,14 @@ export default function UserList(props: UserListProps) {
 
   return (
     <>
+      <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <div className="sm:col-span-6">
+          <h3 className="text-base font-semibold leading-7 text-gray-900">
+            {title || 'Users'}
+          </h3>
+        </div>
+      </div>
+
       <div className="sm:flex flex-row-reverse">
         <button
           type="button"
@@ -176,6 +179,7 @@ export default function UserList(props: UserListProps) {
                     type="button"
                     onClick={() => {
                       setEditUser(user);
+                      setShowEditModal(true);
                     }}
                     className="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-rose-100">
                     Edit
@@ -195,7 +199,7 @@ export default function UserList(props: UserListProps) {
       </ul>
 
       {/* USER EDIT MODAL */}
-      <Transition.Root show={editUser !== null} as={Fragment}>
+      <Transition.Root show={showEditModal} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-10"
@@ -237,9 +241,10 @@ export default function UserList(props: UserListProps) {
                               <div className="sm:col-span-3">
                                 <TextInput
                                   label="First name"
-                                  inputName="first-name"
+                                  inputName="firstName"
                                   inputValue={editUser?.firstName ?? ''}
                                   type="text"
+                                  onChange={handleInputChange}
                                   validate={validateFirstLastName}
                                 />
                               </div>
@@ -247,9 +252,10 @@ export default function UserList(props: UserListProps) {
                               <div className="sm:col-span-3">
                                 <TextInput
                                   label="Last name"
-                                  inputName="last-name"
+                                  inputName="lastName"
                                   inputValue={editUser?.lastName ?? ''}
                                   type="text"
+                                  onChange={handleInputChange}
                                   validate={validateFirstLastName}
                                 />
                               </div>
@@ -303,7 +309,8 @@ export default function UserList(props: UserListProps) {
                                     type="email"
                                     autoComplete="email"
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rose-600 sm:text-sm sm:leading-6"
-                                    defaultValue={editUser?.email}
+                                    value={editUser?.email}
+                                    onChange={handleInputChange}
                                   />
                                 </div>
                               </div>
@@ -315,6 +322,7 @@ export default function UserList(props: UserListProps) {
                           <button
                             type="button"
                             onClick={() => {
+                              setShowEditModal(false);
                               setEditUser(null);
                             }}
                             className="text-sm font-semibold leading-6 text-gray-900">

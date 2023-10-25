@@ -1,6 +1,6 @@
-export const createOrganization = /* GraphQL */ `
-  mutation CreateOrganization($organization: OrganizationInput!) {
-    createOrganization(organization: $organization) {
+export const saveOrganization = /* GraphQL */ `
+  mutation SaveOrganization($organization: OrganizationInput!) {
+    saveOrganization(organization: $organization) {
       id
       name
       type
@@ -14,19 +14,9 @@ export const deleteOrganization = /* GraphQL */ `
   }
 `;
 
-export const updateOrganization = /* GraphQL */ `
-  mutation UpdateOrganization($organization: UpdateOrganizationInput!) {
-    updateOrganization(organization: $organization) {
-      id
-      name
-      type
-    }
-  }
-`;
-
-export const saveUser = /* GraphQL */ `
-  mutation SaveUser($user: SaveUserInput!) {
-    saveUser(user: $user) {
+export const saveOrgUser = /* GraphQL */ `
+  mutation SaveOrgUser($user: SaveOrgUserInput!) {
+    saveOrgUser(user: $user) {
       id
       firstName
       lastName

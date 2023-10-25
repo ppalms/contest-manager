@@ -1,17 +1,13 @@
 'use client';
 
 import {
-  UpdateOrganizationMutation,
   OrganizationType,
-  CreateOrganizationMutation,
   GetOrganizationWithUsersQuery,
   User,
   Organization,
+  SaveOrganizationMutation,
 } from '@/graphql/API';
-import {
-  createOrganization,
-  updateOrganization,
-} from '@/graphql/resolvers/mutations';
+import { saveOrganization } from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
@@ -51,6 +47,7 @@ export default function OrganizationDetail({ params }: any) {
   useEffect(() => {
     const loadOrgWithUsers = async () => {
       if (params.id === 'new') {
+        setOrganization({ id: v4(), name: '', type: OrganizationType.Unknown });
         setLoading(false);
         return;
       }
@@ -96,6 +93,13 @@ export default function OrganizationDetail({ params }: any) {
     }
   }, [params.id]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e);
+    
+    const { name, value } = e.target;
+    setOrganization({ ...organization!, [name]: value });
+  };
+
   const validateOrgName = (value: string) => {
     if (!value || value.length === 0) {
       return 'Name is required';
@@ -106,49 +110,24 @@ export default function OrganizationDetail({ params }: any) {
     return null;
   };
 
-  // TODO figure out event type
-  const handleSaveOrg = async (event: any) => {
+  const handleSaveOrg = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       setSaving(true);
       const authHeader = await getAuthHeader();
-      if (organization?.id) {
-        const result = (await API.graphql(
-          graphqlOperation(
-            updateOrganization,
-            {
-              organization: {
-                id: organization.id,
-                name: event.target.name.value,
-                type: event.target.type.value as OrganizationType,
-              },
-            },
-            authHeader.Authorization
-          )
-        )) as { data: UpdateOrganizationMutation };
+      const result = (await API.graphql(
+        graphqlOperation(
+          saveOrganization,
+          { organization },
+          authHeader.Authorization
+        )
+      )) as { data: SaveOrganizationMutation };
 
-        setOrganization(result.data.updateOrganization!);
-      } else {
-        const result = (await API.graphql(
-          graphqlOperation(
-            createOrganization,
-            {
-              organization: {
-                id: v4(),
-                name: event.target.name.value,
-                type: event.target.type.value as OrganizationType,
-              },
-            },
-            authHeader.Authorization
-          )
-        )) as { data: CreateOrganizationMutation };
-
-        setOrganization(result.data.createOrganization!);
-      }
+      setOrganization(result.data.saveOrganization!);
       setNotification({
         title: 'Successfully saved!',
         type: 'success',
-        message: `${event.target.name.value} saved`,
+        message: `${organization!.name} saved`,
         show: true,
       });
     } catch (error: any) {
@@ -173,6 +152,7 @@ export default function OrganizationDetail({ params }: any) {
                 Organization Details
               </h1>
 
+              {/* SAVE / CANCEL BUTTONS */}
               <div className="flex justify-end gap-x-6">
                 <button
                   type="button"
@@ -226,6 +206,7 @@ export default function OrganizationDetail({ params }: any) {
                     type="text"
                     inputName="name"
                     inputValue={organization?.name || ''}
+                    onChange={handleInputChange}
                     validate={validateOrgName}
                   />
                 </div>
@@ -266,29 +247,18 @@ export default function OrganizationDetail({ params }: any) {
 
         <div className="flex-grow">
           {!loading && organization?.id ? (
-            <>
-              {/* TODO move into user list component */}
-              <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="sm:col-span-6">
-                  <h3 className="text-base font-semibold leading-7 text-gray-900">
-                    Users
-                  </h3>
-                </div>
-              </div>
-
-              <UserList
-                users={users}
-                organizationId={organization.id}
-                onUserSaved={(user) => {
-                  setNotification({
-                    title: 'Successfully saved!',
-                    type: 'success',
-                    message: `${user.firstName} ${user.lastName} saved`,
-                    show: true,
-                  });
-                }}
-              />
-            </>
+            <UserList
+              users={users}
+              orgId={organization.id}
+              onUserSaved={(user) => {
+                setNotification({
+                  title: 'Successfully saved!',
+                  type: 'success',
+                  message: `${user.firstName} ${user.lastName} saved`,
+                  show: true,
+                });
+              }}
+            />
           ) : (
             <></>
           )}

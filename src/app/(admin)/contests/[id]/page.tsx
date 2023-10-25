@@ -272,6 +272,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="name"
                     inputValue={contest?.name || ''}
                     validate={validateContestName}
+                    onChange={()=>console.log('TODO')}
                   />
                 </div>
 
@@ -353,6 +354,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="startDate"
                     inputValue={contest?.startDate ?? ''}
                     validate={(e) => validateDateInput(e, 'Start date')}
+                    onChange={()=>console.log('TODO')}
                   />
                 </div>
 
@@ -364,6 +366,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="endDate"
                     inputValue={contest?.endDate || ''}
                     validate={(e) => validateDateInput(e, 'End date')}
+                    onChange={()=>console.log('TODO')}
                   />
                 </div>
 
@@ -375,6 +378,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="signUpStartDate"
                     inputValue={contest?.signUpStartDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up start date')}
+                    onChange={()=>console.log('TODO')}
                   />
                 </div>
 
@@ -386,6 +390,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="signUpEndDate"
                     inputValue={contest?.signUpEndDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up end date')}
+                    onChange={()=>console.log('TODO')}
                   />
                 </div>
               </div>
