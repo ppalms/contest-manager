@@ -242,9 +242,9 @@ export default function OrganizationDetail({ params }: any) {
           </form>
         </div>
 
-        <div className="flex-grow">
+        {/* TODO use same control as contest <div className="flex-grow">
           {!loading && organization?.id ? (
-            <UserList
+            <OrgUserList
               users={users}
               orgId={organization.id}
               onUserSaved={(user) => {
@@ -265,7 +265,7 @@ export default function OrganizationDetail({ params }: any) {
               <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-rose-700" />
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       {notification.show && (
