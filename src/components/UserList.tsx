@@ -1,29 +1,26 @@
-/* eslint-disable @next/next/no-img-element */
-
 import { Fragment, useState } from 'react';
-import { SaveOrgUserMutation, User, UserRole } from '@/graphql/API';
+import { SaveUserMutation, User, UserRole } from '@/graphql/API';
 import { Transition, Dialog } from '@headlessui/react';
 import { getAuthHeader, userRoleMap } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
-import { saveOrgUser } from '@/graphql/resolvers/mutations';
+import { saveUser } from '@/graphql/resolvers/mutations';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from './TextInput';
 
 export interface UserListProps {
   users: User[];
-  orgId: string;
-  title?: string | undefined;
+  title?: string;
   onUserSaved?: (user: User) => void;
 }
 
-export default function UserList(props: UserListProps) {
+export default function OrgUserList(props: UserListProps) {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isValidUser, setIsValidUser] = useState(false);
   const [saving, setSaving] = useState(false);
   const [userRoleError, setUserRoleError] = useState<string | null>(null);
 
-  const { users, orgId, title, onUserSaved } = props;
+  const { users, title, onUserSaved } = props;
 
   const validateFirstLastName = (value: string) => {
     if (!value || value.length === 0) {
@@ -73,28 +70,37 @@ export default function UserList(props: UserListProps) {
       return;
     }
 
+    if (!editUser.email || editUser.email.length === 0) {
+      setSaving(false);
+      return;
+    }
+
     try {
       const authHeader = await getAuthHeader();
       const username =
-        editUser.username.length === 0 ? editUser.email : editUser.username;
+        !editUser.username || editUser.username.length === 0
+          ? editUser.email
+          : editUser.username;
+
+      console.log({ ...editUser, username });
 
       const result = (await API.graphql(
         graphqlOperation(
-          saveOrgUser,
-          { user: { ...editUser, username, orgId } },
+          saveUser,
+          { user: { ...editUser, username } },
           authHeader.Authorization
         )
-      )) as { data: SaveOrgUserMutation };
+      )) as { data: SaveUserMutation };
 
       let savedUser: User;
-      const i = users.findIndex((u) => u.id === result.data.saveOrgUser!.id);
+      const i = users.findIndex((u) => u.id === result.data.saveUser!.id);
       if (i === -1) {
-        savedUser = result.data.saveOrgUser!;
+        savedUser = result.data.saveUser!;
         users.push(savedUser);
       } else {
         savedUser = {
           ...users[i],
-          ...result.data.saveOrgUser,
+          ...result.data.saveUser,
         };
         users[i] = savedUser;
       }
@@ -114,38 +120,39 @@ export default function UserList(props: UserListProps) {
 
   return (
     <>
-      <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-        <div className="sm:col-span-6">
-          <h3 className="text-base font-semibold leading-7 text-gray-900">
+      <div className="sm:flex sm:items-center">
+        <div className="sm:flex-auto">
+          <h1 className="text-2xl font-bold leading-6 text-gray-900">
             {title || 'Users'}
-          </h3>
+          </h1>
         </div>
-      </div>
 
-      <div className="sm:flex flex-row-reverse">
-        <button
-          type="button"
-          className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
-          onClick={() => {
-            setEditUser({
-              id: '',
-              firstName: '',
-              lastName: '',
-              email: '',
-              username: '',
-              enabled: true,
-              role: UserRole.Unknown,
-            });
-          }}>
-          Add User
-          <UserPlusIcon className="-mr-0.5 ml-1 h-5 w-5" aria-hidden="true" />
-        </button>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+            onClick={() => {
+              setEditUser({
+                id: '',
+                firstName: '',
+                lastName: '',
+                email: '',
+                username: '',
+                enabled: true,
+                role: UserRole.Unknown,
+              });
+              setShowEditModal(true);
+            }}>
+            Add User
+            <UserPlusIcon className="-mr-0.5 ml-1 h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {/* USER LIST */}
       <ul
         role="list"
-        className="grid grid-cols-1 gap-6 pt-4 sm:grid-cols-2 xl:grid-cols-3">
+        className="grid grid-cols-1 gap-6 pt-8 sm:grid-cols-2 xl:grid-cols-3">
         {users.map((user) => (
           <li
             key={user.id}
@@ -269,7 +276,7 @@ export default function UserList(props: UserListProps) {
                                 <select
                                   id="user-role"
                                   name="user-role"
-                                  className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 ${
+                                  className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-neutral-600 sm:text-sm sm:leading-6 ${
                                     userRoleError
                                       ? 'ring-red-300 text-red-900 focus:ring-red-500'
                                       : ''
@@ -308,7 +315,7 @@ export default function UserList(props: UserListProps) {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rose-600 sm:text-sm sm:leading-6"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-neutral-600 sm:text-sm sm:leading-6"
                                     value={editUser?.email}
                                     onChange={handleInputChange}
                                   />

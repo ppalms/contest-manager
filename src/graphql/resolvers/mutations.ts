@@ -1,3 +1,17 @@
+export const saveUser = /* GraphQL */ `
+  mutation SaveUser($user: SaveUserInput!) {
+    saveUser(user: $user) {
+      id
+      firstName
+      lastName
+      email
+      role
+      username
+      enabled
+    }
+  }
+`;
+
 export const saveOrganization = /* GraphQL */ `
   mutation SaveOrganization($organization: OrganizationInput!) {
     saveOrganization(organization: $organization) {

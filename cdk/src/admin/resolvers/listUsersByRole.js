@@ -5,18 +5,22 @@ export function request(ctx) {
     operation: 'Query',
     index: 'GSI1',
     query: {
-      expression: 'GSI1PK = :pk',
+      expression: 'GSI1PK = :pk and GSI1SK = :sk',
       expressionValues: util.dynamodb.toMapValues({
         ':pk': `TENANT#${tenantId}#USERS`,
+        ':sk': ctx.arguments.role,
       }),
     },
   };
 }
 
 export function response(ctx) {
-  const users = ctx.result.items.map((entity) => {
-    return { ...entity, id: entity.PK.split('#')[3] };
+  const contests = ctx.result.items.map((entity) => {
+    return {
+      ...entity,
+      id: entity.PK.split('#')[3],
+    };
   });
 
-  return users;
+  return contests;
 }

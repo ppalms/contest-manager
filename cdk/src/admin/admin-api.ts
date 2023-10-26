@@ -115,6 +115,33 @@ export class AdministrationAPI extends Construct {
     });
     adminTableDataSource.grantPrincipal.addToPrincipalPolicy(gsiPolicy);
 
+    // ** USERS ** //
+    api.createResolver('listUsersResolver', {
+      typeName: 'Query',
+      fieldName: 'listUsers',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api.createResolver('listUsersByRoleResolver', {
+      typeName: 'Query',
+      fieldName: 'listUsersByRole',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'listUsersByRole.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api.createResolver('saveUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'saveUser',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
     // ** ORGANIZATIONS ** //
     api.createResolver('getOrganizationWithUsersResolver', {
       typeName: 'Query',

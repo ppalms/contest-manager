@@ -4,6 +4,7 @@ schema @aws_api_key @aws_lambda {
 }
 
 type Query @aws_api_key @aws_lambda {
+  listUsers: [User]
   listOrganizations: [Organization]
   getOrganizationWithUsers(id: ID!): OrganizationWithUsers
   listUsersByRole(role: UserRole): [User]
@@ -12,6 +13,7 @@ type Query @aws_api_key @aws_lambda {
 }
 
 type Mutation @aws_api_key @aws_lambda {
+  saveUser(user: SaveUserInput!): User
   saveOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: ID!): String
   saveOrgUser(user: SaveOrgUserInput!): User
@@ -19,50 +21,13 @@ type Mutation @aws_api_key @aws_lambda {
   deleteContest(id: ID!): String
 }
 
-# ** Organizations ** #
-type Organization @aws_api_key @aws_lambda {
-  id: ID!
-  name: String!
-  type: OrganizationType
-}
-
-type OrganizationWithUsers @aws_api_key @aws_lambda {
-  organization: Organization!
-  users: [User]
-}
-
-enum OrganizationType {
-  DISTRICT
-  NATIONAL
-  SCHOOL
-  STATE
-  UNKNOWN
-}
-
-input OrganizationInput {
-  id: ID!
-  name: String!
-  type: OrganizationType!
-}
-
-input SaveOrgUserInput {
-  id: ID
-  firstName: String
-  lastName: String
-  email: AWSEmail
-  role: UserRole!
-  username: String!
-  enabled: Boolean
-  orgId: String!
-}
-
 # ** Users ** #
 type User @aws_api_key @aws_lambda {
-  id: ID!
+  id: ID
   firstName: String!
   lastName: String!
-  email: AWSEmail!
   role: UserRole!
+  email: AWSEmail!
   username: String!
   enabled: Boolean!
 }
@@ -84,9 +49,46 @@ input SaveUserInput {
   enabled: Boolean
 }
 
+# ** Organizations ** #
+type Organization @aws_api_key @aws_lambda {
+  id: ID
+  name: String!
+  type: OrganizationType
+}
+
+type OrganizationWithUsers @aws_api_key @aws_lambda {
+  organization: Organization!
+  users: [User]
+}
+
+enum OrganizationType {
+  DISTRICT
+  NATIONAL
+  SCHOOL
+  STATE
+  UNKNOWN
+}
+
+input OrganizationInput {
+  id: ID
+  name: String!
+  type: OrganizationType!
+}
+
+input SaveOrgUserInput {
+  id: ID
+  firstName: String
+  lastName: String
+  email: AWSEmail
+  role: UserRole!
+  username: String!
+  enabled: Boolean
+  orgId: String!
+}
+
 # ** Contests ** #
 type Contest @aws_api_key @aws_lambda {
-  id: ID!
+  id: ID
   name: String!
   type: ContestType!
   level: ContestLevel
@@ -94,6 +96,7 @@ type Contest @aws_api_key @aws_lambda {
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
   signUpEndDate: AWSDateTime
+  performanceTime: Int
   managers: [Manager]
 }
 
@@ -102,6 +105,30 @@ type Manager @aws_api_key @aws_lambda {
   firstName: String!
   lastName: String!
   email: AWSEmail!
+}
+
+input SaveContestInput {
+  id: ID
+  name: String!
+  type: ContestType!
+  level: ContestLevel
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  signUpStartDate: AWSDateTime
+  signUpEndDate: AWSDateTime
+  performanceTime: Int
+}
+
+enum ContestType {
+  ORCHESTRA
+  MARCHING_BAND
+  UNKNOWN
+}
+
+enum ContestLevel {
+  DISTRICT
+  STATE
+  UNKNOWN
 }
 
 # TODO create registration schema
@@ -116,26 +143,3 @@ type Manager @aws_api_key @aws_lambda {
 #   composerFirstName: String
 #   composerLastName: String
 # }
-
-input SaveContestInput {
-  id: ID
-  name: String!
-  type: ContestType!
-  level: ContestLevel
-  startDate: AWSDateTime
-  endDate: AWSDateTime
-  signUpStartDate: AWSDateTime
-  signUpEndDate: AWSDateTime
-}
-
-enum ContestType {
-  ORCHESTRA
-  MARCHING_BAND
-  UNKNOWN
-}
-
-enum ContestLevel {
-  DISTRICT
-  STATE
-  UNKNOWN
-}

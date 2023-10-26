@@ -1,3 +1,17 @@
+export const listUsers = /* GraphQL */ `
+  query ListUsers {
+    listUsers {
+      id
+      firstName
+      lastName
+      role
+      email
+      username
+      enabled
+    }
+  }
+`;
+
 export const getOrganizationWithUsers = /* GraphQL */ `
   query GetOrganizationWithUsers($id: ID!) {
     getOrganizationWithUsers(id: $id) {
