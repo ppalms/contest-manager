@@ -3,7 +3,7 @@
   "ModelMetadata": {
     "Author": "Patrick Palmer",
     "DateCreated": "Oct 14, 2023, 07:06 PM",
-    "DateLastModified": "Oct 25, 2023, 12:07 AM",
+    "DateLastModified": "Oct 26, 2023, 01:34 AM",
     "Description": "Single-table design for the administration module of Contest Manager",
     "AWSService": "Amazon DynamoDB",
     "Version": "3.0"
@@ -63,11 +63,11 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "signupStartDate",
+          "AttributeName": "signUpStartDate",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "signupEndDate",
+          "AttributeName": "signUpEndDate",
           "AttributeType": "S"
         },
         {
@@ -81,60 +81,99 @@
         {
           "AttributeName": "GSI1SK",
           "AttributeType": "S"
+        },
+        {
+          "AttributeName": "enabled",
+          "AttributeType": "BOOL"
         }
       ],
       "TableFacets": [
         {
-          "FacetName": "OrgTree",
+          "FacetName": "UserDetails",
           "KeyAttributeAlias": {
-            "PartitionKeyAlias": "TENANT#<TenantId>#ORGTREE#<RootOrgId>",
-            "SortKeyAlias": "TREE#<ChildOrgId>#<GrandchildOrgId>"
+            "PartitionKeyAlias": "TENANT#<TenantId>#USER#<UserId>",
+            "SortKeyAlias": "ENTITY"
           },
           "TableData": [
             {
               "PK": {
-                "S": "TENANT#001#ORGTREE#101"
+                "S": "TENANT#001#USER#201"
               },
               "SK": {
-                "S": "ROOT"
+                "S": "DETAILS"
               },
-              "name": {
-                "S": "OSSAA"
+              "entityType": {
+                "S": "USER"
               },
-              "type": {
-                "S": "STATE"
+              "role": {
+                "S": "DIRECTOR"
+              },
+              "username": {
+                "S": "jdoe@school.org"
+              },
+              "firstName": {
+                "S": "Jane"
+              },
+              "lastName": {
+                "S": "Doe"
+              },
+              "email": {
+                "S": "jdoe@school.org"
+              },
+              "enabled": {
+                "BOOL": true
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#USERS"
+              },
+              "GSI1SK": {
+                "S": "DIRECTOR"
               }
             },
             {
               "PK": {
-                "S": "TENANT#001#ORGTREE#101"
+                "S": "TENANT#001#USER#202"
               },
               "SK": {
-                "S": "ORG#102"
+                "S": "DETAILS"
               },
-              "name": {
-                "S": "Edmond Public Schools"
+              "entityType": {
+                "S": "USER"
               },
-              "type": {
-                "S": "DISTRICT"
-              }
-            },
-            {
-              "PK": {
-                "S": "TENANT#001#ORGTREE#101"
+              "role": {
+                "S": "MANAGER"
               },
-              "SK": {
-                "S": "ORG#102#103"
+              "username": {
+                "S": "jsmith@school.org"
               },
-              "name": {
-                "S": "Edmond Santa Fe High School"
+              "firstName": {
+                "S": "John"
               },
-              "type": {
-                "S": "SCHOOL"
+              "lastName": {
+                "S": "Smith"
+              },
+              "email": {
+                "S": "jsmith@school.org"
+              },
+              "enabled": {
+                "BOOL": true
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#USERS"
+              },
+              "GSI1SK": {
+                "S": "MANAGER"
               }
             }
           ],
-          "NonKeyAttributes": ["name", "type"],
+          "NonKeyAttributes": [
+            "role",
+            "username",
+            "firstName",
+            "lastName",
+            "email",
+            "enabled"
+          ],
           "DataAccess": {
             "MySql": {}
           }
@@ -239,12 +278,6 @@
               },
               "email": {
                 "S": "jdoe@school.org"
-              },
-              "GSI1PK": {
-                "S": "TENANT#001#USER#201"
-              },
-              "GSI1SK": {
-                "S": "REFERENCE"
               }
             },
             {
@@ -271,12 +304,6 @@
               },
               "email": {
                 "S": "jsmith@school.org"
-              },
-              "GSI1PK": {
-                "S": "TENANT#001#USER#202"
-              },
-              "GSI1SK": {
-                "S": "REFERENCE"
               }
             }
           ],
@@ -294,71 +321,58 @@
           }
         },
         {
-          "FacetName": "UserDetails",
+          "FacetName": "OrgTree",
           "KeyAttributeAlias": {
-            "PartitionKeyAlias": "TENANT#<TenantId>#USER#<UserId>",
-            "SortKeyAlias": "ENTITY"
+            "PartitionKeyAlias": "TENANT#<TenantId>#ORGTREE#<RootOrgId>",
+            "SortKeyAlias": "TREE#<ChildOrgId>#<GrandchildOrgId>"
           },
           "TableData": [
             {
               "PK": {
-                "S": "TENANT#001#USER#201"
+                "S": "TENANT#001#ORGTREE#101"
               },
               "SK": {
-                "S": "DETAILS"
+                "S": "ROOT"
               },
-              "entityType": {
-                "S": "USER"
+              "name": {
+                "S": "OSSAA"
               },
-              "role": {
-                "S": "DIRECTOR"
-              },
-              "username": {
-                "S": "jdoe@school.org"
-              },
-              "firstName": {
-                "S": "Jane"
-              },
-              "lastName": {
-                "S": "Doe"
-              },
-              "email": {
-                "S": "jdoe@school.org"
+              "type": {
+                "S": "STATE"
               }
             },
             {
               "PK": {
-                "S": "TENANT#001#USER#202"
+                "S": "TENANT#001#ORGTREE#101"
               },
               "SK": {
-                "S": "DETAILS"
+                "S": "ORG#102"
               },
-              "entityType": {
-                "S": "USER"
+              "name": {
+                "S": "Edmond Public Schools"
               },
-              "role": {
-                "S": "MANAGER"
+              "type": {
+                "S": "DISTRICT"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORGTREE#101"
               },
-              "username": {
-                "S": "jsmith@school.org"
+              "SK": {
+                "S": "ORG#102#103"
               },
-              "firstName": {
-                "S": "John"
+              "name": {
+                "S": "Edmond Santa Fe High School"
               },
-              "lastName": {
-                "S": "Smith"
-              },
-              "email": {
-                "S": "jsmith@school.org"
+              "type": {
+                "S": "SCHOOL"
               }
             }
           ],
           "NonKeyAttributes": [
-            "role",
-            "username",
-            "firstName",
-            "lastName",
-            "email"
+            "name",
+            "type"
           ],
           "DataAccess": {
             "MySql": {}
@@ -373,7 +387,7 @@
           "TableData": [
             {
               "PK": {
-                "S": "TENANT#001CONTEST#301"
+                "S": "TENANT#001#CONTEST#301"
               },
               "SK": {
                 "S": "DETAILS"
@@ -393,19 +407,25 @@
               "endDate": {
                 "S": "2023-10-28T22:00:00.000Z"
               },
-              "signupStartDate": {
+              "signUpStartDate": {
                 "S": "2023-08-01T05:00:00.000Z"
               },
-              "signupEndDate": {
+              "signUpEndDate": {
                 "S": "2023-09-25T05:00:00.000Z"
               },
               "performanceTime": {
-                "N": 20
+                "N": "20"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
               }
             },
             {
               "PK": {
-                "S": "TENANT#001CONTEST#301"
+                "S": "TENANT#001#CONTEST#301"
               },
               "SK": {
                 "S": "USER#202"
@@ -424,12 +444,6 @@
               },
               "email": {
                 "S": "jsmith@school.org"
-              },
-              "GSI1PK": {
-                "S": "TENANT#001#USER#202"
-              },
-              "GSI1SK": {
-                "S": "REFERENCE"
               }
             }
           ],
@@ -438,8 +452,8 @@
             "type",
             "startDate",
             "endDate",
-            "signupStartDate",
-            "signupEndDate",
+            "signUpStartDate",
+            "signUpEndDate",
             "performanceTime"
           ],
           "DataAccess": {

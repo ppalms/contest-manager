@@ -1,8 +1,5 @@
 export function request(ctx) {
-  // TODO get from SSM
-  const tenantId =
-    ctx.identity?.resolverContext.tenantId ??
-    'ec79c2bd-eeae-4891-a05e-22222a351273';
+  const tenantId = ctx.identity?.resolverContext.tenantId ?? '001';
 
   return {
     operation: 'Query',

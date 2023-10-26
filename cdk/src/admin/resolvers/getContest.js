@@ -1,7 +1,5 @@
 export function request(ctx) {
-  const tenantId =
-    ctx.identity?.resolverContext.tenantId ??
-    'ec79c2bd-eeae-4891-a05e-22222a351273';
+  const tenantId = ctx.identity?.resolverContext.tenantId ?? '001';
 
   return {
     operation: 'Query',
@@ -21,7 +19,7 @@ export function response(ctx) {
   for (const item of ctx.result.items) {
     if (item.entityType === 'CONTEST') {
       contest = { ...item, id: item.PK.split('#')[3] };
-    } else if (item.entityType === 'MANAGER') {
+    } else if (item.entityType === 'USER') {
       managers.push({ ...item, id: item.SK.split('#')[1] });
     }
   }
