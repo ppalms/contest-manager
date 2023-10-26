@@ -53,6 +53,7 @@ export const saveContest = /* GraphQL */ `
       endDate
       signUpStartDate
       signUpEndDate
+      performanceTime
     }
   }
 `;

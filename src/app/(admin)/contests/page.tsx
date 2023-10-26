@@ -10,7 +10,7 @@ import { contestTypeMap, getAuthHeader } from '@/helpers';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
 import { deleteContest } from '@/graphql/resolvers/mutations';
 
-const Page = () => {
+const ContestList = () => {
   const [contests, setContests] = useState([]);
 
   useEffect(() => {
@@ -124,4 +124,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default ContestList;
