@@ -104,7 +104,7 @@ const ContestList = () => {
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
-                              handleDelete(contest.id);
+                              handleDelete(contest.id!);
                             }}
                             className="text-rose-600 hover:text-rose-900 hover:cursor-pointer">
                             Delete

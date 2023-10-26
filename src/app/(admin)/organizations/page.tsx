@@ -110,7 +110,7 @@ const Index = () => {
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
-                              handleDelete(org.id);
+                              handleDelete(org.id!);
                             }}
                             className="text-rose-600 hover:text-rose-900 hover:cursor-pointer">
                             Delete<span className="sr-only">, {org.name}</span>

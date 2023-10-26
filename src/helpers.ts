@@ -16,7 +16,9 @@ export interface AuthHeader {
   Authorization: string;
 }
 
-export const getAuthHeader: () => Promise<AuthHeader> = async () => {
+export const getAuthHeader: () => Promise<{
+  [key: string]: string;
+}> = async () => {
   const session = await Auth.currentSession();
   const idToken = session.getIdToken().getJwtToken();
   return {
