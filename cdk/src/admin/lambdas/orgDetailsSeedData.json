@@ -92,12 +92,6 @@
     },
     "email": {
       "S": "jdoe@school.org"
-    },
-    "GSI1PK": {
-      "S": "TENANT#001#USER#201"
-    },
-    "GSI1SK": {
-      "S": "REFERENCE"
     }
   },
   {
@@ -124,12 +118,6 @@
     },
     "email": {
       "S": "jsmith@school.org"
-    },
-    "GSI1PK": {
-      "S": "TENANT#001#USER#202"
-    },
-    "GSI1SK": {
-      "S": "REFERENCE"
     }
   }
 ]

@@ -42,8 +42,6 @@ export async function handler(_: any, __: any): Promise<any> {
         },
       };
 
-      console.log(batchDeleteParams);
-
       await dbClient.send(new BatchWriteItemCommand(batchDeleteParams));
     }
   } catch (error) {

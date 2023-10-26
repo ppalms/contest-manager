@@ -12,11 +12,10 @@ import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { v4 } from 'uuid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
-import UserList from '@/components/UserList';
+import OrgUserList from '@/components/OrgUserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
@@ -47,7 +46,7 @@ export default function OrganizationDetail({ params }: any) {
   useEffect(() => {
     const loadOrgWithUsers = async () => {
       if (params.id === 'new') {
-        setOrganization({ id: v4(), name: '', type: OrganizationType.Unknown });
+        setOrganization({ name: '', type: OrganizationType.Unknown });
         setLoading(false);
         return;
       }
@@ -94,8 +93,6 @@ export default function OrganizationDetail({ params }: any) {
   }, [params.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
-    
     const { name, value } = e.target;
     setOrganization({ ...organization!, [name]: value });
   };
@@ -220,7 +217,7 @@ export default function OrganizationDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-neutral-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
                     value={organization?.type || OrganizationType.Unknown}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const type = e.target.value as OrganizationType;

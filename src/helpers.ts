@@ -12,7 +12,11 @@ export const classNames = (...classes: string[]) => {
 
 export const APPSYNC_AUTH_TYPE = 'AWS_LAMBDA';
 
-export const getAuthHeader = async () => {
+export interface AuthHeader {
+  Authorization: string;
+}
+
+export const getAuthHeader: () => Promise<AuthHeader> = async () => {
   const session = await Auth.currentSession();
   const idToken = session.getIdToken().getJwtToken();
   return {

@@ -45,7 +45,7 @@ export class AppStack extends Stack {
     //      GSI1SK: <OrgType>
 
     // - Organization details: TENANT#<TenantId>#ORG#<OrgId>
-    //    Org metadata under SK: <OrgId>#DETAILS
+    //    Org metadata under SK: DETAILS
     //    Org users under SK: <OrgId>#<RoleName>#<UserId>
     //    Look up all orgs for a tenant in GSI1 under
     //      GSI1PK: TENANT#<TenantId>#ORGS
@@ -80,11 +80,11 @@ export class AppStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
-    const seedContestsLambda = new Function(this, 'SeedContestsLambda', {
+    const seedUsersLambda = new Function(this, 'SeedUsersLambda', {
       code: Code.fromAsset(
-        path.join(__dirname, '..', 'esbuild.out', 'seedContests')
+        path.join(__dirname, '..', 'esbuild.out', 'seedUsers')
       ),
-      handler: 'seedContests.handler',
+      handler: 'seedUsers.handler',
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
@@ -92,8 +92,8 @@ export class AppStack extends Stack {
       },
     });
 
-    adminTable.grantReadData(seedContestsLambda);
-    adminTable.grantWriteData(seedContestsLambda);
+    adminTable.grantReadData(seedUsersLambda);
+    adminTable.grantWriteData(seedUsersLambda);
 
     const seedOrgsLambda = new Function(this, 'SeedOrgsLambda', {
       code: Code.fromAsset(
@@ -109,6 +109,21 @@ export class AppStack extends Stack {
 
     adminTable.grantReadData(seedOrgsLambda);
     adminTable.grantWriteData(seedOrgsLambda);
+
+    const seedContestsLambda = new Function(this, 'SeedContestsLambda', {
+      code: Code.fromAsset(
+        path.join(__dirname, '..', 'esbuild.out', 'seedContests')
+      ),
+      handler: 'seedContests.handler',
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.ARM_64,
+      environment: {
+        ADMINISTRATION_TABLE_NAME: adminTable.tableName,
+      },
+    });
+
+    adminTable.grantReadData(seedContestsLambda);
+    adminTable.grantWriteData(seedContestsLambda);
 
     new AdministrationAPI(this, 'AdministrationAPI', {
       organizationTable: organizationTable,
