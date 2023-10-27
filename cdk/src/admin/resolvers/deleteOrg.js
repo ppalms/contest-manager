@@ -4,7 +4,7 @@ export function request(ctx) {
   return {
     operation: 'DeleteItem',
     key: util.dynamodb.toMapValues({
-      PK: `TENANT#${tenantId}#CONTEST#${ctx.arguments.id}`,
+      PK: `TENANT#${tenantId}#ORG#${ctx.arguments.id}`,
       SK: `DETAILS`,
     }),
   };

@@ -31,12 +31,12 @@ const navigation = [
     icon: UserGroupIcon,
     current: false,
   },
-  // {
-  //   name: 'Users',
-  //   href: '/users',
-  //   icon: UserCircleIcon,
-  //   current: false,
-  // },
+  {
+    name: 'Users',
+    href: '/users',
+    icon: UserCircleIcon,
+    current: false,
+  },
 ];
 
 // TODO this might not be useful
@@ -86,7 +86,7 @@ const NavLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className='bg-neutral-100'>
+      <div className="bg-neutral-100">
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"

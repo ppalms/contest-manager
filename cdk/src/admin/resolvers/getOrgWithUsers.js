@@ -6,23 +6,23 @@ export function request(ctx) {
     query: {
       expression: 'PK = :pk',
       expressionValues: util.dynamodb.toMapValues({
-        ':pk': `TENANT#${tenantId}#CONTEST#${ctx.arguments.id}`,
+        ':pk': `TENANT#${tenantId}#ORG#${ctx.arguments.id}`,
       }),
     },
   };
 }
 
 export function response(ctx) {
-  let contest = null;
-  const managers = [];
+  let organization = null;
+  const users = [];
 
   for (const item of ctx.result.items) {
-    if (item.entityType === 'CONTEST') {
-      contest = { ...item, id: item.PK.split('#')[3] };
+    if (item.entityType === 'ORGANIZATION') {
+      organization = { ...item, id: item.PK.split('#')[3] };
     } else if (item.entityType === 'USER') {
-      managers.push({ ...item, id: item.SK.split('#')[1] });
+      users.push({ ...item, id: item.SK.split('#')[1] });
     }
   }
 
-  return { ...contest, managers: managers };
+  return { organization, users };
 }

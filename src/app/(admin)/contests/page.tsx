@@ -10,7 +10,7 @@ import { contestTypeMap, getAuthHeader } from '@/helpers';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
 import { deleteContest } from '@/graphql/resolvers/mutations';
 
-const Page = () => {
+const ContestList = () => {
   const [contests, setContests] = useState([]);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const Page = () => {
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
-                              handleDelete(contest.id);
+                              handleDelete(contest.id!);
                             }}
                             className="text-rose-600 hover:text-rose-900 hover:cursor-pointer">
                             Delete
@@ -124,4 +124,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default ContestList;

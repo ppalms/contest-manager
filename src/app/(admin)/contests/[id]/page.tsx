@@ -7,20 +7,21 @@ import {
   GetContestQuery,
   SaveContestMutation,
 } from '@/graphql/API';
+import { getContest } from '@/graphql/resolvers/queries';
 import { saveContest } from '@/graphql/resolvers/mutations';
+import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { v4 } from 'uuid';
+import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import { contestTypeMap, contestLevelMap } from '@/helpers';
-import { getContest } from '@/graphql/resolvers/queries';
-import { CheckCircleIcon } from '@heroicons/react/20/solid';
+import UserSearch from '@/components/UserSearch';
 
 export default function ContestDetail({ params }: any) {
   const [contest, setContest] = useState<Contest | null>(null);
+  const [showManagerSearch, setShowManagerSearch] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,6 +31,7 @@ export default function ContestDetail({ params }: any) {
     null
   );
 
+  // TODO refactor notification
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -41,7 +43,6 @@ export default function ContestDetail({ params }: any) {
     const loadContest = async () => {
       if (params.id === 'new') {
         setContest({
-          id: v4(),
           name: '',
           type: ContestType.Unknown,
           level: ContestLevel.Unknown,
@@ -85,6 +86,19 @@ export default function ContestDetail({ params }: any) {
       setLoading(false);
     }
   }, [params.id]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setContest({ ...contest!, [name]: value });
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    // console.log(`${name}: ${value}`);
+    const utcDate = toUTCDate(value);
+    // console.log(`utc value: ${utcDate}`);
+    setContest({ ...contest!, [name]: utcDate });
+  };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const type = e.target.value as ContestType;
@@ -159,6 +173,7 @@ export default function ContestDetail({ params }: any) {
 
     let isValid = validateContestType(contest!.type);
     isValid = validateContestLevel(contest!.level!) && isValid;
+    // isValid = event.target.name.value.length > 3 && isValid;
     if (!isValid) {
       setSaving(false);
       return;
@@ -166,23 +181,15 @@ export default function ContestDetail({ params }: any) {
 
     // TODO validate dates
 
+    // TODO handle managers like org users and remove from contest type
+    const { managers, ...values } = contest!;
+
     try {
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
           saveContest,
-          {
-            contest: {
-              id: contest?.id ?? v4(),
-              name: event.target.name.value,
-              type: event.target.type.value as ContestType,
-              level: event.target.level.value as ContestLevel,
-              startDate: toUTCDate(event.target.startDate?.value),
-              endDate: toUTCDate(event.target.endDate?.value),
-              signUpStartDate: toUTCDate(event.target.signUpStartDate?.value),
-              signUpEndDate: toUTCDate(event.target.signUpEndDate?.value),
-            },
-          },
+          { contest: values },
           authHeader.Authorization
         )
       )) as { data: SaveContestMutation };
@@ -204,8 +211,8 @@ export default function ContestDetail({ params }: any) {
 
   return (
     <>
-      {/* Contest Details */}
       <div className="px-4 sm:px-6 lg:px-8 divide-y flex flex-col flex-grow">
+        {/* CONTEST DETAILS */}
         <form onSubmit={(e) => handleSaveContest(e)}>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold leading-7 text-gray-900 flex">
@@ -268,6 +275,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="name"
                     inputValue={contest?.name || ''}
                     validate={validateContestName}
+                    onChange={handleInputChange}
                   />
                 </div>
 
@@ -281,7 +289,7 @@ export default function ContestDetail({ params }: any) {
                   <select
                     id="type"
                     name="type"
-                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-neutral-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
                       contestTypeError
                         ? 'ring-red-300 text-red-900 focus:ring-red-500'
                         : ''
@@ -316,7 +324,7 @@ export default function ContestDetail({ params }: any) {
                   <select
                     id="level"
                     name="level"
-                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-rose-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+                    className={`mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-neutral-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
                       contestLevelError
                         ? 'ring-red-300 text-red-900 focus:ring-red-500'
                         : ''
@@ -349,6 +357,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="startDate"
                     inputValue={contest?.startDate ?? ''}
                     validate={(e) => validateDateInput(e, 'Start date')}
+                    onChange={handleDateChange}
                   />
                 </div>
 
@@ -360,6 +369,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="endDate"
                     inputValue={contest?.endDate || ''}
                     validate={(e) => validateDateInput(e, 'End date')}
+                    onChange={handleDateChange}
                   />
                 </div>
 
@@ -371,6 +381,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="signUpStartDate"
                     inputValue={contest?.signUpStartDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up start date')}
+                    onChange={handleDateChange}
                   />
                 </div>
 
@@ -382,6 +393,7 @@ export default function ContestDetail({ params }: any) {
                     inputName="signUpEndDate"
                     inputValue={contest?.signUpEndDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up end date')}
+                    onChange={handleDateChange}
                   />
                 </div>
               </div>
@@ -389,30 +401,64 @@ export default function ContestDetail({ params }: any) {
           </fieldset>
         </form>
 
-        <div className="flex-grow">
+        {/* MANAGERS */}
+        <div className="flex-grow pt-8">
           {!loading && contest?.id ? (
             <>
-              {/* TODO move into user list component */}
-              {/* <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="sm:col-span-6">
-                  <h3 className="text-base font-semibold leading-7 text-gray-900">
-                    Managers
-                  </h3>
-                </div>
-              </div> */}
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg font-semibold leading-7 text-gray-900 flex">
+                  Managers
+                </h1>
 
-              {/* <UserList
-                users={[]}
-                organizationId={contest.id}
-                onUserSaved={(user) => {
-                  setNotificationTitle('Successfully saved!');
-                  setNotificationMessage(
-                    `${user.firstName} ${user.lastName} saved`
-                  );
-                  setNotificationType('success');
-                  setShowNotification(true);
-                }}
-              /> */}
+                <div className="flex justify-end gap-x-6">
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+                    onClick={() => {
+                      setShowManagerSearch(true);
+                    }}>
+                    Assign Manager
+                    <UserPlusIcon
+                      className="-mr-0.5 ml-1 h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <ul role="list" className="divide-y divide-gray-100">
+                {contest.managers?.map((manager) => (
+                  <li
+                    key={manager?.id}
+                    className="flex items-center justify-between gap-x-6 py-5">
+                    <div className="min-w-0">
+                      <div className="flex items-start gap-x-3">
+                        <p className="text-sm font-semibold leading-6 text-gray-900">
+                          {manager?.firstName} {manager?.lastName}
+                        </p>
+                      </div>
+                      <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
+                        <p className="whitespace-nowrap">
+                          <a href={`mailto:${manager?.email}`} target="_blank">
+                            {manager?.email}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-none items-center gap-x-4">
+                      <button
+                        type="button"
+                        onClick={() => console.log('removeManager')}
+                        className="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block">
+                        Remove
+                        <span className="sr-only">
+                          , {manager?.firstName} {manager?.lastName}
+                        </span>
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </>
           ) : (
             <></>
@@ -425,6 +471,9 @@ export default function ContestDetail({ params }: any) {
           )}
         </div>
       </div>
+
+      {/* ASSIGN MANAGER MODAL */}
+      <UserSearch show={showManagerSearch} setShow={setShowManagerSearch} />
 
       {showNotification && (
         <Notification

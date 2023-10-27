@@ -1,0 +1,123 @@
+[
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#101"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "OSSAA"
+    },
+    "type": {
+      "S": "STATE"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "STATE"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#102"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Edmond Public Schools"
+    },
+    "type": {
+      "S": "DISTRICT"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "DISTRICT"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#103"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Edmond Santa Fe High School"
+    },
+    "type": {
+      "S": "SCHOOL"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "SCHOOL"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#103"
+    },
+    "SK": {
+      "S": "USER#201"
+    },
+    "entityType": {
+      "S": "USER"
+    },
+    "role": {
+      "S": "DIRECTOR"
+    },
+    "username": {
+      "S": "jdoe@school.org"
+    },
+    "firstName": {
+      "S": "Jane"
+    },
+    "lastName": {
+      "S": "Doe"
+    },
+    "email": {
+      "S": "jdoe@school.org"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#103"
+    },
+    "SK": {
+      "S": "USER#202"
+    },
+    "entityType": {
+      "S": "USER"
+    },
+    "role": {
+      "S": "MANAGER"
+    },
+    "username": {
+      "S": "jsmith@school.org"
+    },
+    "firstName": {
+      "S": "John"
+    },
+    "lastName": {
+      "S": "Smith"
+    },
+    "email": {
+      "S": "jsmith@school.org"
+    }
+  }
+]

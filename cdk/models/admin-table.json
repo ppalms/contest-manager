@@ -1,0 +1,515 @@
+{
+  "ModelName": "Contest Manager Admin Table",
+  "ModelMetadata": {
+    "Author": "Patrick Palmer",
+    "DateCreated": "Oct 14, 2023, 07:06 PM",
+    "DateLastModified": "Oct 26, 2023, 01:34 AM",
+    "Description": "Single-table design for the administration module of Contest Manager",
+    "AWSService": "Amazon DynamoDB",
+    "Version": "3.0"
+  },
+  "DataModel": [
+    {
+      "TableName": "Administration",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "PK",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "SK",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "entityType",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "name",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "type",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "role",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "username",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "firstName",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "lastName",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "email",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "startDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "endDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "signUpStartDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "signUpEndDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "performanceTime",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "GSI1PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI1SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "enabled",
+          "AttributeType": "BOOL"
+        }
+      ],
+      "TableFacets": [
+        {
+          "FacetName": "UserDetails",
+          "KeyAttributeAlias": {
+            "PartitionKeyAlias": "TENANT#<TenantId>#USER#<UserId>",
+            "SortKeyAlias": "ENTITY"
+          },
+          "TableData": [
+            {
+              "PK": {
+                "S": "TENANT#001#USER#201"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "USER"
+              },
+              "role": {
+                "S": "DIRECTOR"
+              },
+              "username": {
+                "S": "jdoe@school.org"
+              },
+              "firstName": {
+                "S": "Jane"
+              },
+              "lastName": {
+                "S": "Doe"
+              },
+              "email": {
+                "S": "jdoe@school.org"
+              },
+              "enabled": {
+                "BOOL": true
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#USERS"
+              },
+              "GSI1SK": {
+                "S": "DIRECTOR"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#USER#202"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "USER"
+              },
+              "role": {
+                "S": "MANAGER"
+              },
+              "username": {
+                "S": "jsmith@school.org"
+              },
+              "firstName": {
+                "S": "John"
+              },
+              "lastName": {
+                "S": "Smith"
+              },
+              "email": {
+                "S": "jsmith@school.org"
+              },
+              "enabled": {
+                "BOOL": true
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#USERS"
+              },
+              "GSI1SK": {
+                "S": "MANAGER"
+              }
+            }
+          ],
+          "NonKeyAttributes": [
+            "role",
+            "username",
+            "firstName",
+            "lastName",
+            "email",
+            "enabled"
+          ],
+          "DataAccess": {
+            "MySql": {}
+          }
+        },
+        {
+          "FacetName": "OrgDetails",
+          "KeyAttributeAlias": {
+            "PartitionKeyAlias": "TENANT#<TenantId>#ORG#<OrgId>",
+            "SortKeyAlias": "ENTITY"
+          },
+          "TableData": [
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#101"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "OSSAA"
+              },
+              "type": {
+                "S": "STATE"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "STATE"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#102"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Edmond Public Schools"
+              },
+              "type": {
+                "S": "DISTRICT"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "DISTRICT"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#103"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Edmond Santa Fe High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#103"
+              },
+              "SK": {
+                "S": "USER#201"
+              },
+              "entityType": {
+                "S": "USER"
+              },
+              "role": {
+                "S": "DIRECTOR"
+              },
+              "username": {
+                "S": "jdoe@school.org"
+              },
+              "firstName": {
+                "S": "Jane"
+              },
+              "lastName": {
+                "S": "Doe"
+              },
+              "email": {
+                "S": "jdoe@school.org"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#103"
+              },
+              "SK": {
+                "S": "USER#202"
+              },
+              "entityType": {
+                "S": "USER"
+              },
+              "role": {
+                "S": "MANAGER"
+              },
+              "username": {
+                "S": "jsmith@school.org"
+              },
+              "firstName": {
+                "S": "John"
+              },
+              "lastName": {
+                "S": "Smith"
+              },
+              "email": {
+                "S": "jsmith@school.org"
+              }
+            }
+          ],
+          "NonKeyAttributes": [
+            "name",
+            "type",
+            "role",
+            "username",
+            "firstName",
+            "lastName",
+            "email"
+          ],
+          "DataAccess": {
+            "MySql": {}
+          }
+        },
+        {
+          "FacetName": "OrgTree",
+          "KeyAttributeAlias": {
+            "PartitionKeyAlias": "TENANT#<TenantId>#ORGTREE#<RootOrgId>",
+            "SortKeyAlias": "TREE#<ChildOrgId>#<GrandchildOrgId>"
+          },
+          "TableData": [
+            {
+              "PK": {
+                "S": "TENANT#001#ORGTREE#101"
+              },
+              "SK": {
+                "S": "ROOT"
+              },
+              "name": {
+                "S": "OSSAA"
+              },
+              "type": {
+                "S": "STATE"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORGTREE#101"
+              },
+              "SK": {
+                "S": "ORG#102"
+              },
+              "name": {
+                "S": "Edmond Public Schools"
+              },
+              "type": {
+                "S": "DISTRICT"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORGTREE#101"
+              },
+              "SK": {
+                "S": "ORG#102#103"
+              },
+              "name": {
+                "S": "Edmond Santa Fe High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              }
+            }
+          ],
+          "NonKeyAttributes": [
+            "name",
+            "type"
+          ],
+          "DataAccess": {
+            "MySql": {}
+          }
+        },
+        {
+          "FacetName": "ContestDetails",
+          "KeyAttributeAlias": {
+            "PartitionKeyAlias": "TENANT#<TenantId>#CONTEST#<ContestId>",
+            "SortKeyAlias": "ENTITY"
+          },
+          "TableData": [
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#301"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "CONTEST"
+              },
+              "name": {
+                "S": "OBA Class 6A1-6A2 Marching Championships"
+              },
+              "type": {
+                "S": "MARCHING_BAND"
+              },
+              "startDate": {
+                "S": "2023-10-28T13:00:00.000Z"
+              },
+              "endDate": {
+                "S": "2023-10-28T22:00:00.000Z"
+              },
+              "signUpStartDate": {
+                "S": "2023-08-01T05:00:00.000Z"
+              },
+              "signUpEndDate": {
+                "S": "2023-09-25T05:00:00.000Z"
+              },
+              "performanceTime": {
+                "N": "20"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#301"
+              },
+              "SK": {
+                "S": "USER#202"
+              },
+              "entityType": {
+                "S": "USER"
+              },
+              "role": {
+                "S": "MANAGER"
+              },
+              "firstName": {
+                "S": "John"
+              },
+              "lastName": {
+                "S": "Smith"
+              },
+              "email": {
+                "S": "jsmith@school.org"
+              }
+            }
+          ],
+          "NonKeyAttributes": [
+            "name",
+            "type",
+            "startDate",
+            "endDate",
+            "signUpStartDate",
+            "signUpEndDate",
+            "performanceTime"
+          ],
+          "DataAccess": {
+            "MySql": {}
+          }
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "GSI1",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GSI1PK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GSI1SK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      },
+      "SampleDataFormats": {},
+      "BillingMode": "PROVISIONED",
+      "ProvisionedCapacitySettings": {
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "AutoScalingRead": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        },
+        "AutoScalingWrite": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        }
+      }
+    }
+  ]
+}

@@ -11,18 +11,18 @@ export async function handler(_: any, __: any): Promise<any> {
 
   const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  // Clean up contests
-  const getContestsCommand = new QueryCommand({
+  // Clean up orgs
+  const getOrgsCommand = new QueryCommand({
     TableName: process.env.ADMINISTRATION_TABLE_NAME,
     IndexName: 'GSI1',
     KeyConditionExpression: 'GSI1PK = :pk',
     ExpressionAttributeValues: {
-      ':pk': { S: 'TENANT#001#CONTESTS' },
+      ':pk': { S: 'TENANT#001#ORGS' },
     },
   });
 
   try {
-    const result = await dbClient.send(getContestsCommand);
+    const result = await dbClient.send(getOrgsCommand);
     const items = result.Items;
     if (items && items.length > 0) {
       const deleteRequests = items.map((item) => {
@@ -49,22 +49,22 @@ export async function handler(_: any, __: any): Promise<any> {
     throw error;
   }
 
-  // Seed contests
-  const contestSeedData = require('./contestSeedData.json');
-  const contestItems = {
-    [process.env.ADMINISTRATION_TABLE_NAME]: contestSeedData.map(
+  // Seed orgs
+  const orgDetailSeedData = require('./orgDetailsSeedData.json');
+  const orgItems = {
+    [process.env.ADMINISTRATION_TABLE_NAME]: orgDetailSeedData.map(
       (item: any) => ({
         PutRequest: { Item: item },
       })
     ),
   };
 
-  const writeContests = new BatchWriteItemCommand({
-    RequestItems: contestItems as any,
+  const writeOrgs = new BatchWriteItemCommand({
+    RequestItems: orgItems as any,
   });
 
   try {
-    await dbClient.send(writeContests);
+    await dbClient.send(writeOrgs);
   } catch (error) {
     console.error('Error writing batch to DynamoDB', error);
     throw error;
