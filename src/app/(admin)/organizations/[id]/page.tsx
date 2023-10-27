@@ -15,7 +15,6 @@ import { useState, useEffect } from 'react';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
-import OrgUserList from '@/components/OrgUserList';
 import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
 import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
