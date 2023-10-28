@@ -25,6 +25,9 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  const user = { ...ctx.result, id: ctx.result.PK.split('#')[3] };
-  return user;
+  // Too lazy to look up a better way not to return PK/SK junk to caller
+  const { PK, SK, GSI1PK, GSI1SK, ...userAttributes } = ctx.result;
+
+  const savedUser = { ...userAttributes, id: ctx.result.PK.split('#')[3] };
+  return savedUser;
 }

@@ -9,6 +9,8 @@ import {
   FieldLogLevel,
   FunctionRuntime,
   Code,
+  AppsyncFunction,
+  InlineCode,
 } from 'aws-cdk-lib/aws-appsync';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Effect, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
@@ -18,10 +20,10 @@ import {
   Code as LambdaCode,
   Runtime,
 } from 'aws-cdk-lib/aws-lambda';
+import { EventBus, Rule, CfnArchive } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
 
 interface APIProps {
-  organizationTable: ITable;
-  organizationUserMappingTable: ITable;
   adminTable: ITable;
 }
 
@@ -102,6 +104,23 @@ export class AdministrationAPI extends Construct {
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
 
+    const adminEventBus = new EventBus(this, 'AdminEventBus', {
+      eventBusName: 'AdminEventBus',
+    });
+    adminEventBus.grantPutEventsTo(pooledTenantRole);
+
+    // TODO upgrade CDK
+    new CfnArchive(this, 'AdminEventArchive', {
+      archiveName: 'AdminEventArchive',
+      sourceArn: adminEventBus.eventBusArn,
+      retentionDays: 1,
+    });
+
+    const eventBusDataSource = api.addEventBridgeDataSource(
+      'EventBridgeDataSource',
+      adminEventBus
+    );
+
     const adminTableDataSource = api.addDynamoDbDataSource(
       'AdminTableDataSource',
       props.adminTable
@@ -134,11 +153,46 @@ export class AdministrationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    api.createResolver('saveUserResolver', {
-      typeName: 'Mutation',
-      fieldName: 'saveUser',
+    const saveUser = new AppsyncFunction(this, 'SaveUserFunction', {
+      api: api,
+      name: 'saveUserFunction',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    const emitUserSavedEvent = new AppsyncFunction(this, 'EmitUserSavedEvent', {
+      api: api,
+      name: 'emitUserSavedEvent',
+      dataSource: eventBusDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'events', 'userSaved.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    const userSavedRule = new Rule(this, 'UserSavedRule', {
+      eventBus: adminEventBus,
+      eventPattern: {
+        source: ['contest-manager.admin.users'],
+        detailType: ['User Created', 'User Updated'],
+      },
+    });
+
+    const passthrough = InlineCode.fromInline(`
+      export function request(...args) {
+        return {}
+      }
+
+      export function response(ctx) {
+        return ctx.prev.result
+      }`);
+
+    api.createResolver('saveUser', {
+      typeName: 'Mutation',
+      fieldName: 'saveUser',
+      code: passthrough,
+      pipelineConfig: [saveUser, emitUserSavedEvent],
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -185,42 +239,37 @@ export class AdministrationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    // TODO create user management UI and wire up eventbridge or org page
     // ** CONGITO USERS ** //
-    // const saveUserLambdaFunction = new LambdaFunction(
-    //   this,
-    //   'SaveUserLambdaFunction',
-    //   {
-    //     code: LambdaCode.fromAsset(
-    //       path.join(__dirname, '..', '..', 'esbuild.out', 'saveUser')
-    //     ),
-    //     handler: 'saveUser.handler',
-    //     runtime: Runtime.NODEJS_18_X,
-    //     architecture: Architecture.ARM_64,
-    //     environment: {
-    //       ORGUSERS_TABLE_NAME: props.organizationUserMappingTable.tableName,
-    //     },
-    //   }
-    // );
+    const saveCognitoUserLambdaFunction = new LambdaFunction(
+      this,
+      'SaveCognitoUserLambdaFunction',
+      {
+        code: LambdaCode.fromAsset(
+          path.join(__dirname, '..', '..', 'esbuild.out', 'saveCognitoUser')
+        ),
+        handler: 'saveCognitoUser.handler',
+        runtime: Runtime.NODEJS_18_X,
+        architecture: Architecture.ARM_64,
+      }
+    );
 
-    // const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
-    // saveUserLambdaFunction.addToRolePolicy(
-    //   new PolicyStatement({
-    //     effect: Effect.ALLOW,
-    //     actions: [
-    //       'cognito-idp:AdminCreateUser',
-    //       'cognito-idp:AdminAddUserToGroup',
-    //       'cognito-idp:AdminUpdateUserAttributes',
-    //       'cognito-idp:AdminGetUser',
-    //     ],
-    //     resources: [allUserPools, props.organizationUserMappingTable.tableArn],
-    //   })
-    // );
+    userSavedRule.addTarget(
+      new LambdaFunctionTarget(saveCognitoUserLambdaFunction)
+    );
 
-    // const saveUserDataSource = api.addLambdaDataSource(
-    //   'SaveUserDataSource',
-    //   saveUserLambdaFunction
-    // );
+    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
+    saveCognitoUserLambdaFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminAddUserToGroup',
+          'cognito-idp:AdminUpdateUserAttributes',
+          'cognito-idp:AdminGetUser',
+        ],
+        resources: [allUserPools],
+      })
+    );
 
     // ** CONTESTS ** //
     api.createResolver('listContestsResolver', {

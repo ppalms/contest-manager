@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
+    "@types/jsonwebtoken": "^9.0.4",
     "@types/jwk-to-pem": "^2.0.1",
     "@types/node": "20.5.3",
     "@types/prompts": "^2.4.5",

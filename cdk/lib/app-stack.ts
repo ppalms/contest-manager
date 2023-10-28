@@ -16,51 +16,25 @@ export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    // TODO move to AdministrationTable under TENANT#<TenantId>ORG#<OrgId>#DETAILS
-    const organizationTable = new Table(this, 'OrganizationTable', {
-      removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
-      partitionKey: { name: 'id', type: AttributeType.STRING },
-    });
-
-    // TODO move to GSI1 under GSI1PK: TENANT#<TenantId>#ORG#<OrgId>#USERS, GSI1SK: <RoleName>
-    const organizationUserMappingTable = new Table(
-      this,
-      'OrganizationUserMappingTable',
-      {
-        removalPolicy: RemovalPolicy.DESTROY,
-        billingMode: BillingMode.PAY_PER_REQUEST,
-        partitionKey: { name: 'organizationId', type: AttributeType.STRING },
-        sortKey: { name: 'userId', type: AttributeType.STRING },
-      }
-    );
-
-    // This table contains entities related to the admin module:
-
-    // - Organization hierarchy: TENANT#<TenantId>
-    //    Child orgs are appended to their parent with a # under SK: ORG#<OrgId>#...
-    //      E.g.: ORG#<StateId>#<DistrictId>#<SchoolId>
-    //    Look up all orgs for a tenant in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#ORGS
-    //      GSI1SK: <OrgType>
-
-    // - Organization details: TENANT#<TenantId>#ORG#<OrgId>
-    //    Org metadata under SK: DETAILS
-    //    Org users under SK: <OrgId>#<RoleName>#<UserId>
-    //    Look up all orgs for a tenant in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#ORGS
-    //      GSI1SK: <OrgType>
+    // AdministrationTable entities/partitions:
 
     // - Users: TENANT#<TenantId>#USER#<UserId>
-    //    UserId matches the subject identifier attribute from the user pool
+    //    User details under SK: DETAILS
     //    Look up all users for a tenant in GSI1 under
     //      GSI1PK: TENANT#<TenantId>#USERS
     //      GSI1SK: <RoleName>
     //    Look up all references to a user in GSI1 under
     //      GSI1PK: TENANT#<TenantId>#USER#<UserId>
 
+    // - Organizations: TENANT#<TenantId>#ORG#<OrgId>
+    //    Org details under SK: DETAILS
+    //    Org users under SK: USER#<UserId>
+    //    Look up all orgs for a tenant in GSI1 under
+    //      GSI1PK: TENANT#<TenantId>#ORGS
+    //      GSI1SK: <OrgType>
+
     // - Contests: TENANT#<TenantId>#CONTEST#<ContestId>
-    //    Contest metadata under SK: DETAILS
+    //    Contest details under SK: DETAILS
     //    Contest managers under SK: MANAGER#<UserId>
     //    Look up all contests for a tenant in GSI1 under
     //      GSI1PK: TENANT#<TenantId>#CONTESTS
@@ -126,8 +100,6 @@ export class AppStack extends Stack {
     adminTable.grantWriteData(seedContestsLambda);
 
     new AdministrationAPI(this, 'AdministrationAPI', {
-      organizationTable: organizationTable,
-      organizationUserMappingTable: organizationUserMappingTable,
       adminTable: adminTable,
     });
   }
