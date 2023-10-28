@@ -437,7 +437,7 @@ export default function ContestDetail({ params }: any) {
                           {manager?.firstName} {manager?.lastName}
                         </p>
                       </div>
-                      <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
+                      <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-blue-500 hover:text-blue-700">
                         <p className="whitespace-nowrap">
                           <a href={`mailto:${manager?.email}`} target="_blank">
                             {manager?.email}
@@ -473,7 +473,11 @@ export default function ContestDetail({ params }: any) {
       </div>
 
       {/* ASSIGN MANAGER MODAL */}
-      <UserSearch show={showManagerSearch} setShow={setShowManagerSearch} />
+      <UserSearch
+        title="Managers"
+        show={showManagerSearch}
+        setShow={setShowManagerSearch}
+      />
 
       {showNotification && (
         <Notification

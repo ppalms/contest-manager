@@ -61,7 +61,7 @@ export default function TextInput(props: TextInputProps) {
           type={type}
           name={inputName}
           id={inputName}
-          className={`placeholder-gray-300 block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
+          className={`placeholder-gray-300 block w-full rounded-md border-0 py-1.5 pr-10 ring-1 ring-inset focus:ring-2 focus:ring-neutral-600 focus:ring-inset sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300 ${
             error ? 'ring-red-300 text-red-900 focus:ring-red-500' : ''
           }`}
           value={value}
