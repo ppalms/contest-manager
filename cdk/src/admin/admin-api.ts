@@ -188,13 +188,13 @@ export class AdministrationAPI extends Construct {
         return ctx.prev.result
       }`);
 
-    // api.createResolver('saveUser', {
-    //   typeName: 'Mutation',
-    //   fieldName: 'saveUser',
-    //   code: passthrough,
-    //   pipelineConfig: [saveUser, emitUserSavedEvent],
-    //   runtime: FunctionRuntime.JS_1_0_0,
-    // });
+    api.createResolver('saveUser', {
+      typeName: 'Mutation',
+      fieldName: 'saveUser',
+      code: passthrough,
+      pipelineConfig: [saveUser, emitUserSavedEvent],
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
 
     // ** ORGANIZATIONS ** //
     api.createResolver('getOrganizationWithUsersResolver', {
