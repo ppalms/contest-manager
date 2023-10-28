@@ -175,6 +175,11 @@ export default function OrgUserList(props: UserListProps) {
                 <p className="mt-1 truncate text-sm text-gray-500">
                   {userRoleMap[user.role]}
                 </p>
+                <p className="mt-1 truncate text-sm text-blue-500 hover:text-blue-700">
+                  <a href={`mailto:${user.email}`} target="_blank">
+                    {user.email}
+                  </a>
+                </p>
               </div>
             </div>
 

@@ -4,44 +4,66 @@ import { classNames } from '@/helpers';
 import { Manager } from '@/graphql/API';
 
 interface UserSearchProps {
+  title: string;
   show: boolean;
   setShow: (show: boolean) => void;
 }
 
 // TODO query GSI1 on GSI1PK TENANT#<TenantId>#USERS and GSI1SK 'MANAGER'
-const people = [
-  { id: '1', firstName: 'Leslie', lastName: 'Alexander', email: 'a@b.c' },
-  { id: '2', firstName: 'Turd', lastName: 'Ferguson', email: 'd@e.f' },
-  { id: '3', firstName: 'Beep', lastName: 'Boop', email: 'g@h.i' },
-  { id: '4', firstName: 'Fat', lastName: 'Wa', email: 'j@k.l' },
+const users = [
+  {
+    id: '1',
+    firstName: 'Leslie',
+    lastName: 'Alexander',
+    email: 'landerson@school.org',
+  },
+  {
+    id: '2',
+    firstName: 'Marcus',
+    lastName: 'Portland',
+    email: 'mportland@school.org',
+  },
+  {
+    id: '3',
+    firstName: 'Jason',
+    lastName: "O'Connor",
+    email: 'joconnor@school.org',
+  },
+  {
+    id: '4',
+    firstName: 'Colin',
+    lastName: 'Williamson',
+    email: 'cwilliamson@school.org',
+  },
 ];
 
-const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
+// TODO use this method for getting props in other components
+const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
   const checkbox = useRef<HTMLInputElement | null>(null);
   const [checked, setChecked] = useState(false);
   const [indeterminate, setIndeterminate] = useState(false);
-  const [selectedPeople, setSelectedPeople] = useState<Manager[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<Manager[]>([]); // TODO refactor Manager to UserInfo
 
   useLayoutEffect(() => {
     const isIndeterminate =
-      selectedPeople.length > 0 && selectedPeople.length < people.length;
-    setChecked(selectedPeople.length === people.length);
+      selectedUsers.length > 0 && selectedUsers.length < users.length;
+    setChecked(selectedUsers.length === users.length);
     setIndeterminate(isIndeterminate);
 
     if (checkbox.current) {
       checkbox.current.indeterminate = isIndeterminate;
     }
-  }, [selectedPeople]);
+  }, [selectedUsers]);
 
   function toggleAll() {
-    setSelectedPeople(checked || indeterminate ? [] : people);
+    setSelectedUsers(checked || indeterminate ? [] : users);
     setChecked(!checked && !indeterminate);
     setIndeterminate(false);
   }
 
   function onClose() {
     setShow(false);
-    setSelectedPeople([]);
+    setSelectedUsers([]);
     setIndeterminate(false);
   }
 
@@ -72,14 +94,14 @@ const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:mx-4 sm:p-6">
                 <div className="overflow-hidden rounded-lg bg-white shadow">
                   <div className="bg-gray-100 px-4 py-4 sm:px-6">
-                    <h3 className="text-md font-bold">Assign Managers</h3>
+                    <h3 className="text-md font-bold">{title || 'Users'}</h3>
                   </div>
                   <div className="py-2 px-4 sm:px-6">
                     <div className="flow-root">
                       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                         <div className="inline-block min-w-full py-2 pb-4 align-middle sm:px-6 lg:px-8">
                           <div className="relative">
-                            {selectedPeople.length > 0 && (
+                            {selectedUsers.length > 0 && (
                               <div className="absolute left-14 top-0 flex h-12 items-center space-x-3 bg-white sm:left-12">
                                 <button
                                   type="button"
@@ -96,7 +118,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
                                     className="relative px-7 sm:w-12 sm:px-6">
                                     <input
                                       type="checkbox"
-                                      className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-600"
+                                      className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-neutral-600"
                                       ref={checkbox}
                                       checked={checked}
                                       onChange={toggleAll}
@@ -120,31 +142,29 @@ const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-gray-200 bg-white">
-                                {people.map((person) => (
+                                {users.map((user: Manager) => (
                                   <tr
-                                    key={person.email}
+                                    key={user.email}
                                     className={
-                                      selectedPeople.includes(person)
+                                      selectedUsers.includes(user)
                                         ? 'bg-gray-50'
                                         : undefined
                                     }>
                                     <td className="relative px-7 sm:w-12 sm:px-6">
-                                      {selectedPeople.includes(person) && (
+                                      {selectedUsers.includes(user) && (
                                         <div className="absolute inset-y-0 left-0 w-0.5 bg-rose-600" />
                                       )}
                                       <input
                                         type="checkbox"
-                                        className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-600"
-                                        value={person.email}
-                                        checked={selectedPeople.includes(
-                                          person
-                                        )}
+                                        className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-neutral-600"
+                                        value={user.email}
+                                        checked={selectedUsers.includes(user)}
                                         onChange={(e) =>
-                                          setSelectedPeople(
+                                          setSelectedUsers(
                                             e.target.checked
-                                              ? [...selectedPeople, person]
-                                              : selectedPeople.filter(
-                                                  (p) => p !== person
+                                              ? [...selectedUsers, user]
+                                              : selectedUsers.filter(
+                                                  (u) => u !== user
                                                 )
                                           )
                                         }
@@ -153,14 +173,14 @@ const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
                                     <td
                                       className={classNames(
                                         'whitespace-nowrap py-4 pr-3 text-sm font-medium',
-                                        selectedPeople.includes(person)
+                                        selectedUsers.includes(user)
                                           ? 'text-rose-600'
                                           : 'text-gray-900'
                                       )}>
-                                      {person.firstName} {person.lastName}
+                                      {user.firstName} {user.lastName}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                      {person.email}
+                                      {user.email}
                                     </td>
                                     <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
                                       <a
@@ -168,7 +188,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ show, setShow }) => {
                                         className="text-rose-600 hover:text-rose-900">
                                         Assign
                                         <span className="sr-only">
-                                          , {person.firstName} {person.lastName}
+                                          , {user.firstName} {user.lastName}
                                         </span>
                                       </a>
                                     </td>

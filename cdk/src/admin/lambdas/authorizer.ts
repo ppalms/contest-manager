@@ -15,19 +15,19 @@ export async function handler(
     }
 
     const tenantId = payload['custom:tenantId'];
-    if (!tenantId) {
+    if (!tenantId || tenantId.length === 0) {
       return {
         isAuthorized: false,
       };
     }
 
+    const getUserPoolIdCommand = new GetParametersCommand({
+      Names: ['/shared/user-pool-id'],
+    });
+
     // TODO store tenant info in S3/cloudfront
     const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
-    const ssmResult = await ssmClient.send(
-      new GetParametersCommand({
-        Names: ['/shared/user-pool-id'],
-      })
-    );
+    const ssmResult = await ssmClient.send(getUserPoolIdCommand);
     const userPoolId = ssmResult.Parameters![0].Value!;
     const jwks = await getJwks(userPoolId);
     const kid = decoded!.header.kid;
