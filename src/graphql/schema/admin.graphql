@@ -19,6 +19,8 @@ type Mutation @aws_api_key @aws_lambda {
   saveOrgUser(user: SaveOrgUserInput!): User
   saveContest(contest: SaveContestInput!): Contest
   deleteContest(id: ID!): String
+  assignManagers(contestId: ID!, managers: [AssignManagerInput]!): [Manager]
+  removeManager(contestId: ID!, managerId: ID!): Boolean
 }
 
 # ** Users ** #
@@ -117,6 +119,13 @@ input SaveContestInput {
   signUpStartDate: AWSDateTime
   signUpEndDate: AWSDateTime
   performanceTime: Int
+}
+
+input AssignManagerInput {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: AWSEmail!
 }
 
 enum ContestType {

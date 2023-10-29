@@ -63,3 +63,19 @@ export const deleteContest = /* GraphQL */ `
     deleteContest(id: $id)
   }
 `;
+
+export const assignManagers = /* GraphQL */ `
+  mutation AssignManagers($contestId: ID!, $managers: [AssignManagerInput]!) {
+    assignManagers(contestId: $contestId, managers: $managers) {
+      id
+      firstName
+      lastName
+    }
+  }
+`;
+
+export const removeManager = /* GraphQL */ `
+  mutation RemoveManager($contestId: ID!, $managerId: ID!) {
+    removeManager(contestId: $contestId, managerId: $managerId)
+  }
+`;

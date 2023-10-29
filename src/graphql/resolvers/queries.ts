@@ -12,6 +12,16 @@ export const listUsers = /* GraphQL */ `
   }
 `;
 
+export const listUsersByRole = /* GraphQL */ `
+  query ListUsersByRole($role: UserRole!) {
+    listUsersByRole(role: $role) {
+      id
+      firstName
+      lastName
+    }
+  }
+`;
+
 export const getOrganizationWithUsers = /* GraphQL */ `
   query GetOrganizationWithUsers($id: ID!) {
     getOrganizationWithUsers(id: $id) {
