@@ -43,6 +43,9 @@ export class AdministrationAPI extends Construct {
         handler: 'authorizer.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
+        environment: {
+          ADMIN_TABLE_NAME: props.adminTable.tableName,
+        },
       }
     );
 
@@ -277,7 +280,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listContests',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'listContests.js')
+        path.join(__dirname, 'resolvers', 'contest', 'listContests.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -286,7 +289,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'getContest',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contest', 'getContest.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -294,7 +299,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveContest',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveContest.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contest', 'saveContest.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -303,7 +310,48 @@ export class AdministrationAPI extends Construct {
       fieldName: 'deleteContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'deleteContest.js')
+        path.join(__dirname, 'resolvers', 'contest', 'deleteContest.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api
+      .addLambdaDataSource(
+        'AssignManagersDataSource',
+        new LambdaFunction(this, 'AssignManagersLambdaFunction', {
+          code: LambdaCode.fromAsset(
+            path.join(__dirname, '..', '..', 'esbuild.out', 'assignManagers')
+          ),
+          handler: 'assignManagers.handler',
+          runtime: Runtime.NODEJS_18_X,
+          architecture: Architecture.ARM_64,
+          environment: {
+            ADMIN_TABLE_NAME: props.adminTable.tableName,
+          },
+          initialPolicy: [
+            new PolicyStatement({
+              effect: Effect.ALLOW,
+              actions: ['dynamodb:BatchWriteItem'],
+              resources: [props.adminTable.tableArn],
+            }),
+          ],
+        })
+      )
+      .createResolver('assignManagersResolver', {
+        fieldName: 'assignManagers',
+        typeName: 'Mutation',
+        code: Code.fromAsset(
+          path.join(__dirname, 'resolvers', 'contest', 'assignManagers.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      });
+
+    api.createResolver('removeManagerResolver', {
+      typeName: 'Mutation',
+      fieldName: 'removeManager',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contest', 'removeManager.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });

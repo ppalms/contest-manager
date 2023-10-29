@@ -7,7 +7,7 @@ import {
   UserNotFoundException,
   UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { SaveUserInput } from '../../../../src/graphql/API';
+import { SaveUserInput } from '../../../../../src/graphql/API';
 
 /*
 example event:

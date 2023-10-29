@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aws-appsync/utils@^1.3.1":
+"@aws-appsync/utils@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@aws-appsync/utils/-/utils-1.5.0.tgz#34c9bd0d2b417ef0f3299f7902653431a2cda9f8"
   integrity sha512-mkXUxbzUW3vBVev2+EBpkfidl98RymTX4mH71OHIgfsbTLEKmqAYF2LrwtSUYetD7D3YMIQI28UqfOacoJyxVw==

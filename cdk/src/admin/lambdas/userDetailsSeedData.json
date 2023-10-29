@@ -68,5 +68,40 @@
     "GSI1SK": {
       "S": "MANAGER"
     }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#USER#203"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "USER"
+    },
+    "role": {
+      "S": "MANAGER"
+    },
+    "username": {
+      "S": "tfunke@school.org"
+    },
+    "firstName": {
+      "S": "Tobias"
+    },
+    "lastName": {
+      "S": "Fünke"
+    },
+    "email": {
+      "S": "tfunke@school.org"
+    },
+    "enabled": {
+      "BOOL": true
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#USERS"
+    },
+    "GSI1SK": {
+      "S": "MANAGER"
+    }
   }
 ]
