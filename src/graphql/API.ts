@@ -24,18 +24,19 @@ export type Scalars = {
 };
 
 export type AssignManagerInput = {
+  contestId: Scalars['ID']['input'];
   email: Scalars['AWSEmail']['input'];
   firstName: Scalars['String']['input'];
-  id: Scalars['ID']['input'];
   lastName: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 export type Contest = {
   __typename?: 'Contest';
   endDate?: Maybe<Scalars['AWSDateTime']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
-  level?: Maybe<ContestLevel>;
-  managers?: Maybe<Array<Maybe<Manager>>>;
+  id: Scalars['ID']['output'];
+  level: ContestLevel;
+  managers?: Maybe<Array<UserReference>>;
   name: Scalars['String']['output'];
   performanceTime?: Maybe<Scalars['Int']['output']>;
   signUpEndDate?: Maybe<Scalars['AWSDateTime']['output']>;
@@ -56,30 +57,21 @@ export enum ContestType {
   Unknown = 'UNKNOWN'
 }
 
-export type Manager = {
-  __typename?: 'Manager';
-  email: Scalars['AWSEmail']['output'];
-  firstName: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  lastName: Scalars['String']['output'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
-  assignManagers?: Maybe<Array<Maybe<Manager>>>;
+  assignManagers?: Maybe<Array<Maybe<UserReference>>>;
   deleteContest?: Maybe<Scalars['String']['output']>;
   deleteOrganization?: Maybe<Scalars['String']['output']>;
   removeManager?: Maybe<Scalars['Boolean']['output']>;
   saveContest?: Maybe<Contest>;
-  saveOrgUser?: Maybe<User>;
+  saveOrgUser?: Maybe<UserReference>;
   saveOrganization?: Maybe<Organization>;
   saveUser?: Maybe<User>;
 };
 
 
 export type MutationAssignManagersArgs = {
-  contestId: Scalars['ID']['input'];
-  managers: Array<InputMaybe<AssignManagerInput>>;
+  assignments: Array<InputMaybe<AssignManagerInput>>;
 };
 
 
@@ -122,7 +114,7 @@ export type Organization = {
   __typename?: 'Organization';
   id?: Maybe<Scalars['ID']['output']>;
   name: Scalars['String']['output'];
-  type?: Maybe<OrganizationType>;
+  type: OrganizationType;
 };
 
 export type OrganizationInput = {
@@ -152,7 +144,7 @@ export type Query = {
   listContests?: Maybe<Array<Maybe<Contest>>>;
   listOrganizations?: Maybe<Array<Maybe<Organization>>>;
   listUsers?: Maybe<Array<Maybe<User>>>;
-  listUsersByRole?: Maybe<Array<Maybe<User>>>;
+  listUsersByRole: Array<User>;
 };
 
 
@@ -162,7 +154,7 @@ export type QueryGetContestArgs = {
 
 
 export type QueryGetOrganizationWithUsersArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -173,7 +165,7 @@ export type QueryListUsersByRoleArgs = {
 export type SaveContestInput = {
   endDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
-  level?: InputMaybe<ContestLevel>;
+  level: ContestLevel;
   name: Scalars['String']['input'];
   performanceTime?: InputMaybe<Scalars['Int']['input']>;
   signUpEndDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
@@ -183,14 +175,12 @@ export type SaveContestInput = {
 };
 
 export type SaveOrgUserInput = {
-  email?: InputMaybe<Scalars['AWSEmail']['input']>;
-  enabled?: InputMaybe<Scalars['Boolean']['input']>;
-  firstName?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['ID']['input']>;
-  lastName?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['AWSEmail']['input'];
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
   orgId: Scalars['String']['input'];
   role: UserRole;
-  username: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 export type SaveUserInput = {
@@ -208,10 +198,19 @@ export type User = {
   email: Scalars['AWSEmail']['output'];
   enabled: Scalars['Boolean']['output'];
   firstName: Scalars['String']['output'];
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
   role: UserRole;
   username: Scalars['String']['output'];
+};
+
+export type UserReference = {
+  __typename?: 'UserReference';
+  email: Scalars['AWSEmail']['output'];
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+  role?: Maybe<UserRole>;
+  userId: Scalars['ID']['output'];
 };
 
 export enum UserRole {
@@ -226,14 +225,14 @@ export type SaveUserMutationVariables = Exact<{
 }>;
 
 
-export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id?: string | null, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
+export type SaveUserMutation = { __typename?: 'Mutation', saveUser?: { __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
 
 export type SaveOrganizationMutationVariables = Exact<{
   organization: OrganizationInput;
 }>;
 
 
-export type SaveOrganizationMutation = { __typename?: 'Mutation', saveOrganization?: { __typename?: 'Organization', id?: string | null, name: string, type?: OrganizationType | null } | null };
+export type SaveOrganizationMutation = { __typename?: 'Mutation', saveOrganization?: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType } | null };
 
 export type DeleteOrganizationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -242,19 +241,12 @@ export type DeleteOrganizationMutationVariables = Exact<{
 
 export type DeleteOrganizationMutation = { __typename?: 'Mutation', deleteOrganization?: string | null };
 
-export type SaveOrgUserMutationVariables = Exact<{
-  user: SaveOrgUserInput;
-}>;
-
-
-export type SaveOrgUserMutation = { __typename?: 'Mutation', saveOrgUser?: { __typename?: 'User', id?: string | null, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null };
-
 export type SaveContestMutationVariables = Exact<{
   contest: SaveContestInput;
 }>;
 
 
-export type SaveContestMutation = { __typename?: 'Mutation', saveContest?: { __typename?: 'Contest', id?: string | null, name: string, type: ContestType, level?: ContestLevel | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, performanceTime?: number | null } | null };
+export type SaveContestMutation = { __typename?: 'Mutation', saveContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, performanceTime?: number | null } | null };
 
 export type DeleteContestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -264,12 +256,11 @@ export type DeleteContestMutationVariables = Exact<{
 export type DeleteContestMutation = { __typename?: 'Mutation', deleteContest?: string | null };
 
 export type AssignManagersMutationVariables = Exact<{
-  contestId: Scalars['ID']['input'];
-  managers: Array<InputMaybe<AssignManagerInput>> | InputMaybe<AssignManagerInput>;
+  assignments: Array<InputMaybe<AssignManagerInput>> | InputMaybe<AssignManagerInput>;
 }>;
 
 
-export type AssignManagersMutation = { __typename?: 'Mutation', assignManagers?: Array<{ __typename?: 'Manager', id: string, firstName: string, lastName: string } | null> | null };
+export type AssignManagersMutation = { __typename?: 'Mutation', assignManagers?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string } | null> | null };
 
 export type RemoveManagerMutationVariables = Exact<{
   contestId: Scalars['ID']['input'];
@@ -282,35 +273,35 @@ export type RemoveManagerMutation = { __typename?: 'Mutation', removeManager?: b
 export type ListUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListUsersQuery = { __typename?: 'Query', listUsers?: Array<{ __typename?: 'User', id?: string | null, firstName: string, lastName: string, role: UserRole, email: any, username: string, enabled: boolean } | null> | null };
+export type ListUsersQuery = { __typename?: 'Query', listUsers?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, role: UserRole, email: any, username: string, enabled: boolean } | null> | null };
 
 export type ListUsersByRoleQueryVariables = Exact<{
   role: UserRole;
 }>;
 
 
-export type ListUsersByRoleQuery = { __typename?: 'Query', listUsersByRole?: Array<{ __typename?: 'User', id?: string | null, firstName: string, lastName: string } | null> | null };
+export type ListUsersByRoleQuery = { __typename?: 'Query', listUsersByRole: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any }> };
 
 export type GetOrganizationWithUsersQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id?: string | null, name: string, type?: OrganizationType | null }, users?: Array<{ __typename?: 'User', id?: string | null, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null> | null } | null };
+export type GetOrganizationWithUsersQuery = { __typename?: 'Query', getOrganizationWithUsers?: { __typename?: 'OrganizationWithUsers', organization: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType }, users?: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: any, role: UserRole, username: string, enabled: boolean } | null> | null } | null };
 
 export type ListOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListOrganizationsQuery = { __typename?: 'Query', listOrganizations?: Array<{ __typename?: 'Organization', id?: string | null, name: string, type?: OrganizationType | null } | null> | null };
+export type ListOrganizationsQuery = { __typename?: 'Query', listOrganizations?: Array<{ __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType } | null> | null };
 
 export type ListContestsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListContestsQuery = { __typename?: 'Query', listContests?: Array<{ __typename?: 'Contest', id?: string | null, name: string, type: ContestType, startDate?: any | null, endDate?: any | null } | null> | null };
+export type ListContestsQuery = { __typename?: 'Query', listContests?: Array<{ __typename?: 'Contest', id: string, name: string, type: ContestType, startDate?: any | null, endDate?: any | null } | null> | null };
 
 export type GetContestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id?: string | null, name: string, type: ContestType, level?: ContestLevel | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, managers?: Array<{ __typename?: 'Manager', id: string, firstName: string, lastName: string, email: any } | null> | null } | null };
+export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, managers?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string, email: any }> | null } | null };

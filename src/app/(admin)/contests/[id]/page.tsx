@@ -6,9 +6,11 @@ import {
   ContestType,
   GetContestQuery,
   SaveContestMutation,
+  UserReference,
+  UserRole,
 } from '@/graphql/API';
 import { getContest } from '@/graphql/resolvers/queries';
-import { saveContest } from '@/graphql/resolvers/mutations';
+import { removeManager, saveContest } from '@/graphql/resolvers/mutations';
 import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
@@ -17,7 +19,8 @@ import { useState, useEffect } from 'react';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import UserSearch from '@/components/UserSearch';
+import UserAssignment from '@/components/UserAssignment';
+import { v4 } from 'uuid';
 
 export default function ContestDetail({ params }: any) {
   const [contest, setContest] = useState<Contest | null>(null);
@@ -43,6 +46,7 @@ export default function ContestDetail({ params }: any) {
     const loadContest = async () => {
       if (params.id === 'new') {
         setContest({
+          id: v4(),
           name: '',
           type: ContestType.Unknown,
           level: ContestLevel.Unknown,
@@ -65,7 +69,7 @@ export default function ContestDetail({ params }: any) {
         )
       )) as { data: GetContestQuery };
 
-      setContest(result.data.getContest ?? null);
+      setContest(result.data.getContest || null);
     };
 
     try {
@@ -164,6 +168,32 @@ export default function ContestDetail({ params }: any) {
       return `${fieldName} is required`;
     }
     return null;
+  };
+
+  const handleRemoveManager = async (manager: UserReference) => {
+    if (
+      !confirm(
+        `Are you sure you want to remove ${manager.firstName} ${manager.lastName}?`
+      )
+    ) {
+      return;
+    }
+
+    const authHeader = await getAuthHeader();
+    const result = (await API.graphql(
+      graphqlOperation(
+        removeManager,
+        { ...manager, contestId: contest!.id, managerId: manager.userId },
+        authHeader.Authorization
+      )
+    )) as { data: { removeManager: boolean } };
+
+    if (result.data.removeManager === true) {
+      const managers = contest!.managers!.filter(
+        (m) => m.userId !== manager.userId
+      );
+      setContest({ ...contest!, managers });
+    }
   };
 
   // TODO figure out event type
@@ -429,18 +459,18 @@ export default function ContestDetail({ params }: any) {
               <ul role="list" className="divide-y divide-gray-100">
                 {contest.managers?.map((manager) => (
                   <li
-                    key={manager?.id}
+                    key={manager.userId}
                     className="flex items-center justify-between gap-x-6 py-5">
                     <div className="min-w-0">
                       <div className="flex items-start gap-x-3">
                         <p className="text-sm font-semibold leading-6 text-gray-900">
-                          {manager?.firstName} {manager?.lastName}
+                          {manager.firstName} {manager.lastName}
                         </p>
                       </div>
                       <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-blue-500 hover:text-blue-700">
                         <p className="whitespace-nowrap">
-                          <a href={`mailto:${manager?.email}`} target="_blank">
-                            {manager?.email}
+                          <a href={`mailto:${manager.email}`} target="_blank">
+                            {manager.email}
                           </a>
                         </p>
                       </div>
@@ -448,11 +478,11 @@ export default function ContestDetail({ params }: any) {
                     <div className="flex flex-none items-center gap-x-4">
                       <button
                         type="button"
-                        onClick={() => console.log('removeManager')}
+                        onClick={() => handleRemoveManager(manager)}
                         className="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block">
                         Remove
                         <span className="sr-only">
-                          , {manager?.firstName} {manager?.lastName}
+                          , {manager.firstName} {manager.lastName}
                         </span>
                       </button>
                     </div>
@@ -473,11 +503,18 @@ export default function ContestDetail({ params }: any) {
       </div>
 
       {/* ASSIGN MANAGER MODAL */}
-      <UserSearch
-        title="Managers"
-        show={showManagerSearch}
-        setShow={setShowManagerSearch}
-      />
+      {contest?.id && (
+        <UserAssignment
+          title="Managers"
+          role={UserRole.Manager}
+          parentId={contest.id}
+          show={showManagerSearch}
+          setShow={setShowManagerSearch}
+          onClose={() => {
+            console.log('reload managers');
+          }}
+        />
+      )}
 
       {showNotification && (
         <Notification

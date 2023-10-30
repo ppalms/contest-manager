@@ -6,8 +6,8 @@ schema @aws_api_key @aws_lambda {
 type Query @aws_api_key @aws_lambda {
   listUsers: [User]
   listOrganizations: [Organization]
-  getOrganizationWithUsers(id: ID!): OrganizationWithUsers
-  listUsersByRole(role: UserRole): [User]
+  getOrganizationWithUsers(id: ID): OrganizationWithUsers
+  listUsersByRole(role: UserRole): [User!]!
   listContests: [Contest]
   getContest(id: ID!): Contest
 }
@@ -16,22 +16,30 @@ type Mutation @aws_api_key @aws_lambda {
   saveUser(user: SaveUserInput!): User
   saveOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: ID!): String
-  saveOrgUser(user: SaveOrgUserInput!): User
+  saveOrgUser(user: SaveOrgUserInput!): UserReference
   saveContest(contest: SaveContestInput!): Contest
   deleteContest(id: ID!): String
-  assignManagers(contestId: ID!, managers: [AssignManagerInput]!): [Manager]
+  assignManagers(assignments: [AssignManagerInput]!): [UserReference]
   removeManager(contestId: ID!, managerId: ID!): Boolean
 }
 
 # ** Users ** #
 type User @aws_api_key @aws_lambda {
-  id: ID
+  id: ID!
   firstName: String!
   lastName: String!
-  role: UserRole!
   email: AWSEmail!
+  role: UserRole!
   username: String!
   enabled: Boolean!
+}
+
+type UserReference @aws_api_key @aws_lambda {
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  email: AWSEmail!
+  role: UserRole
 }
 
 enum UserRole {
@@ -55,7 +63,7 @@ input SaveUserInput {
 type Organization @aws_api_key @aws_lambda {
   id: ID
   name: String!
-  type: OrganizationType
+  type: OrganizationType!
 }
 
 type OrganizationWithUsers @aws_api_key @aws_lambda {
@@ -78,42 +86,33 @@ input OrganizationInput {
 }
 
 input SaveOrgUserInput {
-  id: ID
-  firstName: String
-  lastName: String
-  email: AWSEmail
-  role: UserRole!
-  username: String!
-  enabled: Boolean
   orgId: String!
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  email: AWSEmail!
+  role: UserRole!
 }
 
 # ** Contests ** #
 type Contest @aws_api_key @aws_lambda {
-  id: ID
+  id: ID!
   name: String!
   type: ContestType!
-  level: ContestLevel
+  level: ContestLevel!
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
   signUpEndDate: AWSDateTime
   performanceTime: Int
-  managers: [Manager]
-}
-
-type Manager @aws_api_key @aws_lambda {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  email: AWSEmail!
+  managers: [UserReference!]
 }
 
 input SaveContestInput {
   id: ID
   name: String!
   type: ContestType!
-  level: ContestLevel
+  level: ContestLevel!
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
@@ -122,7 +121,8 @@ input SaveContestInput {
 }
 
 input AssignManagerInput {
-  id: ID!
+  contestId: ID!
+  userId: ID!
   firstName: String!
   lastName: String!
   email: AWSEmail!

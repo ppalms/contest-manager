@@ -20,7 +20,7 @@ export function response(ctx) {
     if (item.entityType === 'CONTEST') {
       contest = { ...item, id: item.PK.split('#')[3] };
     } else if (item.entityType === 'USER') {
-      managers.push({ ...item, id: item.SK.split('#')[1] });
+      managers.push({ ...item, userId: item.SK.split('#')[1] });
     }
   }
 

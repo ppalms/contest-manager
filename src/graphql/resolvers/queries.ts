@@ -18,6 +18,7 @@ export const listUsersByRole = /* GraphQL */ `
       id
       firstName
       lastName
+      email
     }
   }
 `;
@@ -77,7 +78,7 @@ export const getContest = /* GraphQL */ `
       signUpStartDate
       signUpEndDate
       managers {
-        id
+        userId
         firstName
         lastName
         email

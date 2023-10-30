@@ -3,12 +3,11 @@ import {
   BatchWriteItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { Manager } from '../../../../../src/graphql/API';
+import { AssignManagerInput } from '../../../../../src/graphql/API';
 
 export interface AssignManagersInput {
   tenantId: string;
-  contestId: string;
-  managers: Manager[];
+  assignments: AssignManagerInput[];
 }
 
 export async function handler(
@@ -21,21 +20,21 @@ export async function handler(
     throw new Error('ADMIN_TABLE_NAME not provided');
   }
 
-  const { tenantId, contestId, managers } = input;
+  const { tenantId, assignments } = input;
 
   const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
   const requestItems = {
-    [process.env.ADMIN_TABLE_NAME]: managers.map((manager) => {
+    [process.env.ADMIN_TABLE_NAME]: assignments.map((assignment) => {
       return {
         PutRequest: {
           Item: marshall({
-            PK: `TENANT#${tenantId}#CONTEST#${contestId}`,
-            SK: `USER#${manager.id}`,
+            PK: `TENANT#${tenantId}#CONTEST#${assignment.contestId}`,
+            SK: `USER#${assignment.userId}`,
             entityType: 'USER',
-            firstName: manager.firstName,
-            lastName: manager.lastName,
-            email: manager.email,
-            GSI1PK: `TENANT#${tenantId}#USER#${manager.id}`,
+            firstName: assignment.firstName,
+            lastName: assignment.lastName,
+            email: assignment.email,
+            GSI1PK: `TENANT#${tenantId}#USER#${assignment.userId}`,
             GSI1SK: 'REFERENCE',
           }),
         },
@@ -47,7 +46,7 @@ export async function handler(
 
   try {
     await dbClient.send(putManagers);
-    return input.managers;
+    return input.assignments;
   } catch (error) {
     console.error('Error writing batch to DynamoDB', error);
     throw error;

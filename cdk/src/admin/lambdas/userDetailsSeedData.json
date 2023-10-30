@@ -103,5 +103,75 @@
     "GSI1SK": {
       "S": "MANAGER"
     }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#USER#204"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "USER"
+    },
+    "role": {
+      "S": "DIRECTOR"
+    },
+    "username": {
+      "S": "gbluth@school.org"
+    },
+    "firstName": {
+      "S": "Gob"
+    },
+    "lastName": {
+      "S": "Bluth"
+    },
+    "email": {
+      "S": "gbluth@school.org"
+    },
+    "enabled": {
+      "BOOL": true
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#USERS"
+    },
+    "GSI1SK": {
+      "S": "DIRECTOR"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#USER#205"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "USER"
+    },
+    "role": {
+      "S": "DIRECTOR"
+    },
+    "username": {
+      "S": "bmsith@school.org"
+    },
+    "firstName": {
+      "S": "Bob"
+    },
+    "lastName": {
+      "S": "Smith"
+    },
+    "email": {
+      "S": "bsmith@school.org"
+    },
+    "enabled": {
+      "BOOL": true
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#USERS"
+    },
+    "GSI1SK": {
+      "S": "DIRECTOR"
+    }
   }
 ]

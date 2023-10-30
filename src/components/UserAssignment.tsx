@@ -1,75 +1,147 @@
-import React, { Fragment, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { classNames } from '@/helpers';
-import { Manager } from '@/graphql/API';
+import { API, graphqlOperation } from 'aws-amplify';
+import { ListUsersByRoleQuery, UserReference, UserRole } from '@/graphql/API';
+import { listUsersByRole } from '@/graphql/resolvers/queries';
+import { classNames, getAuthHeader } from '@/helpers';
+import { assignManagers } from '@/graphql/resolvers/mutations';
 
-interface UserSearchProps {
+interface UserAssignmentProps {
+  parentId: string;
   title: string;
+  role: UserRole;
   show: boolean;
   setShow: (show: boolean) => void;
+  onClose: () => void;
 }
 
-// TODO query GSI1 on GSI1PK TENANT#<TenantId>#USERS and GSI1SK 'MANAGER'
-const users = [
-  {
-    id: '1',
-    firstName: 'Leslie',
-    lastName: 'Alexander',
-    email: 'landerson@school.org',
-  },
-  {
-    id: '2',
-    firstName: 'Marcus',
-    lastName: 'Portland',
-    email: 'mportland@school.org',
-  },
-  {
-    id: '3',
-    firstName: 'Jason',
-    lastName: "O'Connor",
-    email: 'joconnor@school.org',
-  },
-  {
-    id: '4',
-    firstName: 'Colin',
-    lastName: 'Williamson',
-    email: 'cwilliamson@school.org',
-  },
-];
+interface Assignment {
+  parentId: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+async function fetchUsers(role: UserRole): Promise<UserReference[]> {
+  const authHeader = await getAuthHeader();
+  const users = (await API.graphql(
+    graphqlOperation(listUsersByRole, { role }, authHeader.Authorization)
+  )) as { data: ListUsersByRoleQuery };
+
+  return users.data.listUsersByRole.map((user) => {
+    return {
+      userId: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    };
+  });
+}
 
 // TODO use this method for getting props in other components
-const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
+const UserAssignment: React.FC<UserAssignmentProps> = ({
+  parentId,
+  title,
+  role,
+  show,
+  setShow,
+  onClose,
+}) => {
+  const [userList, setUserList] = useState<UserReference[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserReference[]>([]);
+
   const checkbox = useRef<HTMLInputElement | null>(null);
   const [checked, setChecked] = useState(false);
   const [indeterminate, setIndeterminate] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<Manager[]>([]); // TODO refactor Manager to UserInfo
+
+  useEffect(() => {
+    fetchUsers(role).then((users) => {
+      setUserList(users);
+    });
+  }, [role]);
 
   useLayoutEffect(() => {
     const isIndeterminate =
-      selectedUsers.length > 0 && selectedUsers.length < users.length;
-    setChecked(selectedUsers.length === users.length);
+      selectedUsers &&
+      selectedUsers.length > 0 &&
+      selectedUsers.length < userList.length;
+    setChecked(selectedUsers.length === userList.length);
     setIndeterminate(isIndeterminate);
 
     if (checkbox.current) {
       checkbox.current.indeterminate = isIndeterminate;
     }
-  }, [selectedUsers]);
+  }, [selectedUsers, userList]);
 
   function toggleAll() {
-    setSelectedUsers(checked || indeterminate ? [] : users);
+    setSelectedUsers(checked || indeterminate ? [] : userList);
     setChecked(!checked && !indeterminate);
     setIndeterminate(false);
   }
 
-  function onClose() {
+  async function handleAssignUsers(user?: UserReference) {
+    if (!user && selectedUsers.length === 0) {
+      return;
+    }
+
+    let message: string;
+    if (user) {
+      message = `Assign ${user.firstName} ${user.lastName}`;
+      if (selectedUsers.length === 0) {
+        message += '?';
+      } else {
+        message += ` and ${
+          selectedUsers.filter((u) => u.userId === user.userId).length
+        } other user(s)?`;
+      }
+
+      if (!confirm(message)) {
+        return;
+      }
+    } else {
+      if (!confirm(`Assign ${selectedUsers.length} users?`)) {
+        return;
+      }
+    }
+
+    const authHeader = await getAuthHeader();
+    await API.graphql(
+      graphqlOperation(
+        assignManagers,
+        {
+          assignments: selectedUsers.map((user) => {
+            return {
+              contestId: parentId,
+              userId: user.userId,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+            };
+          }),
+        },
+        authHeader.Authorization
+      )
+    );
+    closeAndReset();
+  }
+
+  function closeAndReset() {
     setShow(false);
     setSelectedUsers([]);
     setIndeterminate(false);
+    onClose();
   }
 
   return (
     <Transition.Root show={show} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={onClose}>
+      <Dialog as="div" className="relative z-10" onClose={closeAndReset}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -105,6 +177,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
                               <div className="absolute left-14 top-0 flex h-12 items-center space-x-3 bg-white sm:left-12">
                                 <button
                                   type="button"
+                                  onClick={() => handleAssignUsers()}
                                   className="inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">
                                   Assign Selected
                                 </button>
@@ -142,7 +215,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-gray-200 bg-white">
-                                {users.map((user: Manager) => (
+                                {userList.map((user: UserReference) => (
                                   <tr
                                     key={user.email}
                                     className={
@@ -157,7 +230,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
                                       <input
                                         type="checkbox"
                                         className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-neutral-600"
-                                        value={user.email}
+                                        value={user.userId}
                                         checked={selectedUsers.includes(user)}
                                         onChange={(e) =>
                                           setSelectedUsers(
@@ -184,8 +257,11 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
                                     </td>
                                     <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
                                       <a
-                                        href="#"
-                                        className="text-rose-600 hover:text-rose-900">
+                                        type="button"
+                                        onClick={() => {
+                                          handleAssignUsers(user);
+                                        }}
+                                        className="text-rose-600 hover:text-rose-900 hover:cursor-pointer">
                                         Assign
                                         <span className="sr-only">
                                           , {user.firstName} {user.lastName}
@@ -206,7 +282,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
                 <div className="flex justify-end mt-6 pr-4">
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={closeAndReset}
                     className="inline-flex items-center rounded-md bg-neutral-200 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-gray-300 hover:outline hover:outline-1 hover:outline-neutral-300 hover:outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600">
                     Close
                   </button>
@@ -220,4 +296,4 @@ const UserSearch: React.FC<UserSearchProps> = ({ title, show, setShow }) => {
   );
 };
 
-export default UserSearch;
+export default UserAssignment;

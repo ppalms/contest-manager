@@ -65,9 +65,9 @@ export const deleteContest = /* GraphQL */ `
 `;
 
 export const assignManagers = /* GraphQL */ `
-  mutation AssignManagers($contestId: ID!, $managers: [AssignManagerInput]!) {
-    assignManagers(contestId: $contestId, managers: $managers) {
-      id
+  mutation AssignManagers($assignments: [AssignManagerInput]!) {
+    assignManagers(assignments: $assignments) {
+      userId
       firstName
       lastName
     }

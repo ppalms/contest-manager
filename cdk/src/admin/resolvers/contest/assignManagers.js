@@ -1,22 +1,16 @@
 export function request(ctx) {
   const tenantId = ctx.identity?.resolverContext.tenantId ?? '001';
 
-  const contestId = ctx.arguments.contestId;
-  if (!contestId) {
-    console.error('contestId is required');
-  }
-
-  const managers = ctx.arguments.managers;
-  if (!managers || managers.length === 0) {
-    console.error('No managers provided');
+  const assignments = ctx.arguments.assignments;
+  if (!assignments || assignments.length === 0) {
+    console.error('No assignments provided');
   }
 
   return {
     operation: 'Invoke',
     payload: {
       tenantId,
-      contestId,
-      managers,
+      assignments,
     },
   };
 }
