@@ -21,14 +21,6 @@ interface UserAssignmentProps {
   onClose: () => void;
 }
 
-interface Assignment {
-  parentId: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
 async function fetchUsers(role: UserRole): Promise<UserReference[]> {
   const authHeader = await getAuthHeader();
   const users = (await API.graphql(

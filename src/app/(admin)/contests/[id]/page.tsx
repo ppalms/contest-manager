@@ -211,7 +211,6 @@ export default function ContestDetail({ params }: any) {
 
     // TODO validate dates
 
-    // TODO handle managers like org users and remove from contest type
     const { managers, ...values } = contest!;
 
     try {
@@ -224,7 +223,7 @@ export default function ContestDetail({ params }: any) {
         )
       )) as { data: SaveContestMutation };
 
-      setContest(result.data.saveContest!);
+      setContest({ ...result.data.saveContest!, managers });
 
       setNotificationTitle('Successfully saved!');
       setNotificationMessage(`${event.target.name.value} saved`);

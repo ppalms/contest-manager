@@ -28,20 +28,6 @@ export const deleteOrganization = /* GraphQL */ `
   }
 `;
 
-export const saveOrgUser = /* GraphQL */ `
-  mutation SaveOrgUser($user: SaveOrgUserInput!) {
-    saveOrgUser(user: $user) {
-      id
-      firstName
-      lastName
-      email
-      role
-      username
-      enabled
-    }
-  }
-`;
-
 export const saveContest = /* GraphQL */ `
   mutation SaveContest($contest: SaveContestInput!) {
     saveContest(contest: $contest) {
