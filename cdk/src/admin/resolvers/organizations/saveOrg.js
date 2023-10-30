@@ -7,7 +7,7 @@ export function request(ctx) {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({
       PK: `TENANT#${tenantId}#ORG#${orgId}`,
-      SK: `DETAILS`,
+      SK: 'DETAILS',
     }),
     attributeValues: util.dynamodb.toMapValues({
       ...values,

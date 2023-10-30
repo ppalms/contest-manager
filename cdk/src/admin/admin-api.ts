@@ -142,7 +142,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'listUsers',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'users', 'listUsers.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -151,7 +153,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listUsersByRole',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'listUsersByRole.js')
+        path.join(__dirname, 'resolvers', 'users', 'listUsersByRole.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -160,7 +162,9 @@ export class AdministrationAPI extends Construct {
       api: api,
       name: 'saveUserFunction',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'users', 'saveUser.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -205,7 +209,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'getOrganizationWithUsers',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'getOrgWithUsers.js')
+        path.join(__dirname, 'resolvers', 'organizations', 'getOrgWithUsers.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -214,7 +218,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'listOrganizations',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listOrgs.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'listOrgs.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -222,7 +228,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveOrganization',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrg.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'saveOrg.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -230,7 +238,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'deleteOrganization',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'deleteOrg.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'deleteOrg.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -238,7 +248,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveOrgUser',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrgUser.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'saveOrgUser.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -280,7 +292,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listContests',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contest', 'listContests.js')
+        path.join(__dirname, 'resolvers', 'contests', 'listContests.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -290,7 +302,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'getContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contest', 'getContest.js')
+        path.join(__dirname, 'resolvers', 'contests', 'getContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -300,7 +312,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'saveContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contest', 'saveContest.js')
+        path.join(__dirname, 'resolvers', 'contests', 'saveContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -310,7 +322,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'deleteContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contest', 'deleteContest.js')
+        path.join(__dirname, 'resolvers', 'contests', 'deleteContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -341,7 +353,7 @@ export class AdministrationAPI extends Construct {
         fieldName: 'assignManagers',
         typeName: 'Mutation',
         code: Code.fromAsset(
-          path.join(__dirname, 'resolvers', 'contest', 'assignManagers.js')
+          path.join(__dirname, 'resolvers', 'contests', 'assignManagers.js')
         ),
         runtime: FunctionRuntime.JS_1_0_0,
       });
@@ -351,7 +363,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'removeManager',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contest', 'removeManager.js')
+        path.join(__dirname, 'resolvers', 'contests', 'removeManager.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
