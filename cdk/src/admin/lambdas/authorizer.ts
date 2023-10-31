@@ -34,7 +34,7 @@ export async function handler(
     const ssmResult = await ssmClient.send(getUserPoolIdCommand);
     const userPoolId = ssmResult.Parameters![0].Value!;
 
-    verifyJwt();
+    await verifyJwt();
 
     // TODO get tenant-scoped STS token
     /**
