@@ -13,7 +13,7 @@ export interface UserListProps {
   onUserSaved?: (user: User) => void;
 }
 
-export default function OrgUserList(props: UserListProps) {
+export default function UserList(props: UserListProps) {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isValidUser, setIsValidUser] = useState(false);
@@ -81,8 +81,6 @@ export default function OrgUserList(props: UserListProps) {
         !editUser.username || editUser.username.length === 0
           ? editUser.email
           : editUser.username;
-
-      console.log({ ...editUser, username });
 
       const result = (await API.graphql(
         graphqlOperation(

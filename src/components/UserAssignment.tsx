@@ -18,16 +18,16 @@ interface UserAssignmentProps {
   role: UserRole;
   show: boolean;
   setShow: (show: boolean) => void;
-  onClose: () => void;
+  onAssign: (assignedUsers: UserReference[]) => void;
 }
 
 async function fetchUsers(role: UserRole): Promise<UserReference[]> {
   const authHeader = await getAuthHeader();
-  const users = (await API.graphql(
+  const userList = (await API.graphql(
     graphqlOperation(listUsersByRole, { role }, authHeader.Authorization)
   )) as { data: ListUsersByRoleQuery };
 
-  return users.data.listUsersByRole.map((user) => {
+  return userList.data.listUsersByRole.map((user) => {
     return {
       userId: user.id,
       firstName: user.firstName,
@@ -44,7 +44,7 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
   role,
   show,
   setShow,
-  onClose,
+  onAssign,
 }) => {
   const [userList, setUserList] = useState<UserReference[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<UserReference[]>([]);
@@ -54,8 +54,9 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
   const [indeterminate, setIndeterminate] = useState(false);
 
   useEffect(() => {
-    fetchUsers(role).then((users) => {
-      setUserList(users);
+    fetchUsers(role).then((userList) => {
+      // TODO filter existing users
+      setUserList(userList);
     });
   }, [role]);
 
@@ -83,32 +84,38 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
       return;
     }
 
+    // Prompt the user if they clicked an "Assign" link on an individual
     let message: string;
     if (user) {
       message = `Assign ${user.firstName} ${user.lastName}`;
-      if (selectedUsers.length === 0) {
+      if (
+        selectedUsers.length === 0 ||
+        (selectedUsers.length === 1 && selectedUsers[0].userId === user.userId)
+      ) {
         message += '?';
       } else {
         message += ` and ${
-          selectedUsers.filter((u) => u.userId === user.userId).length
+          selectedUsers.filter((u) => u.userId !== user.userId).length
         } other user(s)?`;
       }
 
       if (!confirm(message)) {
         return;
       }
-    } else {
-      if (!confirm(`Assign ${selectedUsers.length} users?`)) {
-        return;
-      }
     }
 
+    let assignedUsers = selectedUsers;
+    if (user) {
+      assignedUsers.push(user);
+    }
+
+    // TODO move to parent component
     const authHeader = await getAuthHeader();
     await API.graphql(
       graphqlOperation(
         assignManagers,
         {
-          assignments: selectedUsers.map((user) => {
+          assignments: assignedUsers.map((user) => {
             return {
               contestId: parentId,
               userId: user.userId,
@@ -121,6 +128,7 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
         authHeader.Authorization
       )
     );
+    onAssign(assignedUsers);
     closeAndReset();
   }
 
@@ -128,7 +136,6 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
     setShow(false);
     setSelectedUsers([]);
     setIndeterminate(false);
-    onClose();
   }
 
   return (
@@ -276,7 +283,7 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
                     type="button"
                     onClick={closeAndReset}
                     className="inline-flex items-center rounded-md bg-neutral-200 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-gray-300 hover:outline hover:outline-1 hover:outline-neutral-300 hover:outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600">
-                    Close
+                    Cancel
                   </button>
                 </div>
               </Dialog.Panel>
