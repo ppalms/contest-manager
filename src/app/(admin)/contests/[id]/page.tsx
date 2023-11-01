@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from '@/components/TextInput';
+import DateInput from '@/components/DateInput';
 import Notification from '@/components/Notification';
 import UserAssignment from '@/components/UserAssignment';
 import { v4 } from 'uuid';
@@ -96,12 +97,8 @@ export default function ContestDetail({ params }: any) {
     setContest({ ...contest!, [name]: value });
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    // console.log(`${name}: ${value}`);
-    const utcDate = toUTCDate(value);
-    // console.log(`utc value: ${utcDate}`);
-    setContest({ ...contest!, [name]: utcDate });
+  const handleDateChange = (dateFieldName: string, utcDate: string) => {
+    setContest({ ...contest!, [dateFieldName]: utcDate });
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -148,19 +145,6 @@ export default function ContestDetail({ params }: any) {
       setContestLevelError(null);
       return true;
     }
-  };
-
-  const toUTCDate = (localDateStr: string) => {
-    if (!localDateStr || localDateStr.length === 0) {
-      return '';
-    }
-
-    const localDate = new Date(localDateStr);
-    return new Date(
-      localDate.getUTCFullYear(),
-      localDate.getUTCMonth(),
-      localDate.getUTCDate()
-    ).toISOString();
   };
 
   const validateDateInput = (dateStr: string, fieldName: string) => {
@@ -395,49 +379,53 @@ export default function ContestDetail({ params }: any) {
                 {/* Scheduling info */}
                 {/* Start Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Start Date"
-                    type="date"
                     inputName="startDate"
-                    inputValue={contest?.startDate ?? ''}
+                    utcValue={contest?.startDate || ''}
                     validate={(e) => validateDateInput(e, 'Start date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('startDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="End Date"
-                    type="date"
                     inputName="endDate"
-                    inputValue={contest?.endDate || ''}
+                    utcValue={contest?.endDate || ''}
                     validate={(e) => validateDateInput(e, 'End date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('endDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* Signup Start Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Sign-up Start Date"
-                    type="date"
                     inputName="signUpStartDate"
-                    inputValue={contest?.signUpStartDate || ''}
+                    utcValue={contest?.signUpStartDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up start date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('signUpStartDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* Signup End Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Sign-up End Date"
-                    type="date"
                     inputName="signUpEndDate"
-                    inputValue={contest?.signUpEndDate || ''}
+                    utcValue={contest?.signUpEndDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up end date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('signUpEndDate', utcDate)
+                    }
                   />
                 </div>
               </div>
