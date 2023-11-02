@@ -16,30 +16,6 @@ export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    // AdministrationTable entities/partitions:
-
-    // - Users: TENANT#<TenantId>#USER#<UserId>
-    //    User details under SK: DETAILS
-    //    Look up all users for a tenant in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#USERS
-    //      GSI1SK: <RoleName>
-    //    Look up all references to a user in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#USER#<UserId>
-
-    // - Organizations: TENANT#<TenantId>#ORG#<OrgId>
-    //    Org details under SK: DETAILS
-    //    Org users under SK: USER#<UserId>
-    //    Look up all orgs for a tenant in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#ORGS
-    //      GSI1SK: <OrgType>
-
-    // - Contests: TENANT#<TenantId>#CONTEST#<ContestId>
-    //    Contest details under SK: DETAILS
-    //    Contest managers under SK: MANAGER#<UserId>
-    //    Look up all contests for a tenant in GSI1 under
-    //      GSI1PK: TENANT#<TenantId>#CONTESTS
-    //      GSI1SK: <ContestType>
-
     const adminTable = new Table(this, 'AdministrationTable', {
       partitionKey: { name: 'PK', type: AttributeType.STRING },
       sortKey: { name: 'SK', type: AttributeType.STRING },
@@ -54,6 +30,7 @@ export class AppStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    // TODO only add seed Lambdas in non-prod environments
     const seedUsersLambda = new Function(this, 'SeedUsersLambda', {
       code: Code.fromAsset(
         path.join(__dirname, '..', 'esbuild.out', 'seedUsers')
@@ -62,7 +39,7 @@ export class AppStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
-        ADMINISTRATION_TABLE_NAME: adminTable.tableName,
+        ADMIN_TABLE_NAME: adminTable.tableName,
       },
     });
 
@@ -77,7 +54,7 @@ export class AppStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
-        ADMINISTRATION_TABLE_NAME: adminTable.tableName,
+        ADMIN_TABLE_NAME: adminTable.tableName,
       },
     });
 
@@ -92,7 +69,7 @@ export class AppStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
       environment: {
-        ADMINISTRATION_TABLE_NAME: adminTable.tableName,
+        ADMIN_TABLE_NAME: adminTable.tableName,
       },
     });
 

@@ -5,15 +5,15 @@ import {
 } from '@aws-sdk/client-dynamodb';
 
 export async function handler(_: any, __: any): Promise<any> {
-  if (!process.env.ADMINISTRATION_TABLE_NAME) {
-    throw new Error('ADMINISTRATION_TABLE_NAME not provided');
+  if (!process.env.ADMIN_TABLE_NAME) {
+    throw new Error('ADMIN_TABLE_NAME not provided');
   }
 
   const dbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // Clean up users
   const getUsersCommand = new QueryCommand({
-    TableName: process.env.ADMINISTRATION_TABLE_NAME,
+    TableName: process.env.ADMIN_TABLE_NAME,
     IndexName: 'GSI1',
     KeyConditionExpression: 'GSI1PK = :pk',
     ExpressionAttributeValues: {
@@ -38,7 +38,7 @@ export async function handler(_: any, __: any): Promise<any> {
 
       const batchDeleteParams = {
         RequestItems: {
-          [process.env.ADMINISTRATION_TABLE_NAME]: deleteRequests,
+          [process.env.ADMIN_TABLE_NAME]: deleteRequests,
         },
       };
 
@@ -54,7 +54,7 @@ export async function handler(_: any, __: any): Promise<any> {
   // Seed users
   const userDetailSeedData = require('./userDetailsSeedData.json');
   const userItems = {
-    [process.env.ADMINISTRATION_TABLE_NAME]: userDetailSeedData.map(
+    [process.env.ADMIN_TABLE_NAME]: userDetailSeedData.map(
       (item: any) => ({
         PutRequest: { Item: item },
       })

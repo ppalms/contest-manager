@@ -1,6 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
 // These styles apply to every route in the application
-
 import './globals.css';
 import { Metadata } from 'next';
 

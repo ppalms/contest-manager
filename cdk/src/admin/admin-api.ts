@@ -43,6 +43,9 @@ export class AdministrationAPI extends Construct {
         handler: 'authorizer.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
+        environment: {
+          ADMIN_TABLE_NAME: props.adminTable.tableName,
+        },
       }
     );
 
@@ -139,7 +142,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'listUsers',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listUsers.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'users', 'listUsers.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -148,7 +153,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listUsersByRole',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'listUsersByRole.js')
+        path.join(__dirname, 'resolvers', 'users', 'listUsersByRole.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -157,7 +162,9 @@ export class AdministrationAPI extends Construct {
       api: api,
       name: 'saveUserFunction',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveUser.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'users', 'saveUser.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -197,12 +204,17 @@ export class AdministrationAPI extends Construct {
     });
 
     // ** ORGANIZATIONS ** //
-    api.createResolver('getOrganizationWithUsersResolver', {
+    api.createResolver('getOrgWithMembersResolver', {
       typeName: 'Query',
-      fieldName: 'getOrganizationWithUsers',
+      fieldName: 'getOrgWithMembers',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'getOrgWithUsers.js')
+        path.join(
+          __dirname,
+          'resolvers',
+          'organizations',
+          'getOrgWithMembers.js'
+        )
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -211,7 +223,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'listOrganizations',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'listOrgs.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'listOrgs.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -219,7 +233,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveOrganization',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrg.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'saveOrg.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -227,15 +243,50 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'deleteOrganization',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'deleteOrg.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'deleteOrg.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    api.createResolver('saveOrgUserResolver', {
+    api
+      .addLambdaDataSource(
+        'AssignMembersDataSource',
+        new LambdaFunction(this, 'AssignMembersLambdaFunction', {
+          code: LambdaCode.fromAsset(
+            path.join(__dirname, '..', '..', 'esbuild.out', 'assignMembers')
+          ),
+          handler: 'assignMembers.handler',
+          runtime: Runtime.NODEJS_18_X,
+          architecture: Architecture.ARM_64,
+          environment: {
+            ADMIN_TABLE_NAME: props.adminTable.tableName,
+          },
+          initialPolicy: [
+            new PolicyStatement({
+              effect: Effect.ALLOW,
+              actions: ['dynamodb:BatchWriteItem'],
+              resources: [props.adminTable.tableArn],
+            }),
+          ],
+        })
+      )
+      .createResolver('assignMembersResolver', {
+        fieldName: 'assignMembers',
+        typeName: 'Mutation',
+        code: Code.fromAsset(
+          path.join(__dirname, 'resolvers', 'organizations', 'assignMembers.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      });
+
+    api.createResolver('removeMemberResolver', {
       typeName: 'Mutation',
-      fieldName: 'saveOrgUser',
+      fieldName: 'removeMember',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveOrgUser.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'organizations', 'removeMember.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -277,7 +328,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listContests',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'listContests.js')
+        path.join(__dirname, 'resolvers', 'contests', 'listContests.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -286,7 +337,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Query',
       fieldName: 'getContest',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'getContest.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contests', 'getContest.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -294,7 +347,9 @@ export class AdministrationAPI extends Construct {
       typeName: 'Mutation',
       fieldName: 'saveContest',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(path.join(__dirname, 'resolvers', 'saveContest.js')),
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contests', 'saveContest.js')
+      ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -303,7 +358,48 @@ export class AdministrationAPI extends Construct {
       fieldName: 'deleteContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'deleteContest.js')
+        path.join(__dirname, 'resolvers', 'contests', 'deleteContest.js')
+      ),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    api
+      .addLambdaDataSource(
+        'AssignManagersDataSource',
+        new LambdaFunction(this, 'AssignManagersLambdaFunction', {
+          code: LambdaCode.fromAsset(
+            path.join(__dirname, '..', '..', 'esbuild.out', 'assignManagers')
+          ),
+          handler: 'assignManagers.handler',
+          runtime: Runtime.NODEJS_18_X,
+          architecture: Architecture.ARM_64,
+          environment: {
+            ADMIN_TABLE_NAME: props.adminTable.tableName,
+          },
+          initialPolicy: [
+            new PolicyStatement({
+              effect: Effect.ALLOW,
+              actions: ['dynamodb:BatchWriteItem'],
+              resources: [props.adminTable.tableArn],
+            }),
+          ],
+        })
+      )
+      .createResolver('assignManagersResolver', {
+        fieldName: 'assignManagers',
+        typeName: 'Mutation',
+        code: Code.fromAsset(
+          path.join(__dirname, 'resolvers', 'contests', 'assignManagers.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      });
+
+    api.createResolver('removeManagerResolver', {
+      typeName: 'Mutation',
+      fieldName: 'removeManager',
+      dataSource: adminTableDataSource,
+      code: Code.fromAsset(
+        path.join(__dirname, 'resolvers', 'contests', 'removeManager.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });

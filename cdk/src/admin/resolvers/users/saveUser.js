@@ -1,6 +1,6 @@
 export function request(ctx) {
   const tenantId = ctx.identity?.resolverContext.tenantId ?? '001';
-  const { id, orgId, ...values } = ctx.arguments.user;
+  const { id, ...values } = ctx.arguments.user;
 
   let userId = id;
   if (!userId || userId.length === 0) {
@@ -10,14 +10,14 @@ export function request(ctx) {
   const command = {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({
-      PK: `TENANT#${tenantId}#ORG#${orgId}`,
-      SK: `USER#${userId}`,
+      PK: `TENANT#${tenantId}#USER#${userId}`,
+      SK: `DETAILS`,
     }),
     attributeValues: util.dynamodb.toMapValues({
       ...values,
       entityType: 'USER',
-      GSI1PK: `TENANT#${tenantId}#USER#${userId}`,
-      GSI1SK: 'REFERENCE',
+      GSI1PK: `TENANT#${tenantId}#USERS`,
+      GSI1SK: values.role,
     }),
   };
 
@@ -25,10 +25,9 @@ export function request(ctx) {
 }
 
 export function response(ctx) {
-  const user = {
-    ...ctx.result,
-    id: ctx.result.SK.split('#')[1],
-  };
+  // Too lazy to look up a better way not to return PK/SK junk to caller
+  const { PK, SK, entityType, GSI1PK, GSI1SK, ...userAttributes } = ctx.result;
 
-  return user;
+  const savedUser = { ...userAttributes, id: PK.split('#')[3] };
+  return savedUser;
 }

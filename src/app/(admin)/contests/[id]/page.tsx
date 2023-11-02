@@ -6,9 +6,15 @@ import {
   ContestType,
   GetContestQuery,
   SaveContestMutation,
+  UserReference,
+  UserRole,
 } from '@/graphql/API';
 import { getContest } from '@/graphql/resolvers/queries';
-import { saveContest } from '@/graphql/resolvers/mutations';
+import {
+  assignManagers,
+  removeManager,
+  saveContest,
+} from '@/graphql/resolvers/mutations';
 import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
@@ -16,12 +22,14 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import TextInput from '@/components/TextInput';
+import DateInput from '@/components/DateInput';
 import Notification from '@/components/Notification';
-import UserSearch from '@/components/UserSearch';
+import UserAssignment from '@/components/UserAssignment';
+import { v4 } from 'uuid';
 
 export default function ContestDetail({ params }: any) {
   const [contest, setContest] = useState<Contest | null>(null);
-  const [showManagerSearch, setShowManagerSearch] = useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,6 +51,7 @@ export default function ContestDetail({ params }: any) {
     const loadContest = async () => {
       if (params.id === 'new') {
         setContest({
+          id: v4(),
           name: '',
           type: ContestType.Unknown,
           level: ContestLevel.Unknown,
@@ -65,7 +74,7 @@ export default function ContestDetail({ params }: any) {
         )
       )) as { data: GetContestQuery };
 
-      setContest(result.data.getContest ?? null);
+      setContest(result.data.getContest || null);
     };
 
     try {
@@ -92,12 +101,8 @@ export default function ContestDetail({ params }: any) {
     setContest({ ...contest!, [name]: value });
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    // console.log(`${name}: ${value}`);
-    const utcDate = toUTCDate(value);
-    // console.log(`utc value: ${utcDate}`);
-    setContest({ ...contest!, [name]: utcDate });
+  const handleDateChange = (dateFieldName: string, utcDate: string) => {
+    setContest({ ...contest!, [dateFieldName]: utcDate });
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -146,24 +151,82 @@ export default function ContestDetail({ params }: any) {
     }
   };
 
-  const toUTCDate = (localDateStr: string) => {
-    if (!localDateStr || localDateStr.length === 0) {
-      return '';
-    }
-
-    const localDate = new Date(localDateStr);
-    return new Date(
-      localDate.getUTCFullYear(),
-      localDate.getUTCMonth(),
-      localDate.getUTCDate()
-    ).toISOString();
-  };
-
   const validateDateInput = (dateStr: string, fieldName: string) => {
     if (!dateStr || dateStr.length === 0) {
       return `${fieldName} is required`;
     }
     return null;
+  };
+
+  const handleAssignManagers = async (assignedManagers: UserReference[]) => {
+    if (!contest) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const authHeader = await getAuthHeader();
+      await API.graphql(
+        graphqlOperation(
+          assignManagers,
+          {
+            assignments: assignedManagers.map((user) => {
+              return {
+                contestId: contest.id,
+                userId: user.userId,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+              };
+            }),
+          },
+          authHeader.Authorization
+        )
+      );
+
+      const existing = contest.managers || [];
+      const added = assignedManagers.filter((assigned) => {
+        return !existing.some((manager) => manager.userId === assigned.userId);
+      });
+
+      setContest({
+        ...contest,
+        managers: [...existing, ...added],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveManager = async (manager: UserReference) => {
+    if (
+      !confirm(
+        `Are you sure you want to remove ${manager.firstName} ${manager.lastName}?`
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const authHeader = await getAuthHeader();
+      const result = (await API.graphql(
+        graphqlOperation(
+          removeManager,
+          { ...manager, contestId: contest!.id, managerId: manager.userId },
+          authHeader.Authorization
+        )
+      )) as { data: { removeManager: boolean } };
+
+      if (result.data.removeManager === true) {
+        const managers = contest!.managers!.filter(
+          (m) => m.userId !== manager.userId
+        );
+        setContest({ ...contest!, managers });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // TODO figure out event type
@@ -181,7 +244,6 @@ export default function ContestDetail({ params }: any) {
 
     // TODO validate dates
 
-    // TODO handle managers like org users and remove from contest type
     const { managers, ...values } = contest!;
 
     try {
@@ -194,7 +256,7 @@ export default function ContestDetail({ params }: any) {
         )
       )) as { data: SaveContestMutation };
 
-      setContest(result.data.saveContest!);
+      setContest({ ...result.data.saveContest!, managers });
 
       setNotificationTitle('Successfully saved!');
       setNotificationMessage(`${event.target.name.value} saved`);
@@ -351,49 +413,53 @@ export default function ContestDetail({ params }: any) {
                 {/* Scheduling info */}
                 {/* Start Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Start Date"
-                    type="date"
                     inputName="startDate"
-                    inputValue={contest?.startDate ?? ''}
+                    utcValue={contest?.startDate || ''}
                     validate={(e) => validateDateInput(e, 'Start date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('startDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="End Date"
-                    type="date"
                     inputName="endDate"
-                    inputValue={contest?.endDate || ''}
+                    utcValue={contest?.endDate || ''}
                     validate={(e) => validateDateInput(e, 'End date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('endDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* Signup Start Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Sign-up Start Date"
-                    type="date"
                     inputName="signUpStartDate"
-                    inputValue={contest?.signUpStartDate || ''}
+                    utcValue={contest?.signUpStartDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up start date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('signUpStartDate', utcDate)
+                    }
                   />
                 </div>
 
                 {/* Signup End Date */}
                 <div className="sm:col-span-3">
-                  <TextInput
+                  <DateInput
                     label="Sign-up End Date"
-                    type="date"
                     inputName="signUpEndDate"
-                    inputValue={contest?.signUpEndDate || ''}
+                    utcValue={contest?.signUpEndDate || ''}
                     validate={(e) => validateDateInput(e, 'Sign-up end date')}
-                    onChange={handleDateChange}
+                    onDateChange={(utcDate) =>
+                      handleDateChange('signUpEndDate', utcDate)
+                    }
                   />
                 </div>
               </div>
@@ -415,7 +481,7 @@ export default function ContestDetail({ params }: any) {
                     type="button"
                     className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
                     onClick={() => {
-                      setShowManagerSearch(true);
+                      setShowAssignmentModal(true);
                     }}>
                     Assign Manager
                     <UserPlusIcon
@@ -426,21 +492,21 @@ export default function ContestDetail({ params }: any) {
                 </div>
               </div>
 
-              <ul role="list" className="divide-y divide-gray-100">
+              <ul role="list" className="divide-y pt-2 divide-neutral-200">
                 {contest.managers?.map((manager) => (
                   <li
-                    key={manager?.id}
-                    className="flex items-center justify-between gap-x-6 py-5">
+                    key={manager.userId}
+                    className="flex items-center justify-between gap-x-6 py-2">
                     <div className="min-w-0">
                       <div className="flex items-start gap-x-3">
                         <p className="text-sm font-semibold leading-6 text-gray-900">
-                          {manager?.firstName} {manager?.lastName}
+                          {manager.firstName} {manager.lastName}
                         </p>
                       </div>
                       <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-blue-500 hover:text-blue-700">
                         <p className="whitespace-nowrap">
-                          <a href={`mailto:${manager?.email}`} target="_blank">
-                            {manager?.email}
+                          <a href={`mailto:${manager.email}`} target="_blank">
+                            {manager.email}
                           </a>
                         </p>
                       </div>
@@ -448,11 +514,11 @@ export default function ContestDetail({ params }: any) {
                     <div className="flex flex-none items-center gap-x-4">
                       <button
                         type="button"
-                        onClick={() => console.log('removeManager')}
+                        onClick={() => handleRemoveManager(manager)}
                         className="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block">
                         Remove
                         <span className="sr-only">
-                          , {manager?.firstName} {manager?.lastName}
+                          , {manager.firstName} {manager.lastName}
                         </span>
                       </button>
                     </div>
@@ -473,11 +539,15 @@ export default function ContestDetail({ params }: any) {
       </div>
 
       {/* ASSIGN MANAGER MODAL */}
-      <UserSearch
-        title="Managers"
-        show={showManagerSearch}
-        setShow={setShowManagerSearch}
-      />
+      {contest?.id && (
+        <UserAssignment
+          title="Select Managers"
+          role={UserRole.Manager}
+          show={showAssignmentModal}
+          setShow={setShowAssignmentModal}
+          onAssign={handleAssignManagers}
+        />
+      )}
 
       {showNotification && (
         <Notification

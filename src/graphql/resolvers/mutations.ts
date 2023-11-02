@@ -28,17 +28,21 @@ export const deleteOrganization = /* GraphQL */ `
   }
 `;
 
-export const saveOrgUser = /* GraphQL */ `
-  mutation SaveOrgUser($user: SaveOrgUserInput!) {
-    saveOrgUser(user: $user) {
-      id
+export const assignMembers = /* GraphQL */ `
+  mutation AssignMembers($assignments: [AssignMemberInput]!) {
+    assignMembers(assignments: $assignments) {
+      userId
       firstName
       lastName
       email
       role
-      username
-      enabled
     }
+  }
+`;
+
+export const removeMember = /* GraphQL */ `
+  mutation RemoveMember($orgId: ID!, $memberId: ID!) {
+    removeMember(orgId: $orgId, memberId: $memberId)
   }
 `;
 
@@ -61,5 +65,21 @@ export const saveContest = /* GraphQL */ `
 export const deleteContest = /* GraphQL */ `
   mutation DeleteContest($id: ID!) {
     deleteContest(id: $id)
+  }
+`;
+
+export const assignManagers = /* GraphQL */ `
+  mutation AssignManagers($assignments: [AssignManagerInput]!) {
+    assignManagers(assignments: $assignments) {
+      userId
+      firstName
+      lastName
+    }
+  }
+`;
+
+export const removeManager = /* GraphQL */ `
+  mutation RemoveManager($contestId: ID!, $managerId: ID!) {
+    removeManager(contestId: $contestId, managerId: $managerId)
   }
 `;

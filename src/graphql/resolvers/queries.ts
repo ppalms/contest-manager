@@ -12,22 +12,31 @@ export const listUsers = /* GraphQL */ `
   }
 `;
 
-export const getOrganizationWithUsers = /* GraphQL */ `
-  query GetOrganizationWithUsers($id: ID!) {
-    getOrganizationWithUsers(id: $id) {
+export const listUsersByRole = /* GraphQL */ `
+  query ListUsersByRole($role: UserRole!) {
+    listUsersByRole(role: $role) {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;
+
+export const getOrgWithMembers = /* GraphQL */ `
+  query GetOrgWithMembers($id: ID!) {
+    getOrgWithMembers(id: $id) {
       organization {
         id
         name
         type
       }
-      users {
-        id
+      members {
+        userId
         firstName
         lastName
         email
         role
-        username
-        enabled
       }
     }
   }
@@ -67,7 +76,7 @@ export const getContest = /* GraphQL */ `
       signUpStartDate
       signUpEndDate
       managers {
-        id
+        userId
         firstName
         lastName
         email

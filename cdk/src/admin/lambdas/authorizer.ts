@@ -3,38 +3,37 @@ import * as jwt from 'jsonwebtoken';
 import * as https from 'https';
 import jwkToPem from 'jwk-to-pem';
 
+interface Request {
+  authorizationToken: string;
+}
+
 export async function handler(
-  event: any,
+  request: Request,
   _: any
 ): Promise<{ isAuthorized: boolean; resolverContext?: any }> {
+  const decoded = jwt.decode(request.authorizationToken, { complete: true });
+  const payload = decoded?.payload as jwt.JwtPayload;
+  if (!payload) {
+    throw new Error('Invalid JWT token');
+  }
+
+  const tenantId = payload['custom:tenantId'];
+  if (!tenantId || tenantId.length === 0) {
+    return {
+      isAuthorized: false,
+    };
+  }
+
+  // TODO store tenant context in S3/cloudfront and get rid of SSM params
+  const getUserPoolIdCommand = new GetParametersCommand({
+    Names: ['/shared/user-pool-id'],
+  });
+
+  const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
+  const ssmResult = await ssmClient.send(getUserPoolIdCommand);
+  const userPoolId = ssmResult.Parameters![0].Value!;
   try {
-    const decoded = jwt.decode(event.authorizationToken, { complete: true });
-    const payload = decoded?.payload as jwt.JwtPayload;
-    if (!payload) {
-      throw new Error('Invalid JWT token');
-    }
-
-    const tenantId = payload['custom:tenantId'];
-    if (!tenantId || tenantId.length === 0) {
-      return {
-        isAuthorized: false,
-      };
-    }
-
-    const getUserPoolIdCommand = new GetParametersCommand({
-      Names: ['/shared/user-pool-id'],
-    });
-
-    // TODO store tenant info in S3/cloudfront
-    const ssmClient = new SSMClient({ region: process.env.AWS_REGION });
-    const ssmResult = await ssmClient.send(getUserPoolIdCommand);
-    const userPoolId = ssmResult.Parameters![0].Value!;
-    const jwks = await getJwks(userPoolId);
-    const kid = decoded!.header.kid;
-    const jwk = jwks.keys.find((key) => key.kid === kid);
-    const pem = jwkToPem(jwk!);
-
-    jwt.verify(event.authorizationToken, pem, { algorithms: ['RS256'] });
+    await verifyJwt();
 
     // TODO get tenant-scoped STS token
     /**
@@ -76,35 +75,46 @@ export async function handler(
       },
     };
   } catch (error) {
-    console.error('Authorization failed:', error);
+    console.error('Authorization failed', error);
     return {
       isAuthorized: false,
     };
   }
-}
 
-type JWK = {
-  alg: string;
-  e: string;
-  kid: string;
-  kty: 'RSA';
-  n: string;
-  use: string;
-};
+  // Local functions
+  type JWK = {
+    alg: string;
+    e: string;
+    kid: string;
+    kty: 'RSA';
+    n: string;
+    use: string;
+  };
 
-type JWKS = {
-  keys: JWK[];
-};
+  type JWKS = {
+    keys: JWK[];
+  };
 
-const getJwks = async (userPoolId: string): Promise<JWKS> => {
-  const jwksUrl = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
+  async function getJwks(): Promise<JWKS> {
+    const jwksUrl = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
 
-  return new Promise((resolve, reject) => {
-    https.get(jwksUrl, (response) => {
-      let data = '';
-      response.on('data', (chunk) => (data += chunk));
-      response.on('end', () => resolve(JSON.parse(data)));
-      response.on('error', reject);
+    // TODO gimme da caaccchechehchecchhe
+    return new Promise((resolve, reject) => {
+      https.get(jwksUrl, (response) => {
+        let data = '';
+        response.on('data', (chunk) => (data += chunk));
+        response.on('end', () => resolve(JSON.parse(data)));
+        response.on('error', reject);
+      });
     });
-  });
-};
+  }
+
+  async function verifyJwt() {
+    const jwks = await getJwks();
+    const kid = decoded!.header.kid;
+    const jwk = jwks.keys.find((key) => key.kid === kid);
+    const pem = jwkToPem(jwk!);
+
+    jwt.verify(request.authorizationToken, pem, { algorithms: ['RS256'] });
+  }
+}

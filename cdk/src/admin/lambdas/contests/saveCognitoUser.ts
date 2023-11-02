@@ -3,11 +3,11 @@ import {
   AdminCreateUserCommand,
   AdminCreateUserCommandOutput,
   AdminUpdateUserAttributesCommand,
+  AttributeType,
   CognitoIdentityProviderClient,
-  UserNotFoundException,
   UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { SaveUserInput } from '../../../../src/graphql/API';
+import { SaveUserInput } from '../../../../../src/graphql/API';
 
 /*
 example event:
@@ -16,7 +16,7 @@ example event:
   id: '05287194-570f-9ccb-97e6-2ff4c498a150',
   'detail-type': 'User Updated',
   source: 'contest-manager.admin.users',
-  account: '275316640779',
+  account: '123123123123',
   time: '2023-10-27T21:40:28Z',
   region: 'us-east-1',
   resources: [],
@@ -36,12 +36,12 @@ example event:
 }
  */
 export interface UserSavedEvent {
+  ['detail-type']: string;
   detail: {
     tenantId: string;
     userPoolId: string;
     user: SaveUserInput;
   };
-  detailType: string;
 }
 
 export async function handler(event: UserSavedEvent, _: any): Promise<any> {
@@ -52,14 +52,12 @@ export async function handler(event: UserSavedEvent, _: any): Promise<any> {
     throw new Error('tenantId is required');
   }
 
-  const userAttributes = [{ Name: 'custom:tenantId', Value: tenantId }];
-
   const { username, firstName, lastName, email, role } = event.detail.user;
-
-  // Username is always required, but other fields may not be provided
   if (!username || username.length === 0) {
     throw new Error('username is required');
   }
+
+  const userAttributes: AttributeType[] = [];
 
   if (firstName && firstName.length > 0) {
     userAttributes.push({ Name: 'given_name', Value: firstName });
@@ -77,7 +75,7 @@ export async function handler(event: UserSavedEvent, _: any): Promise<any> {
     userAttributes.push({ Name: 'custom:userRole', Value: role });
   }
 
-  if (userAttributes.length === 1) {
+  if (userAttributes.length === 0) {
     // ¯\_(ツ)_/¯
     return null;
   }
@@ -91,43 +89,43 @@ export async function handler(event: UserSavedEvent, _: any): Promise<any> {
     console.log(JSON.stringify(userAttributes));
 
     let savedUser;
-    if (event.detailType === 'User Created') {
-      savedUser = await createUser();
+    if (event['detail-type'] === 'User Created') {
+      savedUser = await createCognitoUser();
     } else {
-      savedUser = await updateUser();
+      savedUser = await updateCognitoUser();
     }
-
-    if (!savedUser) {
-      throw new Error('Failed to save user');
-    }
-
     return parseResponse(savedUser);
   } catch (error) {
     console.error(error);
-    if (error instanceof UserNotFoundException) {
-      const savedUser = await createUser();
-      if (savedUser) {
-        return parseResponse(savedUser);
-      }
-    } else {
-      throw error;
-    }
+    // Uncomment to cheat and backfill users in dev/test environment
+    // Use event archive/replay in prod
+
+    // if (error instanceof UserNotFoundException) {
+    //   const savedUser = await createCognitoUser();
+    //   if (savedUser) {
+    //     return parseResponse(savedUser);
+    //   }
+    // }
+    throw error;
   }
 
   // Local functions
-  async function createUser(): Promise<UserType | undefined> {
+  async function createCognitoUser(): Promise<UserType> {
     const createUserCommand = new AdminCreateUserCommand({
       UserPoolId: event.detail.userPoolId,
       Username: event.detail.user.username,
-      UserAttributes: userAttributes,
+      UserAttributes: [
+        ...userAttributes,
+        { Name: 'custom:tenantId', Value: tenantId },
+      ],
     });
+
+    console.log('Creating user with AdminCreateUserCommand');
+    console.log(createUserCommand);
 
     const result: AdminCreateUserCommandOutput = await idpClient.send(
       createUserCommand
     );
-    if (!result.User) {
-      throw new Error('User creation failed');
-    }
 
     const addUserToGroupCommand = new AdminAddUserToGroupCommand({
       Username: event.detail.user.username,
@@ -137,39 +135,47 @@ export async function handler(event: UserSavedEvent, _: any): Promise<any> {
 
     await idpClient.send(addUserToGroupCommand);
 
-    return result.User;
+    return result.User!;
   }
 
-  async function updateUser() {
+  async function updateCognitoUser(): Promise<UserType> {
     const updateUserAttributesCommand = new AdminUpdateUserAttributesCommand({
       UserPoolId: event.detail.userPoolId,
       Username: event.detail.user.username,
-      UserAttributes: userAttributes.filter(
-        (attr) => attr.Name !== 'custom:tenantId'
-      ),
+      UserAttributes: userAttributes,
     });
 
     await idpClient.send(updateUserAttributesCommand);
+
+    return {
+      Username: event.detail.user.username,
+      Attributes: userAttributes,
+      Enabled: true,
+    };
   }
 
   function parseResponse(savedUser: UserType) {
+    const getUserAttribute = (attrName: string) => {
+      try {
+        return savedUser.Attributes!.find((attr) => attr.Name === attrName)!
+          .Value!;
+      } catch (error) {
+        console.error(
+          `Error getting attribute ${attrName} for user`,
+          savedUser
+        );
+        throw error;
+      }
+    };
+
     return {
       id: event.detail.user.id,
-      firstName: getUserAttribute(savedUser, 'given_name'),
-      lastName: getUserAttribute(savedUser, 'family_name'),
-      email: getUserAttribute(savedUser, 'email'),
-      role: getUserAttribute(savedUser, 'custom:userRole'),
+      firstName: getUserAttribute('given_name'),
+      lastName: getUserAttribute('family_name'),
+      email: getUserAttribute('email'),
+      role: getUserAttribute('custom:userRole'),
       username: savedUser.Username,
       enabled: savedUser.Enabled,
     };
   }
 }
-
-const getUserAttribute = (user: UserType, attrName: string) => {
-  try {
-    return user.Attributes!.find((attr) => attr.Name === attrName)!.Value!;
-  } catch (error) {
-    console.error(`Error getting attribute ${attrName} for user`, user);
-    throw error;
-  }
-};
