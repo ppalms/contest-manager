@@ -109,25 +109,6 @@ const UserAssignment: React.FC<UserAssignmentProps> = ({
       assignedUsers.push(user);
     }
 
-    // TODO move to parent component
-    const authHeader = await getAuthHeader();
-    await API.graphql(
-      graphqlOperation(
-        assignManagers,
-        {
-          assignments: assignedUsers.map((user) => {
-            return {
-              contestId: parentId,
-              userId: user.userId,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-            };
-          }),
-        },
-        authHeader.Authorization
-      )
-    );
     onAssign(assignedUsers);
     closeAndReset();
   }

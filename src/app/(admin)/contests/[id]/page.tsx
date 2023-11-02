@@ -10,7 +10,11 @@ import {
   UserRole,
 } from '@/graphql/API';
 import { getContest } from '@/graphql/resolvers/queries';
-import { removeManager, saveContest } from '@/graphql/resolvers/mutations';
+import {
+  assignManagers,
+  removeManager,
+  saveContest,
+} from '@/graphql/resolvers/mutations';
 import { contestTypeMap, contestLevelMap } from '@/helpers';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
@@ -154,19 +158,44 @@ export default function ContestDetail({ params }: any) {
     return null;
   };
 
-  const handleAssignManagers = (assignedManagers: UserReference[]) => {
+  const handleAssignManagers = async (assignedManagers: UserReference[]) => {
     if (!contest) {
       return;
     }
-    const existing = contest.managers || [];
-    const added = assignedManagers.filter((assigned) => {
-      return !existing.some((manager) => manager.userId === assigned.userId);
-    });
+    setLoading(true);
 
-    setContest({
-      ...contest,
-      managers: [...existing, ...added],
-    });
+    try {
+      const authHeader = await getAuthHeader();
+      await API.graphql(
+        graphqlOperation(
+          assignManagers,
+          {
+            assignments: assignedManagers.map((user) => {
+              return {
+                contestId: contest.id,
+                userId: user.userId,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+              };
+            }),
+          },
+          authHeader.Authorization
+        )
+      );
+
+      const existing = contest.managers || [];
+      const added = assignedManagers.filter((assigned) => {
+        return !existing.some((manager) => manager.userId === assigned.userId);
+      });
+
+      setContest({
+        ...contest,
+        managers: [...existing, ...added],
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveManager = async (manager: UserReference) => {
@@ -177,21 +206,26 @@ export default function ContestDetail({ params }: any) {
     ) {
       return;
     }
+    setLoading(true);
 
-    const authHeader = await getAuthHeader();
-    const result = (await API.graphql(
-      graphqlOperation(
-        removeManager,
-        { ...manager, contestId: contest!.id, managerId: manager.userId },
-        authHeader.Authorization
-      )
-    )) as { data: { removeManager: boolean } };
+    try {
+      const authHeader = await getAuthHeader();
+      const result = (await API.graphql(
+        graphqlOperation(
+          removeManager,
+          { ...manager, contestId: contest!.id, managerId: manager.userId },
+          authHeader.Authorization
+        )
+      )) as { data: { removeManager: boolean } };
 
-    if (result.data.removeManager === true) {
-      const managers = contest!.managers!.filter(
-        (m) => m.userId !== manager.userId
-      );
-      setContest({ ...contest!, managers });
+      if (result.data.removeManager === true) {
+        const managers = contest!.managers!.filter(
+          (m) => m.userId !== manager.userId
+        );
+        setContest({ ...contest!, managers });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
