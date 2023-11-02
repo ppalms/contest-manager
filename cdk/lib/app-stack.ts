@@ -30,7 +30,7 @@ export class AppStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
-    // TODO only add seed Lambdas in non-prod environments
+    // TODO move seed Lambdas to separate stack and only deploy to non-prod environments
     const seedUsersLambda = new Function(this, 'SeedUsersLambda', {
       code: Code.fromAsset(
         path.join(__dirname, '..', 'esbuild.out', 'seedUsers')
