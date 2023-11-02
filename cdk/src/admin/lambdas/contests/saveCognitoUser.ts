@@ -120,9 +120,6 @@ export async function handler(event: UserSavedEvent, _: any): Promise<any> {
       ],
     });
 
-    console.log('Creating user with AdminCreateUserCommand');
-    console.log(createUserCommand);
-
     const result: AdminCreateUserCommandOutput = await idpClient.send(
       createUserCommand
     );

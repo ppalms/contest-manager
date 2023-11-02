@@ -107,12 +107,13 @@ export class AdministrationAPI extends Construct {
     api.grantMutation(pooledTenantRole);
     api.grantQuery(pooledTenantRole);
 
+    // TODO move event bus and related infra out of API stack
     const adminEventBus = new EventBus(this, 'AdminEventBus', {
       eventBusName: 'AdminEventBus',
     });
     adminEventBus.grantPutEventsTo(pooledTenantRole);
 
-    // TODO upgrade CDK
+    // TODO upgrade CDK? https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_events.Archive.html
     new CfnArchive(this, 'AdminEventArchive', {
       archiveName: 'AdminEventArchive',
       sourceArn: adminEventBus.eventBusArn,
@@ -308,7 +309,6 @@ export class AdministrationAPI extends Construct {
       new LambdaFunctionTarget(saveCognitoUserLambdaFunction)
     );
 
-    const allUserPools = `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`;
     saveCognitoUserLambdaFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
@@ -318,7 +318,9 @@ export class AdministrationAPI extends Construct {
           'cognito-idp:AdminUpdateUserAttributes',
           'cognito-idp:AdminGetUser',
         ],
-        resources: [allUserPools],
+        resources: [
+          `arn:aws:cognito-idp:${stack.region}:${stack.account}:userpool/*`,
+        ],
       })
     );
 
