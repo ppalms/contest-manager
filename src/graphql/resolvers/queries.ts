@@ -23,22 +23,20 @@ export const listUsersByRole = /* GraphQL */ `
   }
 `;
 
-export const getOrganizationWithUsers = /* GraphQL */ `
-  query GetOrganizationWithUsers($id: ID!) {
-    getOrganizationWithUsers(id: $id) {
+export const getOrgWithMembers = /* GraphQL */ `
+  query GetOrgWithMembers($id: ID!) {
+    getOrgWithMembers(id: $id) {
       organization {
         id
         name
         type
       }
-      users {
-        id
+      members {
+        userId
         firstName
         lastName
         email
         role
-        username
-        enabled
       }
     }
   }

@@ -2,12 +2,17 @@
 
 import {
   OrganizationType,
-  GetOrganizationWithUsersQuery,
-  User,
+  GetOrgWithMembersQuery,
   Organization,
   SaveOrganizationMutation,
+  UserReference,
+  UserRole,
 } from '@/graphql/API';
-import { saveOrganization } from '@/graphql/resolvers/mutations';
+import {
+  saveOrganization,
+  assignMembers,
+  removeMember,
+} from '@/graphql/resolvers/mutations';
 import { getAuthHeader } from '@/helpers';
 import { API, graphqlOperation } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
@@ -15,8 +20,9 @@ import { useState, useEffect } from 'react';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
 import { orgTypeMap } from '@/helpers';
-import { getOrganizationWithUsers } from '@/graphql/resolvers/queries';
-import { CheckCircleIcon } from '@heroicons/react/20/solid';
+import { getOrgWithMembers } from '@/graphql/resolvers/queries';
+import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
+import UserAssignment from '@/components/UserAssignment';
 
 // TODO pull this out into a shared file and use in contests/[id] page
 interface Notification {
@@ -28,7 +34,8 @@ interface Notification {
 
 export default function OrganizationDetail({ params }: any) {
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
+  const [members, setMembers] = useState<UserReference[]>([]);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,18 +60,16 @@ export default function OrganizationDetail({ params }: any) {
       const authHeader = await getAuthHeader();
       const result = (await API.graphql(
         graphqlOperation(
-          getOrganizationWithUsers,
+          getOrgWithMembers,
           { id: params.id },
           authHeader.Authorization
         )
-      )) as { data: GetOrganizationWithUsersQuery };
+      )) as { data: GetOrgWithMembersQuery };
 
-      setOrganization(
-        result.data.getOrganizationWithUsers?.organization ?? null
-      );
+      setOrganization(result.data.getOrgWithMembers?.organization ?? null);
 
-      if (result.data.getOrganizationWithUsers?.users) {
-        setUsers(result.data.getOrganizationWithUsers.users as User[]);
+      if (result.data.getOrgWithMembers?.members) {
+        setMembers(result.data.getOrgWithMembers.members as UserReference[]);
       }
     };
 
@@ -104,6 +109,73 @@ export default function OrganizationDetail({ params }: any) {
       return 'Name must be at least 3 characters long';
     }
     return null;
+  };
+
+  const handleAssignMembers = async (assignedMembers: UserReference[]) => {
+    if (!organization) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const authHeader = await getAuthHeader();
+      await API.graphql(
+        graphqlOperation(
+          assignMembers,
+          {
+            assignments: assignedMembers.map((user) => {
+              return {
+                orgId: organization.id,
+                userId: user.userId,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: UserRole.Director,
+              };
+            }),
+          },
+          authHeader.Authorization
+        )
+      );
+
+      const existing = members || [];
+      const added = assignedMembers.filter((assigned) => {
+        return !existing.some((manager) => manager.userId === assigned.userId);
+      });
+
+      setMembers([...existing, ...added]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveMember = async (member: UserReference) => {
+    if (
+      !confirm(
+        `Are you sure you want to remove ${member.firstName} ${member.lastName}?`
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const authHeader = await getAuthHeader();
+      const result = (await API.graphql(
+        graphqlOperation(
+          removeMember,
+          { ...member, orgId: organization!.id, memberId: member.userId },
+          authHeader.Authorization
+        )
+      )) as { data: { removeMember: boolean } };
+
+      if (result.data.removeMember === true) {
+        const updated = members!.filter((m) => m.userId !== member.userId);
+        setMembers(updated);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveOrg = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -241,20 +313,65 @@ export default function OrganizationDetail({ params }: any) {
           </form>
         </div>
 
-        {/* TODO use same control as contest <div className="flex-grow">
+        {/* MEMBERS */}
+        <div className="flex-grow pt-8">
           {!loading && organization?.id ? (
-            <OrgUserList
-              users={users}
-              orgId={organization.id}
-              onUserSaved={(user) => {
-                setNotification({
-                  title: 'Successfully saved!',
-                  type: 'success',
-                  message: `${user.firstName} ${user.lastName} saved`,
-                  show: true,
-                });
-              }}
-            />
+            <>
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg font-semibold leading-7 text-gray-900 flex">
+                  Members
+                </h1>
+
+                <div className="flex justify-end gap-x-6">
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-md bg-rose-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+                    onClick={() => {
+                      setShowAssignmentModal(true);
+                    }}>
+                    Assign Manager
+                    <UserPlusIcon
+                      className="-mr-0.5 ml-1 h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <ul role="list" className="divide-y pt-2 divide-neutral-200">
+                {members?.map((member) => (
+                  <li
+                    key={member.userId}
+                    className="flex items-center justify-between gap-x-6 py-2">
+                    <div className="min-w-0">
+                      <div className="flex items-start gap-x-3">
+                        <p className="text-sm font-semibold leading-6 text-gray-900">
+                          {member.firstName} {member.lastName}
+                        </p>
+                      </div>
+                      <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-blue-500 hover:text-blue-700">
+                        <p className="whitespace-nowrap">
+                          <a href={`mailto:${member.email}`} target="_blank">
+                            {member.email}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-none items-center gap-x-4">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMember(member)}
+                        className="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block">
+                        Remove
+                        <span className="sr-only">
+                          , {member.firstName} {member.lastName}
+                        </span>
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
             <></>
           )}
@@ -264,8 +381,19 @@ export default function OrganizationDetail({ params }: any) {
               <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-rose-700" />
             </div>
           )}
-        </div> */}
+        </div>
       </div>
+
+      {/* ASSIGN MEMBER MODAL */}
+      {organization?.id && (
+        <UserAssignment
+          title="Select Directors"
+          role={UserRole.Director}
+          show={showAssignmentModal}
+          setShow={setShowAssignmentModal}
+          onAssign={handleAssignMembers}
+        />
+      )}
 
       {notification.show && (
         <Notification

@@ -543,7 +543,6 @@ export default function ContestDetail({ params }: any) {
         <UserAssignment
           title="Select Managers"
           role={UserRole.Manager}
-          parentId={contest.id}
           show={showAssignmentModal}
           setShow={setShowAssignmentModal}
           onAssign={handleAssignManagers}

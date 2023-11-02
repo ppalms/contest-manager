@@ -204,12 +204,17 @@ export class AdministrationAPI extends Construct {
     });
 
     // ** ORGANIZATIONS ** //
-    api.createResolver('getOrganizationWithUsersResolver', {
+    api.createResolver('getOrgWithMembersResolver', {
       typeName: 'Query',
-      fieldName: 'getOrganizationWithUsers',
+      fieldName: 'getOrgWithMembers',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'getOrgWithUsers.js')
+        path.join(
+          __dirname,
+          'resolvers',
+          'organizations',
+          'getOrgWithMembers.js'
+        )
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -244,12 +249,43 @@ export class AdministrationAPI extends Construct {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    api.createResolver('saveOrgUserResolver', {
+    api
+      .addLambdaDataSource(
+        'AssignMembersDataSource',
+        new LambdaFunction(this, 'AssignMembersLambdaFunction', {
+          code: LambdaCode.fromAsset(
+            path.join(__dirname, '..', '..', 'esbuild.out', 'assignMembers')
+          ),
+          handler: 'assignMembers.handler',
+          runtime: Runtime.NODEJS_18_X,
+          architecture: Architecture.ARM_64,
+          environment: {
+            ADMIN_TABLE_NAME: props.adminTable.tableName,
+          },
+          initialPolicy: [
+            new PolicyStatement({
+              effect: Effect.ALLOW,
+              actions: ['dynamodb:BatchWriteItem'],
+              resources: [props.adminTable.tableArn],
+            }),
+          ],
+        })
+      )
+      .createResolver('assignMembersResolver', {
+        fieldName: 'assignMembers',
+        typeName: 'Mutation',
+        code: Code.fromAsset(
+          path.join(__dirname, 'resolvers', 'organizations', 'assignMembers.js')
+        ),
+        runtime: FunctionRuntime.JS_1_0_0,
+      });
+
+    api.createResolver('removeMemberResolver', {
       typeName: 'Mutation',
-      fieldName: 'saveOrgUser',
+      fieldName: 'removeMember',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'saveOrgUser.js')
+        path.join(__dirname, 'resolvers', 'organizations', 'removeMember.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });

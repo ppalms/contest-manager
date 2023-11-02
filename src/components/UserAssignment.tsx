@@ -10,10 +10,8 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { ListUsersByRoleQuery, UserReference, UserRole } from '@/graphql/API';
 import { listUsersByRole } from '@/graphql/resolvers/queries';
 import { classNames, getAuthHeader } from '@/helpers';
-import { assignManagers } from '@/graphql/resolvers/mutations';
 
 interface UserAssignmentProps {
-  parentId: string;
   title: string;
   role: UserRole;
   show: boolean;
@@ -39,7 +37,6 @@ async function fetchUsers(role: UserRole): Promise<UserReference[]> {
 
 // TODO use this method for getting props in other components
 const UserAssignment: React.FC<UserAssignmentProps> = ({
-  parentId,
   title,
   role,
   show,

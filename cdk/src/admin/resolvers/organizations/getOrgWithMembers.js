@@ -14,15 +14,15 @@ export function request(ctx) {
 
 export function response(ctx) {
   let organization = null;
-  const users = [];
+  const members = [];
 
   for (const item of ctx.result.items) {
     if (item.entityType === 'ORGANIZATION') {
       organization = { ...item, id: item.PK.split('#')[3] };
     } else if (item.entityType === 'USER') {
-      users.push({ ...item, id: item.SK.split('#')[1] });
+      members.push({ ...item, userId: item.SK.split('#')[1] });
     }
   }
 
-  return { organization, users };
+  return { organization, members };
 }

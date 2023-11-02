@@ -5,9 +5,9 @@ schema @aws_api_key @aws_lambda {
 
 type Query @aws_api_key @aws_lambda {
   listUsers: [User]
-  listOrganizations: [Organization]
-  getOrganizationWithUsers(id: ID): OrganizationWithUsers
   listUsersByRole(role: UserRole): [User!]!
+  listOrganizations: [Organization]
+  getOrgWithMembers(id: ID): OrganizationWithMembers
   listContests: [Contest]
   getContest(id: ID!): Contest
 }
@@ -16,7 +16,8 @@ type Mutation @aws_api_key @aws_lambda {
   saveUser(user: SaveUserInput!): User
   saveOrganization(organization: OrganizationInput!): Organization
   deleteOrganization(id: ID!): String
-  saveOrgUser(user: SaveOrgUserInput!): UserReference
+  assignMembers(assignments: [AssignMemberInput]!): [UserReference]
+  removeMember(orgId: ID!, memberId: ID!): Boolean
   saveContest(contest: SaveContestInput!): Contest
   deleteContest(id: ID!): String
   assignManagers(assignments: [AssignManagerInput]!): [UserReference]
@@ -66,9 +67,9 @@ type Organization @aws_api_key @aws_lambda {
   type: OrganizationType!
 }
 
-type OrganizationWithUsers @aws_api_key @aws_lambda {
+type OrganizationWithMembers @aws_api_key @aws_lambda {
   organization: Organization!
-  users: [User]
+  members: [UserReference]
 }
 
 enum OrganizationType {
@@ -85,7 +86,7 @@ input OrganizationInput {
   type: OrganizationType!
 }
 
-input SaveOrgUserInput {
+input AssignMemberInput {
   orgId: String!
   userId: ID!
   firstName: String!

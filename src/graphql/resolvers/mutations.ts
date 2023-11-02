@@ -28,6 +28,24 @@ export const deleteOrganization = /* GraphQL */ `
   }
 `;
 
+export const assignMembers = /* GraphQL */ `
+  mutation AssignMembers($assignments: [AssignMemberInput]!) {
+    assignMembers(assignments: $assignments) {
+      userId
+      firstName
+      lastName
+      email
+      role
+    }
+  }
+`;
+
+export const removeMember = /* GraphQL */ `
+  mutation RemoveMember($orgId: ID!, $memberId: ID!) {
+    removeMember(orgId: $orgId, memberId: $memberId)
+  }
+`;
+
 export const saveContest = /* GraphQL */ `
   mutation SaveContest($contest: SaveContestInput!) {
     saveContest(contest: $contest) {
