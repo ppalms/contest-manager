@@ -33,15 +33,7 @@ export class AdministrationAPI extends Construct {
 
     const stack = Stack.of(this);
     const resolverBasePath = path.join('src', 'admin', 'resolvers');
-    const graphqlSchemaBasePath = path.join(
-      __dirname,
-      '..',
-      '..',
-      '..',
-      'src',
-      'graphql',
-      'schema'
-    );
+    const graphqlSchemaBasePath = path.join('..', 'src', 'graphql', 'schema');
 
     const authorizerLambdaFunction = new LambdaFunction(
       this,
