@@ -7,7 +7,7 @@ export interface Account {
 }
 
 export class Accounts {
-  static readonly PATH = path.join(__dirname, '.accounts.json');
+  static readonly PATH = '.accounts.json';
 
   static load(): Accounts {
     try {
@@ -16,7 +16,12 @@ export class Accounts {
         JSON.parse(fs.readFileSync(Accounts.PATH).toString())
       );
     } catch (e) {
-      return new Accounts();
+      console.error('Could not load accounts file', e);
+      console.error('Creating new accounts file');
+      fs.writeFileSync(Accounts.PATH, JSON.stringify(new Accounts(), null, 2));
+      console.error('Created new accounts file');
+      console.error('Please edit the file and try again');
+      process.exit(1);
     }
   }
 

@@ -2,7 +2,7 @@
   "name": "cdk",
   "version": "0.1.0",
   "bin": {
-    "cdk": "bin/app.ts"
+    "cdk": "esbuild.out/app.js"
   },
   "scripts": {
     "build": "tsc",
@@ -11,7 +11,7 @@
     "cdk": "cdk",
     "bootstrap": "npx ts-node bootstrap.ts",
     "build:cjs": "node esbuild.cjs.config.js",
-    "package": "npm run build:cjs",
+    "package": "tsc --noEmit && npm run build:cjs",
     "deploy": "npm run package && cdk deploy ContestManagerStack --profile sandbox --output-file outputs.json",
     "cdk-watch": "npm run package && cdk watch ContestManagerStack --profile sandbox"
   },
