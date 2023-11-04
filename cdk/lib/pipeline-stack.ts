@@ -7,49 +7,40 @@ import {
   ManualApprovalStep,
 } from 'aws-cdk-lib/pipelines';
 import { ContestManagerStage } from './pipeline-stage';
-import { Account, Accounts } from '../accounts';
-
-const accounts = Accounts.load();
-
-export interface EnvironmentConfig {
-  name: string;
-  account: Account;
-  region: string;
-}
+import { EnvironmentConfig } from '../bin/app';
 
 export interface PipelineProps extends StackProps {
   readonly owner: string;
   readonly repository: string;
   readonly branch: string;
   readonly githubTokenName: string;
+  readonly devConfig: EnvironmentConfig;
+  readonly prodConfig: EnvironmentConfig;
 }
-
-export const Dev: EnvironmentConfig = {
-  name: 'Dev',
-  account: accounts.development!,
-  region: 'us-east-1',
-};
-
-export const Prod: EnvironmentConfig = {
-  name: 'Prod',
-  account: accounts.production!,
-  region: 'us-east-1',
-};
 
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: PipelineProps) {
     super(scope, id, props);
 
-    const githubRepo = `${props.owner}/${props.repository}`;
+    const {
+      owner,
+      repository,
+      branch,
+      githubTokenName,
+      devConfig: Dev,
+      prodConfig: Prod,
+    } = props;
 
-    const source = CodePipelineSource.gitHub(githubRepo, props.branch, {
-      authentication: SecretValue.secretsManager(props.githubTokenName),
+    const githubRepo = `${owner}/${repository}`;
+    const source = CodePipelineSource.gitHub(githubRepo, branch, {
+      authentication: SecretValue.secretsManager(githubTokenName),
     });
 
     const synth = new CodeBuildStep('SynthStep', {
       input: source,
       commands: [
         'cd cdk && yarn install --frozen-lockfile',
+        'npx tsc --noEmit',
         'npm run build:cjs',
         'npx cdk synth',
       ],
@@ -64,7 +55,7 @@ export class PipelineStack extends Stack {
 
     pipeline.addStage(
       new ContestManagerStage(this, 'ContestManagerDevStage', {
-        stageName: Dev.name,
+        stageName: 'Dev',
         config: Dev,
         env: {
           account: Dev.account.accountId,
@@ -75,7 +66,7 @@ export class PipelineStack extends Stack {
 
     pipeline.addStage(
       new ContestManagerStage(this, 'ContestManagerProdStage', {
-        stageName: Prod.name,
+        stageName: 'Prod',
         config: Prod,
         env: {
           account: Prod.account.accountId,

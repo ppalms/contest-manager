@@ -32,14 +32,22 @@ export class AdministrationAPI extends Construct {
     super(scope, id);
 
     const stack = Stack.of(this);
+    const resolverBasePath = path.join('src', 'admin', 'resolvers');
+    const graphqlSchemaBasePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'src',
+      'graphql',
+      'schema'
+    );
 
     const authorizerLambdaFunction = new LambdaFunction(
       this,
       'AuthorizerLambda',
       {
-        code: LambdaCode.fromAsset(
-          path.join(__dirname, '..', '..', 'esbuild.out', 'authorizer')
-        ),
+        code: LambdaCode.fromAsset(path.join('esbuild.out', 'authorizer')),
         handler: 'authorizer.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -62,16 +70,7 @@ export class AdministrationAPI extends Construct {
     const api = new GraphqlApi(this, 'AdministrationAPI', {
       name: 'AdministrationAPI',
       schema: SchemaFile.fromAsset(
-        path.join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          'src',
-          'graphql',
-          'schema',
-          'admin.graphql'
-        )
+        path.join(graphqlSchemaBasePath, 'admin.graphql')
       ),
       authorizationConfig: {
         defaultAuthorization: {
@@ -144,7 +143,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listUsers',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'users', 'listUsers.js')
+        path.join(resolverBasePath, 'users', 'listUsers.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -154,7 +153,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listUsersByRole',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'users', 'listUsersByRole.js')
+        path.join(resolverBasePath, 'users', 'listUsersByRole.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -163,9 +162,7 @@ export class AdministrationAPI extends Construct {
       api: api,
       name: 'saveUserFunction',
       dataSource: adminTableDataSource,
-      code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'users', 'saveUser.js')
-      ),
+      code: Code.fromAsset(path.join(resolverBasePath, 'users', 'saveUser.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
@@ -174,7 +171,7 @@ export class AdministrationAPI extends Construct {
       name: 'emitUserSavedEvent',
       dataSource: eventBusDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'events', 'userSaved.js')
+        path.join(resolverBasePath, 'events', 'userSaved.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -210,12 +207,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'getOrgWithMembers',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(
-          __dirname,
-          'resolvers',
-          'organizations',
-          'getOrgWithMembers.js'
-        )
+        path.join(resolverBasePath, 'organizations', 'getOrgWithMembers.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -225,7 +217,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listOrganizations',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'listOrgs.js')
+        path.join(resolverBasePath, 'organizations', 'listOrgs.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -235,7 +227,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'saveOrganization',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'saveOrg.js')
+        path.join(resolverBasePath, 'organizations', 'saveOrg.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -245,7 +237,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'deleteOrganization',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'deleteOrg.js')
+        path.join(resolverBasePath, 'organizations', 'deleteOrg.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -254,9 +246,7 @@ export class AdministrationAPI extends Construct {
       .addLambdaDataSource(
         'AssignMembersDataSource',
         new LambdaFunction(this, 'AssignMembersLambdaFunction', {
-          code: LambdaCode.fromAsset(
-            path.join(__dirname, '..', '..', 'esbuild.out', 'assignMembers')
-          ),
+          code: LambdaCode.fromAsset(path.join('esbuild.out', 'assignMembers')),
           handler: 'assignMembers.handler',
           runtime: Runtime.NODEJS_18_X,
           architecture: Architecture.ARM_64,
@@ -276,7 +266,7 @@ export class AdministrationAPI extends Construct {
         fieldName: 'assignMembers',
         typeName: 'Mutation',
         code: Code.fromAsset(
-          path.join(__dirname, 'resolvers', 'organizations', 'assignMembers.js')
+          path.join(resolverBasePath, 'organizations', 'assignMembers.js')
         ),
         runtime: FunctionRuntime.JS_1_0_0,
       });
@@ -286,7 +276,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'removeMember',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'organizations', 'removeMember.js')
+        path.join(resolverBasePath, 'organizations', 'removeMember.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -296,9 +286,7 @@ export class AdministrationAPI extends Construct {
       this,
       'SaveCognitoUserLambdaFunction',
       {
-        code: LambdaCode.fromAsset(
-          path.join(__dirname, '..', '..', 'esbuild.out', 'saveCognitoUser')
-        ),
+        code: LambdaCode.fromAsset(path.join('esbuild.out', 'saveCognitoUser')),
         handler: 'saveCognitoUser.handler',
         runtime: Runtime.NODEJS_18_X,
         architecture: Architecture.ARM_64,
@@ -330,7 +318,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'listContests',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contests', 'listContests.js')
+        path.join(resolverBasePath, 'contests', 'listContests.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -340,7 +328,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'getContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contests', 'getContest.js')
+        path.join(resolverBasePath, 'contests', 'getContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -350,7 +338,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'saveContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contests', 'saveContest.js')
+        path.join(resolverBasePath, 'contests', 'saveContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -360,7 +348,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'deleteContest',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contests', 'deleteContest.js')
+        path.join(resolverBasePath, 'contests', 'deleteContest.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -370,7 +358,7 @@ export class AdministrationAPI extends Construct {
         'AssignManagersDataSource',
         new LambdaFunction(this, 'AssignManagersLambdaFunction', {
           code: LambdaCode.fromAsset(
-            path.join(__dirname, '..', '..', 'esbuild.out', 'assignManagers')
+            path.join('esbuild.out', 'assignManagers')
           ),
           handler: 'assignManagers.handler',
           runtime: Runtime.NODEJS_18_X,
@@ -391,7 +379,7 @@ export class AdministrationAPI extends Construct {
         fieldName: 'assignManagers',
         typeName: 'Mutation',
         code: Code.fromAsset(
-          path.join(__dirname, 'resolvers', 'contests', 'assignManagers.js')
+          path.join(resolverBasePath, 'contests', 'assignManagers.js')
         ),
         runtime: FunctionRuntime.JS_1_0_0,
       });
@@ -401,7 +389,7 @@ export class AdministrationAPI extends Construct {
       fieldName: 'removeManager',
       dataSource: adminTableDataSource,
       code: Code.fromAsset(
-        path.join(__dirname, 'resolvers', 'contests', 'removeManager.js')
+        path.join(resolverBasePath, 'contests', 'removeManager.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });

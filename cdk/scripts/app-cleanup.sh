@@ -72,8 +72,10 @@ while true; do
     fi
 done
 
+# TODO clean up log groups
+
 echo "$(date) cleaning up buckets..."
-for i in $(aws s3 ls | awk '{print $3}' | grep -iE "^ContestManagerPipelineStack.*"); do
+for i in $(aws s3 ls | awk '{print $3}' | grep -iE "^ContestManagerStack.*"); do
 
     if [[ -z "${skip_flag}" ]]; then
         read -p "Delete bucket with name s3://${i} [Y/n] " -n 1 -r
@@ -101,7 +103,7 @@ while true; do
         response=$(aws logs describe-log-groups --starting-token "$next_token")
     fi
 
-    log_groups=$(echo "$response" | jq -r '.logGroups[].logGroupName | select(. | test("^/aws/lambda/ContestManagerStack-*"))')
+    log_groups=$(echo "$response" | jq -r '.logGroups[].logGroupName | select(. | test("^/aws/codebuild/ContestManagerPipeline*"))')
     for i in $log_groups; do
         if [[ -z "${skip_flag}" ]]; then
             read -p "Delete log group with name $i [Y/n] " -n 1 -r

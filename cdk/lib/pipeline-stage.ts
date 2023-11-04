@@ -1,6 +1,6 @@
 import { Stack, Stage, StageProps } from 'aws-cdk-lib';
-import { EnvironmentConfig } from './pipeline-stack';
 import { AppStack } from './app-stack';
+import { EnvironmentConfig } from '../bin/app';
 
 export interface ContestManagerStageProps extends StageProps {
   config: EnvironmentConfig;

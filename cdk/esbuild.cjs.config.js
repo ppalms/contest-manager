@@ -1,22 +1,23 @@
-// CommonJS build configuration for NodeJS Lambda functions
+// CommonJS build configuration for NodeJS Lambda functions and CDK app
 const glob = require('glob');
 const path = require('path');
 const esbuild = require('esbuild');
-
-const entryPoints = glob.sync('./src/**/lambdas/**/*.ts');
 const outputDir = 'esbuild.out';
+
+require('dotenv').config({ path: '.env' });
 
 // Clean output directory before building
 // https://github.com/isaacs/rimraf#readme
 console.log('Cleaning esbuild.out');
-const rimraf = require('rimraf');
-rimraf.sync(outputDir);
+require('rimraf').sync(outputDir);
 
 // Lambda functions must be under a "lambas" folder and named
 // "[functionName].ts" for esbuild to pick them up
-entryPoints.forEach((entry) => {
+const lambdaEntryPoints = glob.sync('./src/**/lambdas/**/*.ts');
+lambdaEntryPoints.forEach((entry) => {
   const functionName = path.basename(entry, '.ts');
 
+  console.log(`Building Lambda function ${functionName}`);
   esbuild
     .build({
       entryPoints: [entry],
@@ -30,4 +31,17 @@ entryPoints.forEach((entry) => {
       // sourcemap: true,
     })
     .catch(() => process.exit(1));
+});
+
+console.log(`Building CDK app`);
+esbuild.build({
+  entryPoints: ['./bin/app.ts'],
+  bundle: true,
+  minify: true,
+  platform: 'node',
+  target: 'node18',
+  external: ['aws-sdk'],
+  outfile: `${outputDir}/app.js`,
+  format: 'cjs',
+  // sourcemap: true,
 });
