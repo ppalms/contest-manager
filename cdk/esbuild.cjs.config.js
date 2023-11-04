@@ -4,8 +4,6 @@ const path = require('path');
 const esbuild = require('esbuild');
 const outputDir = 'esbuild.out';
 
-require('dotenv').config({ path: '.env' });
-
 // Clean output directory before building
 // https://github.com/isaacs/rimraf#readme
 console.log('Cleaning esbuild.out');
