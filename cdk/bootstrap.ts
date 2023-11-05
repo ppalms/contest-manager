@@ -3,7 +3,7 @@ import * as child from 'child_process';
 import { prompts } from 'prompts';
 import { STS } from '@aws-sdk/client-sts';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
+import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader';
 import { Account, Accounts } from './accounts';
 
 export interface EnvironmentConfig {

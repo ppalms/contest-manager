@@ -39,10 +39,11 @@ export class PipelineStack extends Stack {
     const synth = new CodeBuildStep('SynthStep', {
       input: source,
       commands: [
-        'cd cdk && yarn install --frozen-lockfile',
-        'npx tsc --noEmit',
-        'npm run build:cjs',
-        'npx cdk synth',
+        'cd cdk',
+        'yarn install --frozen-lockfile',
+        'yarn run tsc --noEmit',
+        'yarn build:cjs',
+        'yarn run cdk synth',
       ],
       primaryOutputDirectory: 'cdk/cdk.out',
     });

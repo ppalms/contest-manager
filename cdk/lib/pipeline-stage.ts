@@ -20,7 +20,11 @@ export class ContestManagerStage extends Stage {
       );
     }
 
-    console.log(`Deploying ContestManagerStack to ${props.env!.account}`);
+    console.log(
+      `Deploying ${props.stageName} ContestManagerStack to ${
+        props.env!.account
+      }`
+    );
 
     new AppStack(this, 'ContestManagerStack', {
       env: {
