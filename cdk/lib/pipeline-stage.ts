@@ -24,9 +24,11 @@ export class ContestManagerStage extends Stage {
 
     new AppStack(this, 'ContestManagerStack', {
       env: {
-        account: props.config.account.accountId,
+        account: props.config.account.accountId, // TODO use Stack account and remove env config from props
         region: props.config.region,
       },
     });
+
+    // TODO add seeder stack if non-prod deploy
   }
 }
