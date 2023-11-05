@@ -5,7 +5,6 @@ import { Account, Accounts } from '../accounts';
 import { PipelineStack } from '../lib/pipeline-stack';
 import { AppStack } from '../lib/app-stack';
 
-require('dotenv').config();
 const app = new cdk.App({ context: { appName: 'contest-manager' } });
 const accounts = Accounts.load();
 
@@ -16,24 +15,24 @@ export interface EnvironmentConfig {
 
 const Dev: EnvironmentConfig = {
   account: accounts.development!,
-  region: process.env.AWS_REGION!,
+  region: 'us-east-1',
 };
 
 const Prod: EnvironmentConfig = {
   account: accounts.production!,
-  region: process.env.AWS_REGION!,
+  region: 'us-east-1',
 };
 
 new PipelineStack(app, 'ContestManagerPipelineStack', {
-  owner: process.env.GITHUB_OWNER!,
-  repository: process.env.GITHUB_REPO!,
-  branch: process.env.GITHUB_BRANCH!,
-  githubTokenName: process.env.GITHUB_TOKEN_NAME!,
+  owner: 'ppalms',
+  repository: 'contest-manager',
+  branch: 'main',
+  githubTokenName: 'cm-contest-manager-deploy-token',
   devConfig: Dev,
   prodConfig: Prod,
   env: {
     account: accounts.toolchain!.accountId,
-    region: process.env.AWS_REGION,
+    region: 'us-east-1',
   },
 });
 
