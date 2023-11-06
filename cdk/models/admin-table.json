@@ -35,6 +35,10 @@
           "AttributeType": "S"
         },
         {
+          "AttributeName": "class",
+          "AttributeType": "S"
+        },
+        {
           "AttributeName": "role",
           "AttributeType": "S"
         },
@@ -75,16 +79,20 @@
           "AttributeType": "N"
         },
         {
+          "AttributeName": "enabled",
+          "AttributeType": "BOOL"
+        },
+        {
+          "AttributeName": "eligibleClasses",
+          "AttributeType": "M"
+        },
+        {
           "AttributeName": "GSI1PK",
           "AttributeType": "S"
         },
         {
           "AttributeName": "GSI1SK",
           "AttributeType": "S"
-        },
-        {
-          "AttributeName": "enabled",
-          "AttributeType": "BOOL"
         }
       ],
       "TableFacets": [
@@ -352,6 +360,9 @@
               "type": {
                 "S": "SCHOOL"
               },
+              "class": {
+                "S": "6A"
+              },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
               },
@@ -409,6 +420,110 @@
               },
               "email": {
                 "S": "jsmith@school.org"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#104"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Edmond Memorial High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "6A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#105"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Carl Albert High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "5A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#106"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Atoka High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "3A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#107"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Berryhill High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "4A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
               }
             }
           ],
@@ -503,6 +618,11 @@
               "type": {
                 "S": "MARCHING_BAND"
               },
+              "eligibleClasses": {
+                "M": {
+                  "6A": { "BOOL": true }
+                }
+              },
               "startDate": {
                 "S": "2023-10-28T13:00:00.000Z"
               },
@@ -546,6 +666,94 @@
               },
               "email": {
                 "S": "jsmith@school.org"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#302"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "CONTEST"
+              },
+              "name": {
+                "S": "OBA Class 5A Marching Championships"
+              },
+              "type": {
+                "S": "MARCHING_BAND"
+              },
+              "eligibleClasses": {
+                "M": {
+                  "5A": { "BOOL": true }
+                }
+              },
+              "startDate": {
+                "S": "2023-10-21T13:00:00.000Z"
+              },
+              "endDate": {
+                "S": "2023-10-21T22:00:00.000Z"
+              },
+              "signUpStartDate": {
+                "S": "2023-08-01T05:00:00.000Z"
+              },
+              "signUpEndDate": {
+                "S": "2023-09-15T05:00:00.000Z"
+              },
+              "performanceTime": {
+                "N": "20"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#303"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "CONTEST"
+              },
+              "name": {
+                "S": "OBA Class 1A - 3A Marching Championships"
+              },
+              "type": {
+                "S": "MARCHING_BAND"
+              },
+              "eligibleClasses": {
+                "M": {
+                  "1A": { "BOOL": true },
+                  "2A": { "BOOL": true },
+                  "3A": { "BOOL": true }
+                }
+              },
+              "startDate": {
+                "S": "2023-10-14T13:00:00.000Z"
+              },
+              "endDate": {
+                "S": "2023-10-14T22:00:00.000Z"
+              },
+              "signUpStartDate": {
+                "S": "2023-08-01T05:00:00.000Z"
+              },
+              "signUpEndDate": {
+                "S": "2023-09-08T05:00:00.000Z"
+              },
+              "performanceTime": {
+                "N": "30"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
               }
             }
           ],
