@@ -7,6 +7,7 @@ import {
   SaveOrganizationMutation,
   UserReference,
   UserRole,
+  SchoolClass,
 } from '@/graphql/API';
 import {
   saveOrganization,
@@ -19,7 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import TextInput from '@/components/TextInput';
 import Notification from '@/components/Notification';
-import { orgTypeMap } from '@/helpers';
+import { orgTypeMap, schoolClassMap } from '@/helpers';
 import { getOrgWithMembers } from '@/graphql/resolvers/queries';
 import { CheckCircleIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import UserAssignment from '@/components/UserAssignment';
@@ -112,9 +113,6 @@ export default function OrganizationDetail({ params }: any) {
   };
 
   const handleAssignMembers = async (assignedMembers: UserReference[]) => {
-    if (!organization) {
-      return;
-    }
     setLoading(true);
 
     try {
@@ -125,7 +123,7 @@ export default function OrganizationDetail({ params }: any) {
           {
             assignments: assignedMembers.map((user) => {
               return {
-                orgId: organization.id,
+                orgId: organization!.id,
                 userId: user.userId,
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -308,6 +306,50 @@ export default function OrganizationDetail({ params }: any) {
                     </option>
                   </select>
                 </div>
+
+                {organization?.type === OrganizationType.School && (
+                  <div className="sm:col-span-3">
+                    <label
+                      htmlFor="class"
+                      className="block text-sm font-medium leading-6 text-gray-900">
+                      Class
+                    </label>
+                    <select
+                      id="class"
+                      name="class"
+                      className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-neutral-600 sm:text-sm sm:leading-6 disabled:ring-0 disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-300"
+                      value={organization?.class || SchoolClass.Unknown}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const schoolClass = e.target.value as SchoolClass;
+                        setOrganization({
+                          ...organization!,
+                          class: schoolClass,
+                        });
+                      }}>
+                      <option value={SchoolClass.Unknown}>
+                        {loading ? '' : 'Select a class'}
+                      </option>
+                      <option value={SchoolClass['1A']}>
+                        {schoolClassMap[SchoolClass['1A']]}
+                      </option>
+                      <option value={SchoolClass['2A']}>
+                        {schoolClassMap[SchoolClass['2A']]}
+                      </option>
+                      <option value={SchoolClass['3A']}>
+                        {schoolClassMap[SchoolClass['3A']]}
+                      </option>
+                      <option value={SchoolClass['4A']}>
+                        {schoolClassMap[SchoolClass['4A']]}
+                      </option>
+                      <option value={SchoolClass['5A']}>
+                        {schoolClassMap[SchoolClass['5A']]}
+                      </option>
+                      <option value={SchoolClass['6A']}>
+                        {schoolClassMap[SchoolClass['6A']]}
+                      </option>
+                    </select>
+                  </div>
+                )}
               </div>
             </fieldset>
           </form>
