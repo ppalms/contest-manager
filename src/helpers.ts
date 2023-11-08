@@ -3,6 +3,7 @@ import {
   ContestLevel,
   ContestType,
   OrganizationType,
+  SchoolClass,
   UserRole,
 } from './graphql/API';
 
@@ -32,6 +33,15 @@ export const orgTypeMap = {
   [OrganizationType.School]: 'School',
   [OrganizationType.State]: 'State',
   [OrganizationType.Unknown]: 'Unknown',
+};
+
+export const schoolClassMap = {
+  [SchoolClass['1A']]: '1A',
+  [SchoolClass['2A']]: '2A',
+  [SchoolClass['3A']]: '3A',
+  [SchoolClass['4A']]: '4A',
+  [SchoolClass['5A']]: '5A',
+  [SchoolClass['6A']]: '6A',
 };
 
 export const userRoleMap = {
