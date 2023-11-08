@@ -15,10 +15,11 @@
     "type": {
       "S": "MARCHING_BAND"
     },
+    "level": {
+      "S": "STATE"
+    },
     "eligibleClasses": {
-      "M": {
-        "6A": { "BOOL": true }
-      }
+      "SS": ["_6A"]
     },
     "startDate": {
       "S": "2023-10-28T13:00:00.000Z"
@@ -81,10 +82,11 @@
     "type": {
       "S": "MARCHING_BAND"
     },
+    "level": {
+      "S": "STATE"
+    },
     "eligibleClasses": {
-      "M": {
-        "5A": { "BOOL": true }
-      }
+      "SS": ["_5A"]
     },
     "startDate": {
       "S": "2023-10-21T13:00:00.000Z"
@@ -124,12 +126,11 @@
     "type": {
       "S": "MARCHING_BAND"
     },
+    "level": {
+      "S": "STATE"
+    },
     "eligibleClasses": {
-      "M": {
-        "1A": { "BOOL": true },
-        "2A": { "BOOL": true },
-        "3A": { "BOOL": true }
-      }
+      "SS": ["_1A", "_2A", "_3A"]
     },
     "startDate": {
       "S": "2023-10-14T13:00:00.000Z"

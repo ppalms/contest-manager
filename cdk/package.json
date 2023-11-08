@@ -13,7 +13,7 @@
     "build:cjs": "node esbuild.cjs.config.js",
     "package": "tsc --noEmit && npm run build:cjs",
     "deploy": "npm run package && cdk deploy ContestManagerStack --profile sandbox --output-file outputs.json",
-    "cdk-watch": "npm run package && cdk watch ContestManagerStack --profile sandbox"
+    "cdk-watch": "cdk watch ContestManagerStack --profile sandbox"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",

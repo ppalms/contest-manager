@@ -3,7 +3,7 @@
   "ModelMetadata": {
     "Author": "Patrick Palmer",
     "DateCreated": "Oct 14, 2023, 07:06 PM",
-    "DateLastModified": "Oct 26, 2023, 01:34 AM",
+    "DateLastModified": "Nov 07, 2023, 19:15 PM",
     "Description": "Single-table design for the administration module of Contest Manager",
     "AWSService": "Amazon DynamoDB",
     "Version": "3.0"
@@ -32,6 +32,10 @@
         },
         {
           "AttributeName": "type",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "level",
           "AttributeType": "S"
         },
         {
@@ -84,7 +88,7 @@
         },
         {
           "AttributeName": "eligibleClasses",
-          "AttributeType": "M"
+          "AttributeType": "SS"
         },
         {
           "AttributeName": "GSI1PK",
@@ -361,7 +365,7 @@
                 "S": "SCHOOL"
               },
               "class": {
-                "S": "6A"
+                "S": "_6A"
               },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
@@ -439,7 +443,7 @@
                 "S": "SCHOOL"
               },
               "class": {
-                "S": "6A"
+                "S": "_6A"
               },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
@@ -465,33 +469,7 @@
                 "S": "SCHOOL"
               },
               "class": {
-                "S": "5A"
-              },
-              "GSI1PK": {
-                "S": "TENANT#001#ORGS"
-              },
-              "GSI1SK": {
-                "S": "SCHOOL"
-              }
-            },
-            {
-              "PK": {
-                "S": "TENANT#001#ORG#106"
-              },
-              "SK": {
-                "S": "DETAILS"
-              },
-              "entityType": {
-                "S": "ORGANIZATION"
-              },
-              "name": {
-                "S": "Atoka High School"
-              },
-              "type": {
-                "S": "SCHOOL"
-              },
-              "class": {
-                "S": "3A"
+                "S": "_5A"
               },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
@@ -517,7 +495,33 @@
                 "S": "SCHOOL"
               },
               "class": {
-                "S": "4A"
+                "S": "_4A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#106"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Atoka High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "_3A"
               },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
@@ -530,6 +534,7 @@
           "NonKeyAttributes": [
             "name",
             "type",
+            "class",
             "role",
             "username",
             "firstName",
@@ -618,10 +623,11 @@
               "type": {
                 "S": "MARCHING_BAND"
               },
+              "level": {
+                "S": "STATE"
+              },
               "eligibleClasses": {
-                "M": {
-                  "6A": { "BOOL": true }
-                }
+                "SS": ["_6A"]
               },
               "startDate": {
                 "S": "2023-10-28T13:00:00.000Z"
@@ -684,10 +690,11 @@
               "type": {
                 "S": "MARCHING_BAND"
               },
+              "level": {
+                "S": "STATE"
+              },
               "eligibleClasses": {
-                "M": {
-                  "5A": { "BOOL": true }
-                }
+                "SS": ["_5A"]
               },
               "startDate": {
                 "S": "2023-10-21T13:00:00.000Z"
@@ -727,12 +734,11 @@
               "type": {
                 "S": "MARCHING_BAND"
               },
+              "level": {
+                "S": "STATE"
+              },
               "eligibleClasses": {
-                "M": {
-                  "1A": { "BOOL": true },
-                  "2A": { "BOOL": true },
-                  "3A": { "BOOL": true }
-                }
+                "SS": ["_1A", "_2A", "_3A"]
               },
               "startDate": {
                 "S": "2023-10-14T13:00:00.000Z"
@@ -760,6 +766,8 @@
           "NonKeyAttributes": [
             "name",
             "type",
+            "level",
+            "eligibleClasses",
             "startDate",
             "endDate",
             "signUpStartDate",
