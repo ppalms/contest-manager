@@ -65,6 +65,7 @@ type Organization @aws_api_key @aws_lambda {
   id: ID
   name: String!
   type: OrganizationType!
+  class: SchoolClass
 }
 
 type OrganizationWithMembers @aws_api_key @aws_lambda {
@@ -84,6 +85,7 @@ input OrganizationInput {
   id: ID
   name: String!
   type: OrganizationType!
+  class: SchoolClass
 }
 
 input AssignMemberInput {
@@ -138,6 +140,16 @@ enum ContestType {
 enum ContestLevel {
   DISTRICT
   STATE
+  UNKNOWN
+}
+
+enum SchoolClass {
+  _1A
+  _2A
+  _3A
+  _4A
+  _5A
+  _6A
   UNKNOWN
 }
 

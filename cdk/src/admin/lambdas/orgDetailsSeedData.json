@@ -61,6 +61,9 @@
     "type": {
       "S": "SCHOOL"
     },
+    "class": {
+      "S": "_6A"
+    },
     "GSI1PK": {
       "S": "TENANT#001#ORGS"
     },
@@ -118,6 +121,110 @@
     },
     "email": {
       "S": "jsmith@school.org"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#104"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Edmond Memorial High School"
+    },
+    "type": {
+      "S": "SCHOOL"
+    },
+    "class": {
+      "S": "_6A"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "SCHOOL"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#105"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Carl Albert High School"
+    },
+    "type": {
+      "S": "SCHOOL"
+    },
+    "class": {
+      "S": "_5A"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "SCHOOL"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#107"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Berryhill High School"
+    },
+    "type": {
+      "S": "SCHOOL"
+    },
+    "class": {
+      "S": "_4A"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "SCHOOL"
+    }
+  },
+  {
+    "PK": {
+      "S": "TENANT#001#ORG#106"
+    },
+    "SK": {
+      "S": "DETAILS"
+    },
+    "entityType": {
+      "S": "ORGANIZATION"
+    },
+    "name": {
+      "S": "Atoka High School"
+    },
+    "type": {
+      "S": "SCHOOL"
+    },
+    "class": {
+      "S": "_3A"
+    },
+    "GSI1PK": {
+      "S": "TENANT#001#ORGS"
+    },
+    "GSI1SK": {
+      "S": "SCHOOL"
     }
   }
 ]

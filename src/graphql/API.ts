@@ -42,6 +42,7 @@ export type AssignMemberInput = {
 
 export type Contest = {
   __typename?: 'Contest';
+  eligibleClasses?: Maybe<Array<SchoolClass>>;
   endDate?: Maybe<Scalars['AWSDateTime']['output']>;
   id: Scalars['ID']['output'];
   level: ContestLevel;
@@ -128,12 +129,14 @@ export type MutationSaveUserArgs = {
 
 export type Organization = {
   __typename?: 'Organization';
+  class?: Maybe<SchoolClass>;
   id?: Maybe<Scalars['ID']['output']>;
   name: Scalars['String']['output'];
   type: OrganizationType;
 };
 
 export type OrganizationInput = {
+  class?: InputMaybe<SchoolClass>;
   id?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
   type: OrganizationType;
@@ -174,6 +177,12 @@ export type QueryGetOrgWithMembersArgs = {
 };
 
 
+export type QueryListContestsArgs = {
+  classes?: InputMaybe<Array<InputMaybe<SchoolClass>>>;
+  type?: InputMaybe<ContestType>;
+};
+
+
 export type QueryListUsersByRoleArgs = {
   role?: InputMaybe<UserRole>;
 };
@@ -199,6 +208,16 @@ export type SaveUserInput = {
   role: UserRole;
   username: Scalars['String']['input'];
 };
+
+export enum SchoolClass {
+  Unknown = 'UNKNOWN',
+  '1A' = '_1A',
+  '2A' = '_2A',
+  '3A' = '_3A',
+  '4A' = '_4A',
+  '5A' = '_5A',
+  '6A' = '_6A'
+}
 
 export type User = {
   __typename?: 'User';
@@ -239,7 +258,7 @@ export type SaveOrganizationMutationVariables = Exact<{
 }>;
 
 
-export type SaveOrganizationMutation = { __typename?: 'Mutation', saveOrganization?: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType } | null };
+export type SaveOrganizationMutation = { __typename?: 'Mutation', saveOrganization?: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType, class?: SchoolClass | null } | null };
 
 export type DeleteOrganizationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -309,14 +328,17 @@ export type GetOrgWithMembersQueryVariables = Exact<{
 }>;
 
 
-export type GetOrgWithMembersQuery = { __typename?: 'Query', getOrgWithMembers?: { __typename?: 'OrganizationWithMembers', organization: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType }, members?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string, email: any, role?: UserRole | null } | null> | null } | null };
+export type GetOrgWithMembersQuery = { __typename?: 'Query', getOrgWithMembers?: { __typename?: 'OrganizationWithMembers', organization: { __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType, class?: SchoolClass | null }, members?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string, email: any, role?: UserRole | null } | null> | null } | null };
 
 export type ListOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ListOrganizationsQuery = { __typename?: 'Query', listOrganizations?: Array<{ __typename?: 'Organization', id?: string | null, name: string, type: OrganizationType } | null> | null };
 
-export type ListContestsQueryVariables = Exact<{ [key: string]: never; }>;
+export type ListContestsQueryVariables = Exact<{
+  type?: InputMaybe<ContestType>;
+  classes?: InputMaybe<Array<InputMaybe<SchoolClass>> | InputMaybe<SchoolClass>>;
+}>;
 
 
 export type ListContestsQuery = { __typename?: 'Query', listContests?: Array<{ __typename?: 'Contest', id: string, name: string, type: ContestType, startDate?: any | null, endDate?: any | null } | null> | null };

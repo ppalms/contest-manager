@@ -3,7 +3,7 @@
   "ModelMetadata": {
     "Author": "Patrick Palmer",
     "DateCreated": "Oct 14, 2023, 07:06 PM",
-    "DateLastModified": "Oct 26, 2023, 01:34 AM",
+    "DateLastModified": "Nov 07, 2023, 19:15 PM",
     "Description": "Single-table design for the administration module of Contest Manager",
     "AWSService": "Amazon DynamoDB",
     "Version": "3.0"
@@ -32,6 +32,14 @@
         },
         {
           "AttributeName": "type",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "level",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "class",
           "AttributeType": "S"
         },
         {
@@ -75,16 +83,20 @@
           "AttributeType": "N"
         },
         {
+          "AttributeName": "enabled",
+          "AttributeType": "BOOL"
+        },
+        {
+          "AttributeName": "eligibleClasses",
+          "AttributeType": "SS"
+        },
+        {
           "AttributeName": "GSI1PK",
           "AttributeType": "S"
         },
         {
           "AttributeName": "GSI1SK",
           "AttributeType": "S"
-        },
-        {
-          "AttributeName": "enabled",
-          "AttributeType": "BOOL"
         }
       ],
       "TableFacets": [
@@ -352,6 +364,9 @@
               "type": {
                 "S": "SCHOOL"
               },
+              "class": {
+                "S": "_6A"
+              },
               "GSI1PK": {
                 "S": "TENANT#001#ORGS"
               },
@@ -410,11 +425,116 @@
               "email": {
                 "S": "jsmith@school.org"
               }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#104"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Edmond Memorial High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "_6A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#105"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Carl Albert High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "_5A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#107"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Berryhill High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "_4A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#ORG#106"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "ORGANIZATION"
+              },
+              "name": {
+                "S": "Atoka High School"
+              },
+              "type": {
+                "S": "SCHOOL"
+              },
+              "class": {
+                "S": "_3A"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#ORGS"
+              },
+              "GSI1SK": {
+                "S": "SCHOOL"
+              }
             }
           ],
           "NonKeyAttributes": [
             "name",
             "type",
+            "class",
             "role",
             "username",
             "firstName",
@@ -503,6 +623,12 @@
               "type": {
                 "S": "MARCHING_BAND"
               },
+              "level": {
+                "S": "STATE"
+              },
+              "eligibleClasses": {
+                "SS": ["_6A"]
+              },
               "startDate": {
                 "S": "2023-10-28T13:00:00.000Z"
               },
@@ -547,11 +673,101 @@
               "email": {
                 "S": "jsmith@school.org"
               }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#302"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "CONTEST"
+              },
+              "name": {
+                "S": "OBA Class 5A Marching Championships"
+              },
+              "type": {
+                "S": "MARCHING_BAND"
+              },
+              "level": {
+                "S": "STATE"
+              },
+              "eligibleClasses": {
+                "SS": ["_5A"]
+              },
+              "startDate": {
+                "S": "2023-10-21T13:00:00.000Z"
+              },
+              "endDate": {
+                "S": "2023-10-21T22:00:00.000Z"
+              },
+              "signUpStartDate": {
+                "S": "2023-08-01T05:00:00.000Z"
+              },
+              "signUpEndDate": {
+                "S": "2023-09-15T05:00:00.000Z"
+              },
+              "performanceTime": {
+                "N": "20"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
+              }
+            },
+            {
+              "PK": {
+                "S": "TENANT#001#CONTEST#303"
+              },
+              "SK": {
+                "S": "DETAILS"
+              },
+              "entityType": {
+                "S": "CONTEST"
+              },
+              "name": {
+                "S": "OBA Class 1A - 3A Marching Championships"
+              },
+              "type": {
+                "S": "MARCHING_BAND"
+              },
+              "level": {
+                "S": "STATE"
+              },
+              "eligibleClasses": {
+                "SS": ["_1A", "_2A", "_3A"]
+              },
+              "startDate": {
+                "S": "2023-10-14T13:00:00.000Z"
+              },
+              "endDate": {
+                "S": "2023-10-14T22:00:00.000Z"
+              },
+              "signUpStartDate": {
+                "S": "2023-08-01T05:00:00.000Z"
+              },
+              "signUpEndDate": {
+                "S": "2023-09-08T05:00:00.000Z"
+              },
+              "performanceTime": {
+                "N": "30"
+              },
+              "GSI1PK": {
+                "S": "TENANT#001#CONTESTS"
+              },
+              "GSI1SK": {
+                "S": "MARCHING_BAND"
+              }
             }
           ],
           "NonKeyAttributes": [
             "name",
             "type",
+            "level",
+            "eligibleClasses",
             "startDate",
             "endDate",
             "signUpStartDate",

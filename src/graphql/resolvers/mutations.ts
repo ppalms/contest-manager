@@ -18,6 +18,7 @@ export const saveOrganization = /* GraphQL */ `
       id
       name
       type
+      class
     }
   }
 `;

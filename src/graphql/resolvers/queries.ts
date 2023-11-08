@@ -30,6 +30,7 @@ export const getOrgWithMembers = /* GraphQL */ `
         id
         name
         type
+        class
       }
       members {
         userId
