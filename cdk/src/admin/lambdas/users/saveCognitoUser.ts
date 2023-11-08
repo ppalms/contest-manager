@@ -34,7 +34,24 @@ example event:
     }
   }
 }
- */
+
+test payload for creating a sandbox admin in the Lambda console:
+{
+  "detail-type": "User Created",
+  "detail": {
+    "tenantId": "001",
+    "userPoolId": "us-east-1_tXpGrpozQ",
+    "user": {
+      "firstName": "Patrick",
+      "lastName": "Palmer",
+      "email": "pjittles+sandboxadmin@gmail.com",
+      "role": "TENANT_ADMIN",
+      "username": "pjittles+sandboxadmin@gmail.com",
+      "enabled": true
+    }
+  }
+}
+*/
 export interface UserSavedEvent {
   ['detail-type']: string;
   detail: {
