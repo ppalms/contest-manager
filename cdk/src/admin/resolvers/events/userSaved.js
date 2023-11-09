@@ -1,5 +1,5 @@
 export function request(ctx) {
-  // TODO replace hard-coded identity values (e.g. tenantId) with require('.local-config.json').[value]
+  // TODO replace hard-coded identity context values
   const tenantId = ctx.identity?.resolverContext.tenantId ?? '001';
   const userPoolId =
     ctx.identity?.resolverContext.userPoolId ?? 'us-east-1_tXpGrpozQ';

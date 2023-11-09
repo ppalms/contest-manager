@@ -273,7 +273,7 @@ export default function ContestDetail({ params }: any) {
           { contest: values },
           authHeader.Authorization
         )
-      )) as { data: SaveContestMutation };
+      )) as { data: SaveContestMutation; errors: any[] };
 
       setContest({ ...result.data.saveContest!, managers });
 
@@ -281,9 +281,15 @@ export default function ContestDetail({ params }: any) {
       setNotificationMessage(`${event.target.name.value} saved`);
       setNotificationType('success');
     } catch (error: any) {
-      setNotificationTitle('Error saving');
-      setNotificationMessage(error.message);
-      setNotificationType('error');
+      if (error.errors && error.errors.length > 0) {
+        setNotificationTitle('Error saving');
+        setNotificationMessage(error.errors[0].message);
+        setNotificationType('error');
+      } else {
+        setNotificationTitle('Error saving');
+        setNotificationMessage(error.message);
+        setNotificationType('error');
+      }
     } finally {
       setSaving(false);
       setShowNotification(true);
