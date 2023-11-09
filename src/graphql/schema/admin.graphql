@@ -103,6 +103,7 @@ type Contest @aws_api_key @aws_lambda {
   name: String!
   type: ContestType!
   level: ContestLevel!
+  eligibleClasses: [SchoolClass!]
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
@@ -116,6 +117,7 @@ input SaveContestInput {
   name: String!
   type: ContestType!
   level: ContestLevel!
+  eligibleClasses: [SchoolClass!]
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime

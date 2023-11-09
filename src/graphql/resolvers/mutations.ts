@@ -54,6 +54,7 @@ export const saveContest = /* GraphQL */ `
       name
       type
       level
+      eligibleClasses
       startDate
       endDate
       signUpStartDate

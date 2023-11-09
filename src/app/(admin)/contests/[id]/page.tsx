@@ -6,6 +6,7 @@ import {
   ContestType,
   GetContestQuery,
   SaveContestMutation,
+  SchoolClass,
   UserReference,
   UserRole,
 } from '@/graphql/API';
@@ -115,6 +116,24 @@ export default function ContestDetail({ params }: any) {
     const level = e.target.value as ContestLevel;
     validateContestLevel(level);
     setContest({ ...contest!, level });
+  };
+
+  const handleClassChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const className = e.target.name.split('-')[1];
+    const schoolClass = SchoolClass[className as keyof typeof SchoolClass];
+    let updatedClasses = contest?.eligibleClasses
+      ? [...contest.eligibleClasses]
+      : [];
+
+    if (e.target.checked) {
+      if (!updatedClasses.includes(schoolClass)) {
+        updatedClasses.push(schoolClass);
+      }
+    } else {
+      updatedClasses = updatedClasses.filter((c) => c !== schoolClass);
+    }
+
+    setContest({ ...contest!, eligibleClasses: updatedClasses });
   };
 
   const validateContestName = (value: string) => {
@@ -229,7 +248,7 @@ export default function ContestDetail({ params }: any) {
     }
   };
 
-  // TODO figure out event type
+  // TODO fix event type
   const handleSaveContest = async (event: any) => {
     event.preventDefault();
     setSaving(true);
@@ -408,6 +427,45 @@ export default function ContestDetail({ params }: any) {
                       {contestLevelError}
                     </p>
                   ) : null}
+                </div>
+
+                {/* Eligible Classes */}
+                <div className="sm:col-span-6 divide-y divide-gray-200">
+                  <span className="block mb-2 text-sm font-medium leading-6 text-gray-900">
+                    Eligible Classes
+                  </span>
+                  <div className="pt-4 grid sm:grid-cols-6">
+                    {Object.entries(SchoolClass)
+                      .filter(([_, value]) => value !== SchoolClass.Unknown)
+                      .map(([key, value]) => {
+                        return (
+                          <>
+                            <div className="col-span-1 flex" key={`div-${key}`}>
+                              <div className="h-6 flex items-center">
+                                <input
+                                  id={`class-${key}`}
+                                  aria-describedby={`class-${key}-description`}
+                                  name={`class-${key}`}
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-600"
+                                  checked={contest?.eligibleClasses?.includes(
+                                    value
+                                  )}
+                                  onChange={handleClassChange}
+                                />
+                              </div>
+                              <div className="ml-3 flex text-sm leading-6">
+                                <label
+                                  htmlFor={`class-${key}`}
+                                  className="font-medium text-gray-900">
+                                  {key}
+                                </label>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })}
+                  </div>
                 </div>
 
                 {/* Scheduling info */}
