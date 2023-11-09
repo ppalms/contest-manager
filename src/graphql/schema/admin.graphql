@@ -8,7 +8,7 @@ type Query @aws_api_key @aws_lambda {
   listUsersByRole(role: UserRole): [User!]!
   listOrganizations: [Organization]
   getOrgWithMembers(id: ID): OrganizationWithMembers
-  listContests: [Contest]
+  listContests(type: ContestType, classes: [SchoolClass]): [Contest]
   getContest(id: ID!): Contest
 }
 
@@ -103,6 +103,7 @@ type Contest @aws_api_key @aws_lambda {
   name: String!
   type: ContestType!
   level: ContestLevel!
+  eligibleClasses: [SchoolClass!]
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime
@@ -116,6 +117,7 @@ input SaveContestInput {
   name: String!
   type: ContestType!
   level: ContestLevel!
+  eligibleClasses: [SchoolClass!]
   startDate: AWSDateTime
   endDate: AWSDateTime
   signUpStartDate: AWSDateTime

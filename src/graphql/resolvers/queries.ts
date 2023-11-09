@@ -54,8 +54,8 @@ export const listOrganizations = /* GraphQL */ `
 `;
 
 export const listContests = /* GraphQL */ `
-  query ListContests {
-    listContests {
+  query ListContests($type: ContestType, $classes: [SchoolClass]) {
+    listContests(type: $type, classes: $classes) {
       id
       name
       type
@@ -72,6 +72,7 @@ export const getContest = /* GraphQL */ `
       name
       type
       level
+      eligibleClasses
       startDate
       endDate
       signUpStartDate

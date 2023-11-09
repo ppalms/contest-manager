@@ -187,7 +187,7 @@ export default function OrganizationDetail({ params }: any) {
           { organization },
           authHeader.Authorization
         )
-      )) as { data: SaveOrganizationMutation };
+      )) as { data: SaveOrganizationMutation; errors: any[] };
 
       setOrganization(result.data.saveOrganization!);
       setNotification({
@@ -197,12 +197,21 @@ export default function OrganizationDetail({ params }: any) {
         show: true,
       });
     } catch (error: any) {
-      setNotification({
-        title: 'Error saving',
-        type: 'error',
-        message: error.message,
-        show: true,
-      });
+      if (error.errors && error.errors.length > 0) {
+        setNotification({
+          title: 'Error saving',
+          type: 'error',
+          message: error.errors[0].message,
+          show: true,
+        });
+      } else {
+        setNotification({
+          title: 'Error saving',
+          type: 'error',
+          message: error.message,
+          show: true,
+        });
+      }
     } finally {
       setSaving(false);
     }
