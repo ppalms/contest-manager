@@ -138,7 +138,7 @@ export default function OrganizationDetail({ params }: any) {
 
       const existing = members || [];
       const added = assignedMembers.filter((assigned) => {
-        return !existing.some((manager) => manager.userId === assigned.userId);
+        return !existing.some((member) => member.userId === assigned.userId);
       });
 
       setMembers([...existing, ...added]);
@@ -380,7 +380,7 @@ export default function OrganizationDetail({ params }: any) {
                     onClick={() => {
                       setShowAssignmentModal(true);
                     }}>
-                    Assign Manager
+                    Assign Director
                     <UserPlusIcon
                       className="-mr-0.5 ml-1 h-5 w-5"
                       aria-hidden="true"
