@@ -12,25 +12,33 @@ const Page = () => {
 
   const releases: any[] = [
     {
+      name: '11-09-2023',
+      summary: 'Added school classification selection for classes 1A - 6A',
+      features: [
+        {
+          name: 'Organizations',
+          details: ["Set classification on 'School' type organizations"],
+          icon: UserGroupIcon,
+        },
+      ],
+    },
+    {
       name: '11-01-2023',
       summary:
         'Added Users module and the ability to assign users to contests and organizations',
       features: [
         {
           name: 'Users',
-          description: '',
           details: ['User account management has moved to its own module'],
           icon: UserCircleIcon,
         },
         {
           name: 'Organizations',
-          description: '',
           details: ['Assign members to organizations'],
           icon: UserGroupIcon,
         },
         {
           name: 'Contests',
-          description: '',
           details: ['Assign managers to contests'],
           icon: TrophyIcon,
         },
@@ -61,11 +69,6 @@ const Page = () => {
 
   return (
     <>
-      {/* <div className="lg:pr-8 lg:pt-4">
-        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-          {"What's New"}
-        </h2>
-      </div> */}
       <div className="grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 xl:max-w-none xl:grid-cols-2">
         <div className="lg:max-w-lg">
           <h2 className="text-base font-semibold leading-7 text-rose-600">

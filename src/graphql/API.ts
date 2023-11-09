@@ -188,6 +188,7 @@ export type QueryListUsersByRoleArgs = {
 };
 
 export type SaveContestInput = {
+  eligibleClasses?: InputMaybe<Array<SchoolClass>>;
   endDate?: InputMaybe<Scalars['AWSDateTime']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   level: ContestLevel;
@@ -287,7 +288,7 @@ export type SaveContestMutationVariables = Exact<{
 }>;
 
 
-export type SaveContestMutation = { __typename?: 'Mutation', saveContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, performanceTime?: number | null } | null };
+export type SaveContestMutation = { __typename?: 'Mutation', saveContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, eligibleClasses?: Array<SchoolClass> | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, performanceTime?: number | null } | null };
 
 export type DeleteContestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -348,4 +349,4 @@ export type GetContestQueryVariables = Exact<{
 }>;
 
 
-export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, managers?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string, email: any }> | null } | null };
+export type GetContestQuery = { __typename?: 'Query', getContest?: { __typename?: 'Contest', id: string, name: string, type: ContestType, level: ContestLevel, eligibleClasses?: Array<SchoolClass> | null, startDate?: any | null, endDate?: any | null, signUpStartDate?: any | null, signUpEndDate?: any | null, managers?: Array<{ __typename?: 'UserReference', userId: string, firstName: string, lastName: string, email: any }> | null } | null };

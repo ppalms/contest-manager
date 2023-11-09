@@ -8,7 +8,7 @@ type Query @aws_api_key @aws_lambda {
   listUsersByRole(role: UserRole): [User!]!
   listOrganizations: [Organization]
   getOrgWithMembers(id: ID): OrganizationWithMembers
-  listContests: [Contest]
+  listContests(type: ContestType, classes: [SchoolClass]): [Contest]
   getContest(id: ID!): Contest
 }
 
