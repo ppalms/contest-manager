@@ -56,7 +56,7 @@ async function main() {
   const toolchainRegion = await getRegion(accounts.toolchain!.profile);
   const toolchainAccountId = accounts.toolchain!.accountId;
   commands.push(
-    `npx cdk bootstrap --profile ${
+    `npm aws-cdk bootstrap --profile ${
       accounts.toolchain!.profile
     } --cloudformation-execution-policies=arn:aws:iam::aws:policy/AdministratorAccess aws://${toolchainAccountId}/${toolchainRegion}`
   );
@@ -69,13 +69,13 @@ async function main() {
     //   .join(' ');
 
     // commands.push(
-    //   `npx cdk bootstrap --profile ${
+    //   `npm aws-cdk bootstrap --profile ${
     //     account.account!.profile
     //   } --trust ${toolchainAccountId} --cloudformation-execution-policies USES_DpraCfnExecutionPolicy_IN_TEMPLATE --template ./infrastructure/src/dpra_bootstrap_template.yaml ${accountRegions}`
     // );
 
     commands.push(
-      `npx cdk bootstrap --profile ${
+      `npm aws-cdk bootstrap --profile ${
         account.account!.profile
       } --trust ${toolchainAccountId} --cloudformation-execution-policies=arn:aws:iam::aws:policy/AdministratorAccess aws://${
         account.account!.accountId

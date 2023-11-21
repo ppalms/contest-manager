@@ -15,7 +15,7 @@
   resolved "https://registry.yarnpkg.com/@aws-appsync/utils/-/utils-1.5.0.tgz#34c9bd0d2b417ef0f3299f7902653431a2cda9f8"
   integrity sha512-mkXUxbzUW3vBVev2+EBpkfidl98RymTX4mH71OHIgfsbTLEKmqAYF2LrwtSUYetD7D3YMIQI28UqfOacoJyxVw==
 
-"@aws-cdk/asset-awscli-v1@^2.2.200":
+"@aws-cdk/asset-awscli-v1@^2.2.201":
   version "2.2.201"
   resolved "https://registry.yarnpkg.com/@aws-cdk/asset-awscli-v1/-/asset-awscli-v1-2.2.201.tgz#a7b51d3ecc8ff3ca9798269eda3a1db2400b506a"
   integrity sha512-INZqcwDinNaIdb5CtW3ez5s943nX5stGBQS6VOP2JDlOFP81hM3fds/9NDknipqfUkZM43dx+HgVvkXYXXARCQ==
@@ -30,10 +30,10 @@
   resolved "https://registry.yarnpkg.com/@aws-cdk/asset-node-proxy-agent-v6/-/asset-node-proxy-agent-v6-2.0.1.tgz#6dc9b7cdb22ff622a7176141197962360c33e9ac"
   integrity sha512-DDt4SLdLOwWCjGtltH4VCST7hpOI5DzieuhGZsBpZ+AgJdSI2GCjklCXm0GCTwJG/SolkL5dtQXyUKgg9luBDg==
 
-"@aws-cdk/aws-cognito-identitypool-alpha@^2.93.0-alpha.0":
-  version "2.93.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cognito-identitypool-alpha/-/aws-cognito-identitypool-alpha-2.93.0-alpha.0.tgz#b0b16435dbd303ff52476a1e067b9310ef209535"
-  integrity sha512-ZKCtsBaNDUnYXl6g2x45PzSxuXjMyZTzIg3yDWVSUhpvnnMH0nbPvLhAenGXre9Ax+ItKL3Ai4V5LRQWKXQHiA==
+"@aws-cdk/aws-cognito-identitypool-alpha@^2.106.0-alpha.0":
+  version "2.106.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cognito-identitypool-alpha/-/aws-cognito-identitypool-alpha-2.106.0-alpha.0.tgz#97dba93d525b217a9cdf8d1deaa82c78b82bb89f"
+  integrity sha512-yIDiTTSO4iIaicGgBYW66iWxPXM4lyGoRiMOaaPfKGYNHyH5eQ+k9Xbf3XDstdHfzIlqF7MYP7RkQvqPucgMQw==
 
 "@aws-crypto/crc32@3.0.0":
   version "3.0.0"
@@ -1991,12 +1991,12 @@ astral-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-2.0.0.tgz#483143c567aeed4785759c0865786dc77d7d2e31"
   integrity sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==
 
-aws-cdk-lib@2.93.0:
-  version "2.93.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.93.0.tgz#545bc0072bc0f2e27cb0fecb0c9e54de29b10731"
-  integrity sha512-kKbcKkts272Ju5xjGKI3pXTOpiJxW4OQbDF8Vmw/NIkkuJLo8GlRCFfeOfoN/hilvlYQgENA67GCgSWccbvu7w==
+aws-cdk-lib@^2.110.0:
+  version "2.110.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.110.0.tgz#5af2a933a834b9efe3b99abf2c28adbd93f89547"
+  integrity sha512-4IxjdtaoGjQPqtFyYXG6kOs9t/UTAh06tlGyCPpvhTZNoKNFUkku3H6MArlazpiKtm+dThdF+p5lQLB/kIu/qw==
   dependencies:
-    "@aws-cdk/asset-awscli-v1" "^2.2.200"
+    "@aws-cdk/asset-awscli-v1" "^2.2.201"
     "@aws-cdk/asset-kubectl-v20" "^2.1.2"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.0.1"
     "@balena/dockerignore" "^1.0.2"
@@ -2005,15 +2005,15 @@ aws-cdk-lib@2.93.0:
     ignore "^5.2.4"
     jsonschema "^1.4.1"
     minimatch "^3.1.2"
-    punycode "^2.3.0"
+    punycode "^2.3.1"
     semver "^7.5.4"
     table "^6.8.1"
     yaml "1.10.2"
 
-aws-cdk@2.104.0:
-  version "2.104.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.104.0.tgz#67bda59aae58837b88f9923938d664a78076e2b8"
-  integrity sha512-JuCafR5D1lnMKA88JUYhvRYeguozAWneC/n6kR1FUG+kXtXxpEqOxP91118dfJZYRw7FMIkHW8ewddvLwaCy5g==
+aws-cdk@^2.110.0:
+  version "2.110.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.110.0.tgz#7ed0f97b54e2e2dbb6b2a3f3b05569a248a50925"
+  integrity sha512-ods6/Lh5hWv9qOMmifgg6ur/M6020Yi5mFXUolVSy/0gjzo9wFRcPAxKmQ3++Yz+rf5dadUZmmpc53evvUgR4A==
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -3526,7 +3526,7 @@ prompts@^2.0.1, prompts@^2.4.2:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-punycode@^2.1.0, punycode@^2.3.0:
+punycode@^2.1.0, punycode@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
@@ -3920,6 +3920,7 @@ which@^2.0.1:
     isexe "^2.0.0"
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+  name wrap-ansi-cjs
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
