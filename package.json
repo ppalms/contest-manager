@@ -2,7 +2,7 @@
   "name": "contest-manager",
   "version": "0.1.0",
   "private": true,
-  "license": "MPL-2.0",
+  "license": "GNU AGPL",
   "scripts": {
     "codegen": "npx graphql-codegen",
     "dev": "npm run codegen && next dev",
